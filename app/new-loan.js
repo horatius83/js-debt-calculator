@@ -1,6 +1,7 @@
 Vue.component('new-loan', {
     template: `
-        <div>
+        <div class="card fluid">
+            <h2>New Loan</h2>
             <label for="new-loan-name">Name</label>
             <input name="new-loan-name" id="new-loan-name"></input>
             <label for="new-loan-principal">Principal</label>
