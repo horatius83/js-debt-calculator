@@ -11,7 +11,7 @@
         <main>
             <h1>Debt Calculator</h1>
             <div id="main">
-                <max-payment></max-payment>
+                <max-payment v-bind:loans="loans"></max-payment>
                 <loans v-bind:loans="loans"></loans>
                 <new-loan></new-loan>
                 <loan-graph></loan-graph>
