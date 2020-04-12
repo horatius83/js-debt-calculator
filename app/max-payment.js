@@ -7,6 +7,10 @@ Vue.component('max-payment', {
     props: {
         loans: Array
     },
+    created: function() {
+        console.log('Loaded!');
+        this.totalMonthlyPayment = this.minimumPayment;
+    },
     computed: {
         minimumPayment: function() {
             const date = new Date();
@@ -20,9 +24,15 @@ Vue.component('max-payment', {
         <div class="row">
             <div class="card large">
                 <label for="max-payment">Total monthly Payment</label>
-                <input name="max-payment" id="max-payment" type="number" v-bind:value="totalMonthlyPayment"></input>
-                <div v-if="minimumPayment > totalMonthlyPayment" class="card error">
-                    Total monthly payment must exceed minimum required payment.
+                <input 
+                    name="max-payment" 
+                    id="max-payment" 
+                    type="number" 
+                    v-model.number="totalMonthlyPayment"
+                    step="0.01"
+                ></input>
+                <div v-if="minimumPayment > totalMonthlyPayment">
+                    <span class="error-message">Total monthly payment must exceed minimum required payment.</span>
                 </div>
             </div>
             <div class="card large">
