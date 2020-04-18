@@ -1,4 +1,4 @@
-Vue.component('loans-summary', {
+const loansSummary = Vue.component('loans-summary', {
     props: {
         'loans': Array
     },
