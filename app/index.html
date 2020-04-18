@@ -7,15 +7,12 @@
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/mini.css/3.0.1/mini-dark.min.css">
         <link rel="stylesheet" href="css/loans.css">
         <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+        <script src="https://unpkg.com/vue-router/dist/vue-router.js"></script>
     </head>
     <body>
         <main>
-            <h1>Debt Calculator</h1>
             <div id="main">
-                <max-payment v-bind:loans="loans"></max-payment>
-                <loans v-bind:loans="loans"></loans>
-                <new-loan></new-loan>
-                <loan-graph></loan-graph>
+                <loans-summary v-bind:loans="loans"></loans-summary>
             </div>
         </main>
         <script src="models/util/interest.js"></script>
@@ -28,6 +25,7 @@
         <script src="loans.js"></script>
         <script src="new-loan.js"></script>
         <script src="loan-graph.js"></script>
+        <script src="loans-summary.vue.js"></script>
         <script src="main.js"></script>
     </body>
 </html>
