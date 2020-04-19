@@ -1,7 +1,16 @@
 'use strict';
 // import { Loan } from 'model/loan/loan.js'
 
+const routes = [
+    { path: '/', component: loansSummary }
+];
+
+const router = new VueRouter({
+    routes
+});
+
 var app = new Vue({
+    router,
     el: "#main",
     data : {
         loans: [

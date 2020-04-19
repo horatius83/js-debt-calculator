@@ -8,7 +8,6 @@ Vue.component('max-payment', {
         loans: Array
     },
     created: function() {
-        console.log('Loaded!');
         this.totalMonthlyPayment = this.minimumPayment;
     },
     computed: {
