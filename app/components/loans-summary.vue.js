@@ -17,13 +17,6 @@ const loansSummary = Vue.component('loans-summary', {
     },
     template: `
         <div id="loans-summary">
-            <nav>
-                <div class="row">
-                    <a href="https://google.com">Google</a> 
-                    <a href="https://google.com">Google</a> 
-                </div>
-            </nav>
-
             <h1>Debt Calculator</h1>
             <div id="loans-summary-body">
                 <max-payment v-bind:loans="loans"></max-payment>

@@ -1,7 +1,7 @@
 Vue.component('new-loan', {
     data: function() {
         return {
-            shouldAddNewLoan: false,
+            shouldDisplayForm: false,
             name: '',
             principal: 0,
             interest: 0,
@@ -10,7 +10,7 @@ Vue.component('new-loan', {
     },
     methods: {
         clear: function() {
-            this.shouldAddNewLoan = false;
+            this.shouldDisplayForm = false;
             this.name = '';
             this.principal = 0;
             this.interest = 0;
@@ -28,11 +28,10 @@ Vue.component('new-loan', {
     },
     template: `
         <div class="card fluid">
-            <div v-if="!shouldAddNewLoan">
-                <button v-on:click="shouldAddNewLoan = !shouldAddNewLoan">Add New Loan</button>
+            <div v-if="!shouldDisplayForm">
+                <button v-on:click="shouldDisplayForm = true">Add New Loan</button>
             </div>
-            <div v-if="shouldAddNewLoan">
-                <h2>New Loan</h2>
+            <div v-if="shouldDisplayForm">
                 <label for="new-loan-name">Name</label>
                 <input name="new-loan-name" id="new-loan-name" v-model="name"></input>
                 <label for="new-loan-principal">Principal</label>
@@ -42,8 +41,8 @@ Vue.component('new-loan', {
                 <label for="new-loan-minimum">Minimum</label>
                 <input name="new-loan-minimum" id="new-loan-minimum" type="number" inputmode="decimal" v-model.number="minimum" step="0.01"></input>
                 <div class="row">
-                    <button v-on:click="addNewLoan()">Create New Loan</button>
-                    <button v-on:click="clear()">Cancel</button>
+                    <button class="primary" v-on:click="addNewLoan()">Create New Loan</button>
+                    <button class="secondary" v-on:click="clear()">Cancel</button>
                 </div>
             </div>
         </div>
