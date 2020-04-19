@@ -21,7 +21,7 @@ Vue.component('max-payment', {
     },
     template: `
         <div class="row">
-            <div class="card large">
+            <div class="card large col-sm">
                 <label for="max-payment">Total monthly Payment</label>
                 <input 
                     name="max-payment" 
@@ -34,7 +34,7 @@ Vue.component('max-payment', {
                     <span class="error-message">Total monthly payment must exceed minimum required payment.</span>
                 </div>
             </div>
-            <div class="card large">
+            <div class="card large col-sm">
                 <label for="loan-payment-strategy">Loan Payment Strategy</label>
                 <select id="loan-payment-strategy">
                     <option value="avalanche">Avalanche</option>

@@ -1,23 +1,18 @@
 const loansSummary = Vue.component('loans-summary', {
-    props: {
-        'loans': Array
+    data: function() {
+        return {
+            loans: []
+        };
+    },
+    created: function() {
+        this.loans = loanService.getLoans();
     },
     methods: {
         addNewLoan: function(newLoan) {
-            this.loans.push(newLoan);
+            loanService.addLoan(newLoan);
         },
         deleteLoan: function(loan) {
-            let index = -1;
-            for(let i in this.loans) {
-                const existingLoan = this.loans[i];
-                if(existingLoan.name == loan.name) {
-                    index = i;
-                    break;
-                }
-            }
-            if(index > -1) {
-                this.loans.splice(index,1);
-            }
+           loanService.deleteLoan(loan);
         }
     },
     template: `
