@@ -15,9 +15,9 @@ Vue.component('loans', {
                 </thead>
                 <tr v-for="loan in loans">
                     <td>{{ loan.name }}</td>
-                    <td>{{ loan.principal }}</td>
-                    <td>{{ loan.interest }}</td>
-                    <td>{{ loan.minimum }}</td>
+                    <td>{{ loan.principal | currency }}</td>
+                    <td>{{ loan.interest }}%</td>
+                    <td>{{ loan.minimum | currency }}</td>
                     <td><input type="button" value="Delete"></input></td>
                 </tr>
             </table>
