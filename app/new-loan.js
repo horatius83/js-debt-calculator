@@ -16,8 +16,8 @@ Vue.component('new-loan', {
             this.interest = 0;
             this.minimum = 0;
         },
-        submit: function() {
-            this.$emit('submit', {
+        addNewLoan: function() {
+            this.$emit('add-new-loan', {
                 name: this.name,
                 principal: this.principal,
                 interest: this.interest,
@@ -36,13 +36,13 @@ Vue.component('new-loan', {
                 <label for="new-loan-name">Name</label>
                 <input name="new-loan-name" id="new-loan-name" v-model="name"></input>
                 <label for="new-loan-principal">Principal</label>
-                <input name="new-loan-principal" type="number" v-model.number="principal" step="0.01"></input>
+                <input name="new-loan-principal" type="number" inputmode="decimal" v-model.number="principal" step="0.01"></input>
                 <label for="new-loan-interest">Interest</label>
-                <input name="new-loan-interest" id="new-loan-interest" type="number" v-model.number="interest" step="0.01"></input>
+                <input name="new-loan-interest" id="new-loan-interest" type="number" inputmode="decimal" v-model.number="interest" step="0.01"></input>
                 <label for="new-loan-minimum">Minimum</label>
-                <input name="new-loan-minimum" id="new-loan-minimum" type="number" v-model.number="minimum" step="0.01"></input>
+                <input name="new-loan-minimum" id="new-loan-minimum" type="number" inputmode="decimal" v-model.number="minimum" step="0.01"></input>
                 <div class="row">
-                    <button v-on:click="submit()">Create New Loan</button>
+                    <button v-on:click="addNewLoan()">Create New Loan</button>
                     <button v-on:click="clear()">Cancel</button>
                 </div>
             </div>

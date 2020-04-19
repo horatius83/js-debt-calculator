@@ -4,21 +4,23 @@ Vue.component('loans', {
     },
     template: `
         <div class="card fluid">
-        <h2>Loans</h2>
-            <table>
+            <h2>Loans</h2>
+            <table id="loans-table">
                 <thead>
-                    <th>Name</th>
-                    <th>Principal</th>
-                    <th>Interest</th>
-                    <th>Minimum</th>
-                    <th></th>
+                    <th class="loans-table-name-column">Name</th>
+                    <th class="loans-table-principal-column">Principal</th>
+                    <th class="loans-table-interest-column">Interest</th>
+                    <th class="loans-table-minimum-column">Minimum</th>
+                    <th class="loans-table-details-column"></th>
+                    <th class="loans-table-delete-column"></th>
                 </thead>
                 <tr v-for="loan in loans">
-                    <td>{{ loan.name }}</td>
-                    <td>{{ loan.principal }}</td>
-                    <td>{{ loan.interest }}</td>
-                    <td>{{ loan.minimum }}</td>
-                    <td><input type="button" value="Delete"></input></td>
+                    <td data-label="Name">{{ loan.name }}</td>
+                    <td data-label="Principal">{{ loan.principal }}</td>
+                    <td data-label="Interest">{{ loan.interest }}</td>
+                    <td data-label="Minimum">{{ loan.minimum }}</td>
+                    <td><button>Details</button></td>
+                    <td><button v-on:click="$emit('delete', loan)">Delete</button></td>
                 </tr>
             </table>
         </div>

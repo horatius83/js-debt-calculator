@@ -12,7 +12,8 @@
     <body>
         <main>
             <div id="main">
-                <loans-summary v-bind:loans="loans"></loans-summary>
+                <!--<loans-summary v-bind:loans="loans"></loans-summary>-->
+                <router-view></router-view>
             </div>
         </main>
         <script src="models/util/interest.js"></script>
