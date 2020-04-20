@@ -2,7 +2,7 @@ Vue.component('loan-graph', {
     data: function() {
         return {
             shouldShowGraph: false,
-            chart
+            chart: undefined
         };
     },
     methods: {
