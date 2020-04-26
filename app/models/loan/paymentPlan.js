@@ -52,7 +52,6 @@ class PaymentPlan {
         monthlyPaymentAmount,
         paymentStrategy
     ) {
-        debugger;
         let shouldKeepGoing = true;
         let year = startingDate.getFullYear();
         let month = startingDate.getMonth();

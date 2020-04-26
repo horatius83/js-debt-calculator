@@ -1,15 +1,19 @@
 Vue.component('loan-graph', {
+    props: {
+        loans: Array,
+        totalMonthlyPayment: Number,
+        paymentStrategy: Function
+    },
     data: function() {
         return {
-            shouldShowGraph: false,
-            chart: undefined
+            shouldShowGraph: false
         };
     },
     methods: {
         createDataset: function(label, hue, data) {
-            let color = 'hsl( ' + hue + ', 90%, 80% )';
-            let bgColor = 'hsl( ' + hue + ', 90%, 90% )';
-            let hoverBorderColor = 'hsl( ' + hue + ', 90%, 50% )';
+            const color = 'hsl( ' + hue + ', 90%, 80% )';
+            const bgColor = 'hsl( ' + hue + ', 90%, 90% )';
+            const hoverBorderColor = 'hsl( ' + hue + ', 90%, 50% )';
             return {
                 label: label,
                 fill: true,
@@ -33,13 +37,13 @@ Vue.component('loan-graph', {
                 spanGaps: false,
             }
         },
-        createLoanChart: function(elementId) {
-            var ctx = document.getElementById(elementId);
-            var loan_chart = new Chart(ctx, {
+        createLoanChart: function(elementId, labels, dataset) {
+            const ctx = document.getElementById(elementId);
+            const loan_chart = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: [],
-                    datasets: []
+                    labels: labels,
+                    datasets: dataset
                 },
                 options: {
                     scales: {
@@ -53,12 +57,21 @@ Vue.component('loan-graph', {
                 }
             });
             return loan_chart;
+        },
+        displayGraph: function() {
+            this.shouldShowGraph = !this.shouldShowGraph;
+            if(!this.shouldShowGraph) {
+                return;
+            }
+            // Generate the data
+            const paymentPlan = new PaymentPlan(this.loans, 12 * 10);
+            paymentPlan.createPaymentPlan(new Date(), this.totalMonthlyPayment, this.paymentStrategy);
         }
     },
     template: `
         <div class="card fluid" id="loan-graph">
             <div>
-                <button v-on:click="shouldShowGraph = !shouldShowGraph">{{ shouldShowGraph ? 'Hide' : 'Show' }} Graph</button>
+                <button v-on:click="displayGraph">{{ shouldShowGraph ? 'Hide' : 'Show' }} Graph</button>
             </div>
             <div v-if="shouldShowGraph">
                 <canvas id="loan-graph"></canvas>

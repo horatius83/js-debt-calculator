@@ -1,7 +1,9 @@
 const loansSummary = Vue.component('loans-summary', {
     data: function() {
         return {
-            loans: []
+            loans: [],
+            paymentStrategy: undefined,
+            totalMonthlyPayment: 0,
         };
     },
     created: function() {
@@ -13,16 +15,40 @@ const loansSummary = Vue.component('loans-summary', {
         },
         deleteLoan: function(loan) {
            loanService.deleteLoan(loan);
+        },
+        paymentStrategyMapper: function(nameOfPaymentStrategy) {
+            const mapper = new Map([
+                ['avalanche', avalanche],
+                ['snowball', snowball],
+                ['double', double],
+            ]);
+            return mapper.get(nameOfPaymentStrategy);
+        },
+        paymentStrategyChanged: function(newPaymentPlan) {
+            console.log(`paymentStrategyChanged: ${newPaymentPlan}`);
+            this.paymentStrategy = this.paymentStrategyMapper(newPaymentPlan);
+        },
+        totalMonthlyPaymentChanged: function(newTotalMonthlyPayment) {
+            console.log(`totalMonthlyPaymentChanged: ${newTotalMonthlyPayment}`);
+            this.totalMonthlyPayment = Number(newTotalMonthlyPayment);
         }
     },
     template: `
         <div id="loans-summary">
             <h1>Debt Calculator</h1>
             <div id="loans-summary-body">
-                <max-payment v-bind:loans="loans"></max-payment>
+                <max-payment 
+                    v-bind:loans="loans" 
+                    v-on:payment-strategy-changed="paymentStrategyChanged" 
+                    v-on:total-monthly-payment-changed="totalMonthlyPaymentChanged"
+                ></max-payment>
                 <loans v-bind:loans="loans" v-on:delete="deleteLoan"></loans>
                 <new-loan v-on:add-new-loan="addNewLoan"></new-loan>
-                <loan-graph></loan-graph>
+                <loan-graph 
+                    v-bind:loans="loans"
+                    v-bind:totalMonthlyPayment="totalMonthlyPayment"
+                    v-bind:paymentStrategy="paymentStrategy"
+                ></loan-graph>
             </div>
         </div>
     `

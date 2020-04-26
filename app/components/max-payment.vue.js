@@ -9,6 +9,8 @@ Vue.component('max-payment', {
     },
     created: function() {
         this.totalMonthlyPayment = this.minimumPayment;
+        this.$emit('total-monthly-payment-changed', this.totalMonthlyPayment);
+        this.$emit('payment-strategy-changed', 'avalanche');
     },
     computed: {
         minimumPayment: function() {
@@ -29,6 +31,7 @@ Vue.component('max-payment', {
                     type="number" 
                     v-model.number="totalMonthlyPayment"
                     step="0.01"
+                    v-on:change="$emit('total-monthly-payment-changed', $event.target.value)"
                 ></input>
                 <div v-if="minimumPayment > totalMonthlyPayment">
                     <span class="error-message">Total monthly payment must exceed minimum required payment.</span>
@@ -36,11 +39,10 @@ Vue.component('max-payment', {
             </div>
             <div class="card large col-sm">
                 <label for="loan-payment-strategy">Loan Payment Strategy</label>
-                <select id="loan-payment-strategy">
+                <select id="loan-payment-strategy" v-on:change="$emit('payment-strategy-changed', $event.target.value)">
                     <option value="avalanche">Avalanche</option>
                     <option value="snowball">Snowball</option>
                     <option value="double">Double-Double</option>
-                    <option value="minimum">Minimum</option>
                 </select>
             </div>
         </div>
