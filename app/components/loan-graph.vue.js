@@ -39,13 +39,13 @@ Vue.component('loan-graph', {
                 spanGaps: false,
             }
         },
-        createLoanChart: function(elementId, labels, dataset) {
+        createLoanChart: function(elementId, labels, datasets) {
             const ctx = document.getElementById(elementId);
             const loan_chart = new Chart(ctx, {
                 type: 'line',
                 data: {
                     labels: labels,
-                    datasets: dataset
+                    datasets: datasets
                 },
                 options: {
                     scales: {
@@ -65,6 +65,7 @@ Vue.component('loan-graph', {
         }
     },
     updated: function() {
+        console.log('updated');
         if(!this.shouldShowGraph) {
             return;
         }
@@ -73,8 +74,8 @@ Vue.component('loan-graph', {
         paymentPlan.createPaymentPlan(new Date(), this.totalMonthlyPayment, this.paymentStrategy);
         if(paymentPlan.paymentPlans.size) {
             this.hasData = true;
-            //const payments = [...paymentPlan.paymentPlans.values()][0].payments;
-            const [_, payments] = [...paymentPlan.paymentPlans.values()].reduce((tuple, loanPaymentPlan) => {
+            const loanPayments = [...paymentPlan.paymentPlans.values()];
+            const [_, payments] = loanPayments.reduce((tuple, loanPaymentPlan) => {
                 const [numberOfPayments, _] = tuple;
                 if(loanPaymentPlan.payments.length > numberOfPayments) {
                     return [loanPaymentPlan.payments.length, loanPaymentPlan.payments];
@@ -82,8 +83,16 @@ Vue.component('loan-graph', {
                 return tuple;
             }, [-1, []]);
             const labels = payments.map(p => p.dateOfPayment.toLocaleDateString());
-            const dataset = this.createDataset('Test', 0, []);
-            this.loanChart = this.createLoanChart('graph-canvas', labels, dataset);
+            const datasets = loanPayments.map(
+                (loanPayment, i) => 
+                    this.createDataset(
+                        loanPayment.loan.name, 
+                        i * 27, 
+                        loanPayment.payments.map(payment => payment.principal)
+                    )
+            )
+            //const dataset = this.createDataset('Test', 0, []);
+            this.loanChart = this.createLoanChart('graph-canvas', labels, datasets);
         } else {
             this.hasData = false;
         }
