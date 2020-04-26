@@ -91,7 +91,6 @@ Vue.component('loan-graph', {
                         loanPayment.payments.map(payment => payment.principal)
                     )
             )
-            //const dataset = this.createDataset('Test', 0, []);
             this.loanChart = this.createLoanChart('graph-canvas', labels, datasets);
         } else {
             this.hasData = false;
