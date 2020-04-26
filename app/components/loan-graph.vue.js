@@ -6,7 +6,9 @@ Vue.component('loan-graph', {
     },
     data: function() {
         return {
-            shouldShowGraph: false
+            shouldShowGraph: false,
+            hasData: true,
+            loanChart: undefined
         };
     },
     methods: {
@@ -60,12 +62,30 @@ Vue.component('loan-graph', {
         },
         displayGraph: function() {
             this.shouldShowGraph = !this.shouldShowGraph;
-            if(!this.shouldShowGraph) {
-                return;
-            }
-            // Generate the data
-            const paymentPlan = new PaymentPlan(this.loans, 12 * 10);
-            paymentPlan.createPaymentPlan(new Date(), this.totalMonthlyPayment, this.paymentStrategy);
+        }
+    },
+    updated: function() {
+        if(!this.shouldShowGraph) {
+            return;
+        }
+        // Generate the data
+        const paymentPlan = new PaymentPlan(this.loans, 12 * 10);
+        paymentPlan.createPaymentPlan(new Date(), this.totalMonthlyPayment, this.paymentStrategy);
+        if(paymentPlan.paymentPlans.size) {
+            this.hasData = true;
+            //const payments = [...paymentPlan.paymentPlans.values()][0].payments;
+            const [_, payments] = [...paymentPlan.paymentPlans.values()].reduce((tuple, loanPaymentPlan) => {
+                const [numberOfPayments, _] = tuple;
+                if(loanPaymentPlan.payments.length > numberOfPayments) {
+                    return [loanPaymentPlan.payments.length, loanPaymentPlan.payments];
+                }
+                return tuple;
+            }, [-1, []]);
+            const labels = payments.map(p => p.dateOfPayment.toLocaleDateString());
+            const dataset = this.createDataset('Test', 0, []);
+            this.loanChart = this.createLoanChart('graph-canvas', labels, dataset);
+        } else {
+            this.hasData = false;
         }
     },
     template: `
@@ -74,7 +94,10 @@ Vue.component('loan-graph', {
                 <button v-on:click="displayGraph">{{ shouldShowGraph ? 'Hide' : 'Show' }} Graph</button>
             </div>
             <div v-if="shouldShowGraph">
-                <canvas id="loan-graph"></canvas>
+                <canvas id="graph-canvas"></canvas>
+            </div>
+            <div v-if="shouldShowGraph && !hasData">
+                There is no data to display.
             </div>
         </div>
     `
