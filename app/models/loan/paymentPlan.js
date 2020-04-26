@@ -7,13 +7,7 @@ class PaymentPlan {
         if(!loans) {
             throw new Error('Cannot create a payment plan with undefined loans');
         }
-        this.paymentPlans = loans.reduce(
-           (mp, ln) => {
-               mp.set(ln.name, new LoanPaymentPlan(ln))
-               return mp;
-           }, 
-           new Map()
-        );
+        this.paymentPlans = new Map(loans.map(ln => [ln.name, new LoanPaymentPlan(ln)]));
     }
 
     getMinimumPayments(paymentDate) {
