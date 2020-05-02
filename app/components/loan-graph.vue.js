@@ -11,6 +11,47 @@ Vue.component('loan-graph', {
             loanChart: undefined
         };
     },
+    watch: {
+        loans: function(val) {
+            console.log('loans');
+        },
+        totalMonthlyPayment: function(val) {
+            console.log('totalMonthlyPayment},');
+        },
+        paymentStrategy: function(val) {
+            console.log('paymentStrategy');
+            const paymentPlan = new PaymentPlan(this.loans, 12 * 10);
+            paymentPlan.createPaymentPlan(new Date(), this.totalMonthlyPayment, this.paymentStrategy);
+            if(paymentPlan.paymentPlans.size) {
+                this.hasData = true;
+                const loanPayments = [...paymentPlan.paymentPlans.values()];
+                const [_, payments] = loanPayments.reduce((tuple, loanPaymentPlan) => {
+                    const [numberOfPayments, _] = tuple;
+                    if(loanPaymentPlan.payments.length > numberOfPayments) {
+                        return [loanPaymentPlan.payments.length, loanPaymentPlan.payments];
+                    }
+                    return tuple;
+                }, [-1, []]);
+                const labels = payments.map(p => p.dateOfPayment.toLocaleDateString());
+                const datasets = loanPayments.map(
+                    (loanPayment, i) => 
+                        this.createDataset(
+                            loanPayment.loan.name, 
+                            i * 27, 
+                            loanPayment.payments.map(payment => payment.principal)
+                        )
+                )
+                if(this.loanChart) {
+                    this.loanChart.data.labels = labels;
+                    this.loanChart.data.datasets = datasets;
+                    this.loanChart.update();
+                } else {
+                }
+            } else {
+                this.hasData = false;
+            }
+        }
+    },
     methods: {
         createDataset: function(label, hue, data) {
             const color = 'hsl( ' + hue + ', 90%, 80% )';
