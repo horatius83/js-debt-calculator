@@ -6,6 +6,28 @@ const loansSummary = Vue.component('loans-summary', {
             totalMonthlyPayment: 0,
         };
     },
+    computed: {
+        minimumMonthlyPayment: function() {
+            const date = new Date();
+            const payments = this.loans
+                .map(ln => new Payment(ln, ln.principal, 0, date))
+                .map(p => p.getMinimumMonthlyPayment(date));
+            return payments.reduce((acc, x) => acc + x.amountPaid, 0);
+        },
+        paymentPlan: function() {
+            if (this.totalMonthlyPayment 
+                && this.totalMonthlyPayment >= this.minimumMonthlyPayment
+                && this.loans
+                && this.paymentStrategy
+            ) {
+                console.log('paymentPlan created');
+                const paymentPlan = new PaymentPlan(this.loans, 12 * 10);
+                paymentPlan.createPaymentPlan(new Date(), this.totalMonthlyPayment, this.paymentStrategy);
+                return paymentPlan;
+            }
+            return undefined;
+        }
+    },
     created: function() {
         this.loans = loanService.getLoans();
     },
@@ -45,9 +67,7 @@ const loansSummary = Vue.component('loans-summary', {
                 <loans v-bind:loans="loans" v-on:delete="deleteLoan"></loans>
                 <new-loan v-on:add-new-loan="addNewLoan"></new-loan>
                 <loan-graph 
-                    v-bind:loans="loans"
-                    v-bind:totalMonthlyPayment="totalMonthlyPayment"
-                    v-bind:paymentStrategy="paymentStrategy"
+                    v-bind:paymentPlan="paymentPlan"
                 ></loan-graph>
             </div>
         </div>
