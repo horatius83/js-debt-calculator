@@ -17,12 +17,7 @@ Vue.component('new-loan', {
             this.minimum = 0;
         },
         addNewLoan: function() {
-            this.$emit('add-new-loan', {
-                name: this.name,
-                principal: this.principal,
-                interest: this.interest,
-                minimum: this.minimum
-            });
+            this.$emit('add-new-loan', new Loan(this.name, this.principal, this.interest, this.minimum));
             this.clear();
         }
     },
