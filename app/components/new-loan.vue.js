@@ -1,4 +1,6 @@
-Vue.component('new-loan', {
+import { Loan } from '../models/loan/loan.js';
+
+var NewLoan = Vue.component('new-loan', {
     data: function() {
         return {
             shouldDisplayForm: false,
@@ -43,3 +45,5 @@ Vue.component('new-loan', {
         </div>
     `
 });
+
+export { NewLoan };

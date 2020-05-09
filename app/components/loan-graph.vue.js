@@ -1,4 +1,4 @@
-Vue.component('loan-graph', {
+var LoanGraph = Vue.component('loan-graph', {
     props: {
         paymentPlan: Object
     },
@@ -122,3 +122,5 @@ Vue.component('loan-graph', {
         </div>
     `
 });
+
+export { LoanGraph }

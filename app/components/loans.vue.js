@@ -1,4 +1,6 @@
-Vue.component('loans', {
+import { Currency } from './filters.vue.js';
+
+var Loans = Vue.component('loans', {
     data: function() {
         return {
             shouldDisplayLoans: true
@@ -33,3 +35,5 @@ Vue.component('loans', {
         </div>
     `
 });
+
+export { Loans };

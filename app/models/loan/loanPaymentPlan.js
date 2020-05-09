@@ -1,6 +1,6 @@
-// import { createPayment } from './payment.model';
+import { createPayment } from './payment.js';
 
-class LoanPaymentPlan {
+export class LoanPaymentPlan {
     constructor(loan, payments) { 
         this.loan = loan;
         this.payments = payments || [];

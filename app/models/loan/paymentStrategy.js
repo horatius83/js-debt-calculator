@@ -1,12 +1,12 @@
-function avalanche(payments, totalMoney, dateofPayment) {
+export function avalanche(payments, totalMoney, dateofPayment) {
    return sortAndGetPayments(payments, totalMoney, dateofPayment, avalancheSort); 
 }
 
-function snowball(payments, totalMoney, dateOfPayment) {
+export function snowball(payments, totalMoney, dateOfPayment) {
     return sortAndGetPayments(payments, totalMoney, dateOfPayment, snowballSort);
 }
 
-function double(payments, totalMoney, dateOfPayment) {
+export function double(payments, totalMoney, dateOfPayment) {
     const sortingFunction = avalancheSort;
     const priorityList = payments.sort(sortingFunction);
     const minimumMoney = payments.reduce((acc,x) => acc + x.getMinimumMonthlyPayment(dateOfPayment).amountPaid, 0);

@@ -1,6 +1,6 @@
-// import { calculateNewPrincipalForMonth, getMinimumMonthlyPayment } from '../../util/interest';
+import { calculateNewPrincipalForMonth, getMinimumMonthlyPayment } from '../util/interest.js';
 
-class Payment {
+export class Payment {
     constructor(
         loan,
         principal, 
@@ -39,7 +39,7 @@ class Payment {
     }
 }
 
-function createPayment(loan, dateOfPayment) {
+export function createPayment(loan, dateOfPayment) {
     const minimumPayment = loan.getMinimumPayment();
     const newPrincipal = calculateNewPrincipalForMonth(loan.principal, loan.interest);
     return new Payment(loan, newPrincipal - minimumPayment, minimumPayment, dateOfPayment);

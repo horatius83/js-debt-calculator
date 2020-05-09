@@ -1,4 +1,4 @@
-// import { getMinimumMonthlyPayment } from '../../util/interest';
+import { getMinimumMonthlyPayment } from '../util/interest.js';
 
 class Loan {
     constructor(
@@ -16,3 +16,5 @@ class Loan {
         return getMinimumMonthlyPayment(this.principal, this.interest, this.minimum);
     }
 }
+
+export { Loan };

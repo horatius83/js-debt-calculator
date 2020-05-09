@@ -1,6 +1,6 @@
-// import { LoanPaymentPlan } from './loanpaymentplan.model'
+import { LoanPaymentPlan } from './loanPaymentPlan.js';
 
-class PaymentPlan {
+export class PaymentPlan {
     constructor(loans, maxNumberOfPayments) {
         this.loans = loans;
         this._maxNumberOfPayments = maxNumberOfPayments || 40 * 12;

@@ -1,3 +1,5 @@
+import { Loan } from '../models/loan/loan.js';
+
 class LoanService {
     constructor() {
         this.loans = [
@@ -43,3 +45,5 @@ class LoanService {
 }
 
 var loanService = new LoanService();
+
+export { loanService }

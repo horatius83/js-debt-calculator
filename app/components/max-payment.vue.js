@@ -1,4 +1,6 @@
-Vue.component('max-payment', {
+import { Payment } from '../models/loan/payment.js';
+
+var MaxPayment = Vue.component('max-payment', {
     data: function() {
         return {
             totalMonthlyPayment: 0
@@ -48,3 +50,5 @@ Vue.component('max-payment', {
         </div>
     `
 });
+
+export { MaxPayment };

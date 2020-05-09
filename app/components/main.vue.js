@@ -1,5 +1,5 @@
-'use strict';
-// import { Loan } from 'model/loan/loan.js'
+import { Loan } from '../models/loan/loan.js'
+import { loansSummary } from './loans-summary.vue.js'
 
 const routes = [
     { path: '/', component: loansSummary }

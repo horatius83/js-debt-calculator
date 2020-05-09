@@ -1,4 +1,13 @@
-const loansSummary = Vue.component('loans-summary', {
+import { LoanGraph } from './loan-graph.vue.js';
+import { MaxPayment } from './max-payment.vue.js';
+import { NewLoan } from './new-loan.vue.js';
+import { Loans } from './loans.vue.js';
+import { loanService } from '../services/loan-service.js';
+import { Payment } from '../models/loan/payment.js';
+import { avalanche, snowball, double } from '../models/loan/paymentStrategy.js';
+import { PaymentPlan } from '../models/loan/paymentPlan.js';
+
+export const loansSummary = Vue.component('loans-summary', {
     data: function() {
         return {
             loans: [],
@@ -21,7 +30,7 @@ const loansSummary = Vue.component('loans-summary', {
                 && this.paymentStrategy
             ) {
                 console.log('paymentPlan created');
-                const paymentPlan = new PaymentPlan(this.loans, 12 * 10);
+                const paymentPlan = new PaymentPlan(this.loans, 12 * 30);
                 paymentPlan.createPaymentPlan(new Date(), this.totalMonthlyPayment, this.paymentStrategy);
                 return paymentPlan;
             }
