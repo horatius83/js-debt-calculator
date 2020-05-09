@@ -59,13 +59,13 @@ const loansSummary = Vue.component('loans-summary', {
         <div id="loans-summary">
             <h1>Debt Calculator</h1>
             <div id="loans-summary-body">
+                <loans v-bind:loans="loans" v-on:delete="deleteLoan"></loans>
+                <new-loan v-on:add-new-loan="addNewLoan"></new-loan>
                 <max-payment 
                     v-bind:loans="loans" 
                     v-on:payment-strategy-changed="paymentStrategyChanged" 
                     v-on:total-monthly-payment-changed="totalMonthlyPaymentChanged"
                 ></max-payment>
-                <loans v-bind:loans="loans" v-on:delete="deleteLoan"></loans>
-                <new-loan v-on:add-new-loan="addNewLoan"></new-loan>
                 <loan-graph 
                     v-bind:paymentPlan="paymentPlan"
                 ></loan-graph>

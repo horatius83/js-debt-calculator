@@ -1,7 +1,7 @@
 Vue.component('loans', {
     data: function() {
         return {
-            shouldDisplayLoans: false
+            shouldDisplayLoans: true
         };
     },
     props: {

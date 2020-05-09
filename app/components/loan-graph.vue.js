@@ -11,37 +11,7 @@ Vue.component('loan-graph', {
     },
     watch: {
         paymentPlan: function(paymentPlan) {
-            console.log('paymentPlan');
-            if(this.shouldShowGraph && paymentPlan != undefined) {
-                if(paymentPlan.paymentPlans.size) {
-                    this.hasData = true;
-                    const loanPayments = [...paymentPlan.paymentPlans.values()];
-                    const [_, payments] = loanPayments.reduce((tuple, loanPaymentPlan) => {
-                        const [numberOfPayments, _] = tuple;
-                        if(loanPaymentPlan.payments.length > numberOfPayments) {
-                            return [loanPaymentPlan.payments.length, loanPaymentPlan.payments];
-                        }
-                        return tuple;
-                    }, [-1, []]);
-                    const labels = payments.map(p => p.dateOfPayment.toLocaleDateString());
-                    const datasets = loanPayments.map(
-                        (loanPayment, i) => 
-                            this.createDataset(
-                                loanPayment.loan.name, 
-                                i * 27, 
-                                loanPayment.payments.map(payment => payment.principal)
-                            )
-                    )
-                    if(this.loanChart) {
-                        this.loanChart.data.labels = labels;
-                        this.loanChart.data.datasets = datasets;
-                        this.loanChart.update();
-                    } else {
-                        this.loanChart = this.createLoanChart('graph-canvas', labels, datasets);
-                    }
-                } 
-            }
-            this.hasData = false;
+            this.updateGraph(paymentPlan);
         }
     },
     methods: {
@@ -95,38 +65,48 @@ Vue.component('loan-graph', {
         },
         displayGraph: function() {
             this.shouldShowGraph = !this.shouldShowGraph;
-        }
-    },
-    updated: function() {
-        console.log('updated');
-        /*if(!this.shouldShowGraph || !this.paymentPlan) {
-            return;
-        }
-        // Generate the data
-        if(this.paymentPlan.paymentPlans.size) {
-            this.hasData = true;
-            const loanPayments = [...this.paymentPlan.paymentPlans.values()];
-            const [_, payments] = loanPayments.reduce((tuple, loanPaymentPlan) => {
-                const [numberOfPayments, _] = tuple;
-                if(loanPaymentPlan.payments.length > numberOfPayments) {
-                    return [loanPaymentPlan.payments.length, loanPaymentPlan.payments];
-                }
-                return tuple;
-            }, [-1, []]);
-            const labels = payments.map(p => p.dateOfPayment.toLocaleDateString());
-            const datasets = loanPayments.map(
-                (loanPayment, i) => 
-                    this.createDataset(
-                        loanPayment.loan.name, 
-                        i * 27, 
-                        loanPayment.payments.map(payment => payment.principal)
+            if(this.shouldShowGraph) {
+                this.$nextTick(() => {
+                    this.updateGraph(this.paymentPlan);
+                });
+            } else {
+                this.loanChart = undefined;
+            }
+        },
+        updateGraph: function(paymentPlan) {
+            console.log('updateGraph');
+            if(this.shouldShowGraph && paymentPlan != undefined) {
+                if(paymentPlan.paymentPlans.size) {
+                    this.hasData = true;
+                    const loanPayments = [...paymentPlan.paymentPlans.values()];
+                    const [_, payments] = loanPayments.reduce((tuple, loanPaymentPlan) => {
+                        const [numberOfPayments, _] = tuple;
+                        if(loanPaymentPlan.payments.length > numberOfPayments) {
+                            return [loanPaymentPlan.payments.length, loanPaymentPlan.payments];
+                        }
+                        return tuple;
+                    }, [-1, []]);
+                    const labels = payments.map(p => p.dateOfPayment.toLocaleDateString());
+                    const datasets = loanPayments.map(
+                        (loanPayment, i) => 
+                            this.createDataset(
+                                loanPayment.loan.name, 
+                                i * 27, 
+                                loanPayment.payments.map(payment => payment.principal)
+                            )
                     )
-            )
-            this.loanChart = this.createLoanChart('graph-canvas', labels, datasets);
-        } else {
-            this.hasData = false;
+                    if(this.loanChart) {
+                        this.loanChart.data.labels = labels;
+                        this.loanChart.data.datasets = datasets;
+                        this.loanChart.update();
+                    } else {
+                        this.loanChart = this.createLoanChart('graph-canvas', labels, datasets);
+                    }
+                } 
+            } else {
+                this.hasData = false;
+            }
         }
-        */
     },
     template: `
         <div class="card fluid" id="loan-graph">
