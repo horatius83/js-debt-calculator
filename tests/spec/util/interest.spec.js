@@ -1,4 +1,4 @@
-// import { calculateNewPrincipal, calculateNewPrincipalForMonth, getMinimumMonthlyPayment } from '../../../app/models/util/interest';
+import { calculateNewPrincipal, calculateNewPrincipalForMonth, getMinimumMonthlyPayment } from '../../../app/models/util/interest.js';
 
 describe('interest utility module', () => {
     describe('calculateNewPrincipal', () => {

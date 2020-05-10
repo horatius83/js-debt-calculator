@@ -1,4 +1,5 @@
-// import { Loan } from '../../../app/models/loan/loan.js';
+import { Loan } from '../../../app/models/loan/loan.js';
+import { getMinimumMonthlyPayment } from '../../../app/models/util/interest.js';
 
 describe('loan.model', () => {
   it('should be created', () => {

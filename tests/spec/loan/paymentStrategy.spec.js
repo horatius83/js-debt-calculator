@@ -1,6 +1,6 @@
-// import { Loan } from '../../../app/models/loan/loan';
-// import { Payment, createPayment } from '../../../app/models/loan/payment';
-// import { avalanche, snowball, double } from '../../../app/models/loan/paymentStrategy';
+import { Loan } from '../../../app/models/loan/loan.js';
+import { Payment, createPayment } from '../../../app/models/loan/payment.js';
+import { avalanche, snowball, double } from '../../../app/models/loan/paymentStrategy.js';
 
 describe('paymentstrategy.model', () => {
     describe('avalanche', () => {

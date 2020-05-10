@@ -1,8 +1,8 @@
-// import { PaymentPlan } from '../../../app/models/loan/paymentPlan';
-// import { Loan } from '../../../app/models/loan/loan';
-// import { LoanPaymentPlan } from '../../../app/models/loan/loanPaymentPlan';
-// import { Payment, createPayment } from '../../../app/models/loan/payment';
-// import { avalanche } from '../../../app/models/loan/paymentStrategy';
+import { PaymentPlan } from '../../../app/models/loan/paymentPlan.js';
+import { Loan } from '../../../app/models/loan/loan.js';
+import { LoanPaymentPlan } from '../../../app/models/loan/loanPaymentPlan.js';
+import { Payment, createPayment } from '../../../app/models/loan/payment.js';
+import { avalanche } from '../../../app/models/loan/paymentStrategy.js';
 
 describe('paymentplan.model', () => {
     it('should be able to initialize', () => {
@@ -165,7 +165,6 @@ describe('paymentplan.model', () => {
             const paymentPlan = new PaymentPlan(loans, maxNumberOfPayments);
             const dateOfPayment = new Date(2019,1,22);
             const monthlyPaymentAmount = 1200;
-            debugger;
             
             expect(() => paymentPlan
                 .createPaymentPlan(dateOfPayment, monthlyPaymentAmount, avalanche))

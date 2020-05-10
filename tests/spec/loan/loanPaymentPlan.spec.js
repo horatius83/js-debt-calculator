@@ -1,7 +1,7 @@
-// import { Loan } from '../../../app/models/loan/loan';
-// import { LoanPaymentPlan } from '../../../app/models/loan/loanPaymentPlan';
-// import { calculateNewPrincipalForMonth } from '../../../app/models/util/interest';
-// import { Payment, createPayment } from '../../../app/models/loan/payment';
+import { Loan } from '../../../app/models/loan/loan.js';
+import { LoanPaymentPlan } from '../../../app/models/loan/loanPaymentPlan.js';
+import { calculateNewPrincipalForMonth } from '../../../app/models/util/interest.js';
+import { Payment, createPayment } from '../../../app/models/loan/payment.js';
 
 describe('loan payment plan model', () => {
     describe('getMinimumPayment', () => {

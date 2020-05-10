@@ -1,6 +1,6 @@
-// import { Payment, createPayment } from '../../../app/models/loan/payment';
-// import { getMinimumMonthlyPayment, calculateNewPrincipalForMonth } from '../../../app/models/util/interest';
-// import { Loan } from '../../../app/models/loan/loan';
+import { Payment, createPayment } from '../../../app/models/loan/payment.js';
+import { getMinimumMonthlyPayment, calculateNewPrincipalForMonth } from '../../../app/models/util/interest.js';
+import { Loan } from '../../../app/models/loan/loan.js';
 
 describe('payment', () => {
     it('should instantiate', () => {
