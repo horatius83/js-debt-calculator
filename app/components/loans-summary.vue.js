@@ -1,5 +1,6 @@
 import { LoanGraph } from './loan-graph.vue.js';
 import { MaxPayment } from './max-payment.vue.js';
+import { LoanStrategy } from './loan-strategy.vue.js';
 import { NewLoan } from './new-loan.vue.js';
 import { Loans } from './loans.vue.js';
 import { loanService } from '../services/loan-service.js';
@@ -70,11 +71,16 @@ export const loansSummary = Vue.component('loans-summary', {
             <div id="loans-summary-body">
                 <loans v-bind:loans="loans" v-on:delete="deleteLoan"></loans>
                 <new-loan v-on:add-new-loan="addNewLoan"></new-loan>
-                <max-payment 
-                    v-bind:loans="loans" 
-                    v-on:payment-strategy-changed="paymentStrategyChanged" 
-                    v-on:total-monthly-payment-changed="totalMonthlyPaymentChanged"
-                ></max-payment>
+                <div class="row">
+                    <max-payment 
+                        v-bind:loans="loans" 
+                        v-on:total-monthly-payment-changed="totalMonthlyPaymentChanged"
+                    ></max-payment>
+                    <loan-strategy
+                        v-on:payment-strategy-changed="paymentStrategyChanged" 
+                    >
+                    </loan-strategy>
+                </div>
                 <loan-graph 
                     v-bind:paymentPlan="paymentPlan"
                 ></loan-graph>
