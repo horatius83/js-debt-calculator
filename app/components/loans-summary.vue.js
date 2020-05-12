@@ -3,6 +3,7 @@ import { MaxPayment } from './max-payment.vue.js';
 import { LoanStrategy } from './loan-strategy.vue.js';
 import { NewLoan } from './new-loan.vue.js';
 import { Loans } from './loans.vue.js';
+import { PaymentSummary } from './payment-summary.vue.js';
 import { loanService } from '../services/loan-service.js';
 import { Payment } from '../models/loan/payment.js';
 import { avalanche, snowball, double } from '../models/loan/paymentStrategy.js';
@@ -80,6 +81,10 @@ export const loansSummary = Vue.component('loans-summary', {
                         v-on:payment-strategy-changed="paymentStrategyChanged" 
                     >
                     </loan-strategy>
+                    <payment-summary
+                        v-bind:paymentPlan="paymentPlan"
+                    >
+                    </payment-summary>
                 </div>
                 <loan-graph 
                     v-bind:paymentPlan="paymentPlan"
