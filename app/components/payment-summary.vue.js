@@ -42,14 +42,11 @@ export const PaymentSummary = Vue.component('payment-summary', {
     },
     template: `
         <div class="card large col-sm">
-            <div>
+            <div class="section">
                 Number of Months: {{ numberOfMonthsToZeroDebt }}
             </div>
-            <div>
+            <div class="section">
                 Total Interest Paid: {{ totalInterestPaid | currency }}
-            </div>
-            <div>
-                Total Principal Paid: {{ totalPrincipal | currency }}
             </div>
         </div>
     `
