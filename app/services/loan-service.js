@@ -17,8 +17,7 @@ class LoanService {
             new Loan("Ginny's", 433.74, 21, 30),
             new Loan("Walmart", 3872.16, 17.15, 94),
             new Loan("Military Star", 799.68, 10.49, 45),
-            new Loan("Sears", 3797.66, 25.44, 122),
-            new Loan("Test", 5000, 20, 50)
+            new Loan("Sears", 3797.66, 25.44, 122)
         ];
     }
 
