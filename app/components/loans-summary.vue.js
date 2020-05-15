@@ -45,6 +45,13 @@ export const loansSummary = Vue.component('loans-summary', {
     methods: {
         addNewLoan: function(newLoan) {
             loanService.addLoan(newLoan);
+            this.$nextTick(() => {
+                var element = document.getElementById('loans-table');
+                if(element) {
+                    var lastChildElement = element.lastChild;
+                    lastChildElement.scrollIntoView();
+                }
+            });
         },
         deleteLoan: function(loan) {
            loanService.deleteLoan(loan);
@@ -58,11 +65,9 @@ export const loansSummary = Vue.component('loans-summary', {
             return mapper.get(nameOfPaymentStrategy);
         },
         paymentStrategyChanged: function(newPaymentPlan) {
-            console.log(`paymentStrategyChanged: ${newPaymentPlan}`);
             this.paymentStrategy = this.paymentStrategyMapper(newPaymentPlan);
         },
         totalMonthlyPaymentChanged: function(newTotalMonthlyPayment) {
-            console.log(`totalMonthlyPaymentChanged: ${newTotalMonthlyPayment}`);
             this.totalMonthlyPayment = Number(newTotalMonthlyPayment);
         }
     },

@@ -26,7 +26,7 @@ class LoanService {
     }
 
     addLoan(loan) {
-        this.loans.unshift(loan);
+        this.loans.push(loan);
     }
 
     deleteLoan(loan) {
