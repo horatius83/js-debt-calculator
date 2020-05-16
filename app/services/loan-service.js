@@ -30,14 +30,8 @@ class LoanService {
     }
 
     deleteLoan(loan) {
-        let index = -1;
-        for(let i in this.loans) {
-            const existingLoan = this.loans[i];
-            if(existingLoan.name == loan.name) {
-                index = i;
-                break;
-            }
-        }
+        const index = this.loans
+            .reduce((j, x, i) => x.name == loan.name ? i : j, -1);
         if(index > -1) {
             this.loans.splice(index,1);
         }
