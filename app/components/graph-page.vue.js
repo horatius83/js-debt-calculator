@@ -1,3 +1,7 @@
+import { LoanGraph } from './loan-graph.vue.js';
+import { MaxPayment } from './max-payment.vue.js';
+import { LoanStrategy } from './loan-strategy.vue.js';
+import { PaymentSummary } from './payment-summary.vue.js';
 import { loanService } from '../services/loan-service.js';
 import { Payment } from '../models/loan/payment.js';
 import { avalanche, snowball, double } from '../models/loan/paymentStrategy.js';
