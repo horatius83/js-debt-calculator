@@ -38,15 +38,33 @@ var PaymentPlanComponent = Vue.component('payment-plan-component', {
                 }).reduce((y, x) => x > y ? x : y);
             }
             return 0;
+        },
+        paymentsByMonth: function() {
+            if(this.paymentPlan) {
+                const payments = [...this.paymentPlan.paymentPlans.values()].reduce((arr, plan) => {
+                    if(plan.payments) {
+                        for(let i=0; i<plan.payments.length; ++i) {
+                            const payment = plan.payments[i];
+                            if (i in arr) {
+                                arr[i].push(payment);
+                            } else {
+                                arr[i] = [payment];
+                            }
+                        }
+                    } else {
+                        return arr;
+                    }
+                }, []);
+                // Sort each month
+                // ...
+            }
+            return [];
         }
     },
     template: `
-        <div class="card fluid">
-            <div class="section">
-                Number of Months: {{ numberOfMonthsToZeroDebt }}
-            </div>
-            <div class="section">
-                Total Interest Paid: {{ totalInterestPaid | currency }}
+        <div>
+            <div class="card fluid">
+                <h1>1</h1>    
             </div>
         </div>
     ` 
