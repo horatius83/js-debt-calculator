@@ -12,11 +12,17 @@
         <script src="js/accounting.min.js"></script>
     </head>
     <body>
-        <main>
-            <div id="main">
-                <router-view></router-view>
-            </div>
-        </main>
+        <div id="main">
+            <header>
+                <a href="#" class="logo">Debt Calculator</a>
+                <router-link class="button" to="/">Summary</router-link>
+                <router-link class="button" to="/graph">Graph</router-link>
+                <router-link class="button" to="/plan">Plan</router-link>
+            </header>
+            <main>
+                    <router-view></router-view>
+            </main>
+        </div>
         <script src="components/main.vue.js" type="module"></script>
     </body>
 </html>

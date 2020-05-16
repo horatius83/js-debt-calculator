@@ -1,16 +1,9 @@
-import { LoanGraph } from './loan-graph.vue.js';
-import { MaxPayment } from './max-payment.vue.js';
-import { LoanStrategy } from './loan-strategy.vue.js';
-import { NewLoan } from './new-loan.vue.js';
-import { Loans } from './loans.vue.js';
-import { PaymentSummary } from './payment-summary.vue.js';
-import { PaymentPlanComponent } from './payment-plan-component.vue.js';
 import { loanService } from '../services/loan-service.js';
 import { Payment } from '../models/loan/payment.js';
 import { avalanche, snowball, double } from '../models/loan/paymentStrategy.js';
 import { PaymentPlan } from '../models/loan/paymentPlan.js';
 
-export const loansSummary = Vue.component('loans-summary', {
+export var GraphPage = Vue.component('graph-page', {
     data: function() {
         return {
             loans: [],
@@ -32,7 +25,6 @@ export const loansSummary = Vue.component('loans-summary', {
                 && this.loans
                 && this.paymentStrategy
             ) {
-                console.log('paymentPlan created');
                 const paymentPlan = new PaymentPlan(this.loans, 12 * 30);
                 paymentPlan.createPaymentPlan(new Date(), this.totalMonthlyPayment, this.paymentStrategy);
                 return paymentPlan;
@@ -44,19 +36,6 @@ export const loansSummary = Vue.component('loans-summary', {
         this.loans = loanService.getLoans();
     },
     methods: {
-        addNewLoan: function(newLoan) {
-            loanService.addLoan(newLoan);
-            this.$nextTick(() => {
-                var element = document.getElementById('loans-table');
-                if(element) {
-                    var lastChildElement = element.lastChild;
-                    lastChildElement.scrollIntoView();
-                }
-            });
-        },
-        deleteLoan: function(loan) {
-           loanService.deleteLoan(loan);
-        },
         paymentStrategyMapper: function(nameOfPaymentStrategy) {
             const mapper = new Map([
                 ['avalanche', avalanche],
@@ -75,8 +54,6 @@ export const loansSummary = Vue.component('loans-summary', {
     template: `
         <div id="loans-summary">
             <div id="loans-summary-body">
-                <loans v-bind:loans="loans" v-on:delete="deleteLoan"></loans>
-                <new-loan v-on:add-new-loan="addNewLoan"></new-loan>
                 <div class="row">
                     <max-payment 
                         v-bind:loans="loans" 
@@ -94,10 +71,6 @@ export const loansSummary = Vue.component('loans-summary', {
                 <loan-graph 
                     v-bind:paymentPlan="paymentPlan"
                 ></loan-graph>
-                <payment-plan-component
-                    v-bind:paymentPlan="paymentPlan"
-                >
-                </payment-plan-component>
             </div>
         </div>
     `
