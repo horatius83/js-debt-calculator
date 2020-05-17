@@ -1,4 +1,5 @@
 import { Loan } from '../models/loan/loan.js';
+import { avalanche, snowball, double } from '../models/loan/paymentStrategy.js';
 
 class LoanService {
     constructor() {
@@ -19,6 +20,13 @@ class LoanService {
             new Loan("Military Star", 799.68, 10.49, 45),
             new Loan("Sears", 3797.66, 25.44, 122)
         ];
+        this.paymentStategies = {
+            avalanche: {displayName: 'Avalanche', strategy: avalanche},
+            snowball: {displayName: 'Snowball', strategy: snowball},
+            double: {displayName: 'Double-Double', strategy: double}
+        };
+        this.paymentStrategy = undefined;
+        this.totalMonthlyPayment = 0;
     }
 
     getLoans() {
@@ -35,6 +43,26 @@ class LoanService {
         if(index > -1) {
             this.loans.splice(index,1);
         }
+    }
+
+    setPaymentStrategy(strategy) {
+        this.paymentStrategy = this.paymentStategies[strategy];
+    }
+
+    getPaymentStrategy() {
+        return this.paymentStrategy;
+    }
+
+    getPaymentStrategies() {
+        return this.paymentStategies;
+    }
+
+    getTotalMonthlyPayment(payment) {
+        return this.totalMonthlyPayment;
+    }
+
+    setTotalMonthlyPayment(payment) {
+        this.totalMonthlyPayment = payment;
     }
 }
 
