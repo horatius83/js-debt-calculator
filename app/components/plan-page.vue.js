@@ -18,11 +18,7 @@ export var PlanPage = Vue.component('plan-page', {
     },
     computed: {
         minimumMonthlyPayment: function() {
-            const date = new Date();
-            const payments = this.loans
-                .map(ln => new Payment(ln, ln.principal, 0, date))
-                .map(p => p.getMinimumMonthlyPayment(date));
-            return payments.reduce((acc, x) => acc + x.amountPaid, 0);
+            return loanService.getMinimumMonthlyPayment(new Date());
         },
         paymentPlan: function() {
             if (this.totalMonthlyPayment 
@@ -31,7 +27,7 @@ export var PlanPage = Vue.component('plan-page', {
                 && this.paymentStrategy
             ) {
                 const paymentPlan = new PaymentPlan(this.loans, 12 * 30);
-                paymentPlan.createPaymentPlan(new Date(), this.totalMonthlyPayment, this.paymentStrategy);
+                paymentPlan.createPaymentPlan(new Date(), this.totalMonthlyPayment, this.paymentStrategy.strategy);
                 return paymentPlan;
             }
             return undefined;
@@ -39,21 +35,16 @@ export var PlanPage = Vue.component('plan-page', {
     },
     created: function() {
         this.loans = loanService.getLoans();
+        this.paymentStrategy = loanService.getPaymentStrategy();
     },
     methods: {
-        paymentStrategyMapper: function(nameOfPaymentStrategy) {
-            const mapper = new Map([
-                ['avalanche', avalanche],
-                ['snowball', snowball],
-                ['double', double],
-            ]);
-            return mapper.get(nameOfPaymentStrategy);
-        },
         paymentStrategyChanged: function(newPaymentPlan) {
-            this.paymentStrategy = this.paymentStrategyMapper(newPaymentPlan);
+            loanService.setPaymentStrategy(newPaymentPlan);
+            this.paymentStrategy = loanService.getPaymentStrategy();
         },
         totalMonthlyPaymentChanged: function(newTotalMonthlyPayment) {
-            this.totalMonthlyPayment = Number(newTotalMonthlyPayment);
+            loanService.setTotalMonthlyPayment(Number(newTotalMonthlyPayment));
+            this.totalMonthlyPayment = loanService.getTotalMonthlyPayment();
         }
     },
     template: `
