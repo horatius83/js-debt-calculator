@@ -24,7 +24,7 @@ export function double(payments, totalMoney, dateOfPayment) {
                 if(minimumMonthlyPayment.amountPaid <= extraMoney) {
                     const payment = Math.min(minimumMonthlyPayment.amountPaid, minimumMonthlyPayment.principal);
                     extraMoney -= payment;
-                    minimumMonthlyPayment.amountPaid = payment;
+                    minimumMonthlyPayment.amountPaid += payment;
                     minimumMonthlyPayment.wasDoubled = true;
                     newPayments.push(minimumMonthlyPayment);
                 } else {

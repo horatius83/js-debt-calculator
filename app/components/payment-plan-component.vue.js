@@ -1,6 +1,12 @@
 import { Currency, MonthAndYear } from './filters.vue.js';
 
 var PaymentPlanComponent = Vue.component('payment-plan-component', {
+    data: function() {
+        return {
+            highlightClass: 'warning',
+            cardClass: 'card'
+        };
+    },
     props: {
         paymentPlan: Object
     },
@@ -47,11 +53,20 @@ var PaymentPlanComponent = Vue.component('payment-plan-component', {
                     if(plan.payments) {
                         for(let i=0; i<plan.payments.length; ++i) {
                             const payment = plan.payments[i];
+                            const paymentMinimum = payment.getMinimumMonthlyPayment(payment.dateOfPayment).amountPaid;
+                            const shouldBeHighlighted = payment.amountPaid > paymentMinimum;
+                            const display = { 
+                                name: payment.loan.name, 
+                                amountPaid: payment.amountPaid, 
+                                principal: payment.principal,
+                                dateOfPayment: payment.dateOfPayment,
+                                shouldHighlight: shouldBeHighlighted
+                            };
 
                             if (i in arr) {
-                                arr[i].push(payment);
+                                arr[i].push(display);
                             } else {
-                                arr[i] = [payment];
+                                arr[i] = [display];
                             }
                         }
                         return arr;
@@ -60,7 +75,7 @@ var PaymentPlanComponent = Vue.component('payment-plan-component', {
                     }
                 }, []);
                 for(let i=0; i<payments.length; ++i) {
-                    payments[i].sort((a,b) => a.loan.name.localeCompare(b.loan.name));
+                    payments[i].sort((a,b) => a.name.localeCompare(b.name));
                 }
                 return payments;
             }
@@ -72,9 +87,9 @@ var PaymentPlanComponent = Vue.component('payment-plan-component', {
             <div v-for="payments in paymentsByMonth" class="card fluid">
                 <h3 class="doc">{{ payments[0].dateOfPayment | month-and-year }}</h3>
                 <div class="row">
-                    <div v-for="payment in payments" class="card">
+                    <div v-for="payment in payments" v-bind:class="[payment.shouldHighlight ? highlightClass : '', cardClass]">
                         <div class="section dark">
-                            <h4 class="doc">{{ payment.loan.name }}</h4>
+                            <h4 class="doc">{{ payment.name }}</h4>
                         </div>
                         <div class="section">
                             Pay {{ payment.amountPaid | currency }} 
