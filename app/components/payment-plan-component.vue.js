@@ -1,3 +1,5 @@
+import { Currency } from './filters.vue.js';
+
 var PaymentPlanComponent = Vue.component('payment-plan-component', {
     props: {
         paymentPlan: Object
@@ -51,20 +53,36 @@ var PaymentPlanComponent = Vue.component('payment-plan-component', {
                                 arr[i] = [payment];
                             }
                         }
+                        return arr;
                     } else {
                         return arr;
                     }
                 }, []);
                 // Sort each month
                 // ...
+                return payments;
             }
             return [];
         }
     },
     template: `
         <div>
-            <div class="card fluid">
-                <h1>1</h1>    
+            <div v-for="payments in paymentsByMonth" class="card fluid">
+                <h3 class="doc">{{ payments[0].dateOfPayment }}</h3>
+                <div class="row">
+                    <div v-for="payment in payments" class="card">
+                        <div class="section">
+                            <h4 class="doc">{{ payment.loan.name }}</h4>
+                        </div>
+                        <div class="section">
+                            Pay {{ payment.amountPaid | currency }} 
+                        </div>
+                        <div class="section">
+                            Amount Left {{ payment.principal | currency }}
+                        </div>
+                    </div>
+                </div>
+                
             </div>
         </div>
     ` 
