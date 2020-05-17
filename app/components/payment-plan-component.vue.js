@@ -58,8 +58,9 @@ var PaymentPlanComponent = Vue.component('payment-plan-component', {
                         return arr;
                     }
                 }, []);
-                // Sort each month
-                // ...
+                for(let i=0; i<payments.length; ++i) {
+                    payments[i].sort((a,b) => a.loan.name.localeCompare(b.loan.name));
+                }
                 return payments;
             }
             return [];
