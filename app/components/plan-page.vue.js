@@ -3,8 +3,6 @@ import { LoanStrategy } from './loan-strategy.vue.js';
 import { PaymentSummary } from './payment-summary.vue.js';
 import { PaymentPlanComponent } from './payment-plan-component.vue.js';
 import { loanService } from '../services/loan-service.js';
-import { Payment } from '../models/loan/payment.js';
-import { avalanche, snowball, double } from '../models/loan/paymentStrategy.js';
 import { PaymentPlan } from '../models/loan/paymentPlan.js';
 
 
@@ -12,7 +10,7 @@ export var PlanPage = Vue.component('plan-page', {
     data: function() {
         return {
             loans: [],
-            paymentStrategy: undefined,
+            paymentStrategy: loanService.getPaymentStrategy(),
             totalMonthlyPayment: 0,
         };
     },
@@ -35,11 +33,9 @@ export var PlanPage = Vue.component('plan-page', {
     },
     created: function() {
         this.loans = loanService.getLoans();
-        this.paymentStrategy = loanService.getPaymentStrategy();
     },
     methods: {
         paymentStrategyChanged: function(newPaymentPlan) {
-            loanService.setPaymentStrategy(newPaymentPlan);
             this.paymentStrategy = loanService.getPaymentStrategy();
         },
         totalMonthlyPaymentChanged: function(newTotalMonthlyPayment) {
