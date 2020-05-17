@@ -1,5 +1,6 @@
 import { Loan } from '../models/loan/loan.js';
 import { avalanche, snowball, double } from '../models/loan/paymentStrategy.js';
+import { Payment } from '../models/loan/payment.js';
 
 class LoanService {
     constructor() {
@@ -21,11 +22,11 @@ class LoanService {
             new Loan("Sears", 3797.66, 25.44, 122)
         ];
         this.paymentStategies = {
-            avalanche: {displayName: 'Avalanche', strategy: avalanche},
-            snowball: {displayName: 'Snowball', strategy: snowball},
-            double: {displayName: 'Double-Double', strategy: double}
+            avalanche: {name: 'avalanche', displayName: 'Avalanche', strategy: avalanche},
+            snowball: {name: 'snowball', displayName: 'Snowball', strategy: snowball},
+            double: {name: 'double', displayName: 'Double-Double', strategy: double}
         };
-        this.paymentStrategy = undefined;
+        this.paymentStrategy = this.paymentStategies['avalanche'];
         this.totalMonthlyPayment = 0;
     }
 
@@ -63,6 +64,16 @@ class LoanService {
 
     setTotalMonthlyPayment(payment) {
         this.totalMonthlyPayment = payment;
+    }
+
+    getMinimumMonthlyPayment(date) {
+        if(!date) {
+            date = new Date();
+        }
+        const payments = this.loans
+            .map(ln => new Payment(ln, ln.principal, 0, date))
+            .map(p => p.getMinimumMonthlyPayment(date));
+        return payments.reduce((acc, x) => acc + x.amountPaid, 0);
     }
 }
 

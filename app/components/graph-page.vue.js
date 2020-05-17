@@ -3,8 +3,6 @@ import { MaxPayment } from './max-payment.vue.js';
 import { LoanStrategy } from './loan-strategy.vue.js';
 import { PaymentSummary } from './payment-summary.vue.js';
 import { loanService } from '../services/loan-service.js';
-import { Payment } from '../models/loan/payment.js';
-import { avalanche, snowball, double } from '../models/loan/paymentStrategy.js';
 import { PaymentPlan } from '../models/loan/paymentPlan.js';
 
 export var GraphPage = Vue.component('graph-page', {
@@ -17,11 +15,7 @@ export var GraphPage = Vue.component('graph-page', {
     },
     computed: {
         minimumMonthlyPayment: function() {
-            const date = new Date();
-            const payments = this.loans
-                .map(ln => new Payment(ln, ln.principal, 0, date))
-                .map(p => p.getMinimumMonthlyPayment(date));
-            return payments.reduce((acc, x) => acc + x.amountPaid, 0);
+            return loanService.getMinimumMonthlyPayment(new Date());
         },
         paymentPlan: function() {
             if (this.totalMonthlyPayment 
@@ -30,7 +24,7 @@ export var GraphPage = Vue.component('graph-page', {
                 && this.paymentStrategy
             ) {
                 const paymentPlan = new PaymentPlan(this.loans, 12 * 30);
-                paymentPlan.createPaymentPlan(new Date(), this.totalMonthlyPayment, this.paymentStrategy);
+                paymentPlan.createPaymentPlan(new Date(), this.totalMonthlyPayment, this.paymentStrategy.strategy);
                 return paymentPlan;
             }
             return undefined;
@@ -38,21 +32,17 @@ export var GraphPage = Vue.component('graph-page', {
     },
     created: function() {
         this.loans = loanService.getLoans();
+        this.paymentStrategy = loanService.getPaymentStrategy();
+        this.totalMonthlyPayment = loanService.getTotalMonthlyPayment();
     },
     methods: {
-        paymentStrategyMapper: function(nameOfPaymentStrategy) {
-            const mapper = new Map([
-                ['avalanche', avalanche],
-                ['snowball', snowball],
-                ['double', double],
-            ]);
-            return mapper.get(nameOfPaymentStrategy);
-        },
         paymentStrategyChanged: function(newPaymentPlan) {
-            this.paymentStrategy = this.paymentStrategyMapper(newPaymentPlan);
+            loanService.setPaymentStrategy(newPaymentPlan);
+            this.paymentStrategy = loanService.getPaymentStrategy();
         },
         totalMonthlyPaymentChanged: function(newTotalMonthlyPayment) {
-            this.totalMonthlyPayment = Number(newTotalMonthlyPayment);
+            loanService.setTotalMonthlyPayment(Number(newTotalMonthlyPayment));
+            this.totalMonthlyPayment = loanService.getTotalMonthlyPayment();
         }
     },
     template: `
