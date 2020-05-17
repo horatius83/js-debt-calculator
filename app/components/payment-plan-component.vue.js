@@ -1,4 +1,4 @@
-import { Currency } from './filters.vue.js';
+import { Currency, MonthAndYear } from './filters.vue.js';
 
 var PaymentPlanComponent = Vue.component('payment-plan-component', {
     props: {
@@ -47,6 +47,7 @@ var PaymentPlanComponent = Vue.component('payment-plan-component', {
                     if(plan.payments) {
                         for(let i=0; i<plan.payments.length; ++i) {
                             const payment = plan.payments[i];
+
                             if (i in arr) {
                                 arr[i].push(payment);
                             } else {
@@ -69,10 +70,10 @@ var PaymentPlanComponent = Vue.component('payment-plan-component', {
     template: `
         <div>
             <div v-for="payments in paymentsByMonth" class="card fluid">
-                <h3 class="doc">{{ payments[0].dateOfPayment }}</h3>
+                <h3 class="doc">{{ payments[0].dateOfPayment | month-and-year }}</h3>
                 <div class="row">
                     <div v-for="payment in payments" class="card">
-                        <div class="section">
+                        <div class="section dark">
                             <h4 class="doc">{{ payment.loan.name }}</h4>
                         </div>
                         <div class="section">
