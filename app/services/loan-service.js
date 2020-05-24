@@ -20,20 +20,19 @@ function fromBinary(binary) {
     return String.fromCharCode(...new Uint16Array(bytes.buffer));
 }
 
-function saveLoans(key, loans) {
-    const loansAsString = JSON.stringify(loans);
-    const loansAsBase64 = toBinary(loansAsString);
-    window.localStorage.setItem(key, loansAsBase64);
+function saveJsonObject(key, thingToSave) {
+    const thingAsString = JSON.stringify(thingToSave);
+    const thingAsBase64 = toBinary(thingAsString);
+    window.localStorage.setItem(key, thingAsBase64);
 }
 
-function getLoans(key) {
-    const loansAsBase64 = window.localStorage.getItem(key);
-    if(loansAsBase64 === null) {
-        return [];
+function getJsonObject(key) {
+    const thingAsBase64 = window.localStorage.getItem(key);
+    if(thingAsBase64 === null) {
+        return null;
     }
-    const loansAsString = fromBinary(loansAsBase64);
-    const loanAsArrayOfStructs = JSON.parse(loansAsString);
-    return loanAsArrayOfStructs.map(x => new Loan(x.name, x.principal, x.interest, x.minimum));
+    const thingAsString = fromBinary(thingAsBase64);
+    return JSON.parse(thingAsString);
 }
 
 class LoanService {
@@ -57,14 +56,22 @@ class LoanService {
             new Loan("Sears", 3797.66, 25.44, 122)
         ];
         */
-       this.loans = getLoans(loanServiceKey);
-        this.paymentStategies = {
+       const json = getJsonObject(loanServiceKey);
+       this.loans = json?.loans.map(x => new Loan(x.name, x.principal, x.interest, x.minimum)) || [];
+       this.totalMonthlyPayment = json?.totalMonthlyPayment || 0;
+       const startingMonth = json?.startingMonth;
+       if(startingMonth) {
+           this.startingMonth = new Date(startingMonth);
+       } else {
+           this.startingMonth = new Date();
+       }
+
+       this.paymentStategies = {
             avalanche: {name: 'avalanche', displayName: 'Avalanche', strategy: avalanche},
             snowball: {name: 'snowball', displayName: 'Snowball', strategy: snowball},
             double: {name: 'double', displayName: 'Double-Double', strategy: double}
         };
         this.paymentStrategy = this.paymentStategies['avalanche'];
-        this.totalMonthlyPayment = 0;
     }
 
     getLoans() {
@@ -73,7 +80,7 @@ class LoanService {
 
     addLoan(loan) {
         this.loans.push(loan);
-        saveLoans(loanServiceKey, this.loans);
+        this.save();
     }
 
     deleteLoan(loan) {
@@ -82,7 +89,14 @@ class LoanService {
         if(index > -1) {
             this.loans.splice(index,1);
         }
-        saveLoans(loanServiceKey, this.loans);
+        this.save();
+    }
+
+    save() {
+        saveJsonObject(loanServiceKey, {
+            loans: this.loans,
+            totalMonthlyPayment: this.totalMonthlyPayment
+        });
     }
 
     setPaymentStrategy(strategy) {
@@ -103,6 +117,7 @@ class LoanService {
 
     setTotalMonthlyPayment(payment) {
         this.totalMonthlyPayment = payment;
+        this.save();
     }
 
     getMinimumMonthlyPayment(date) {

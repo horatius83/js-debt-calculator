@@ -33,14 +33,15 @@ export var PlanPage = Vue.component('plan-page', {
     },
     created: function() {
         this.loans = loanService.getLoans();
+        this.totalMonthlyPayment = loanService.getTotalMonthlyPayment();
     },
     methods: {
         paymentStrategyChanged: function(newPaymentPlan) {
             this.paymentStrategy = loanService.getPaymentStrategy();
         },
         totalMonthlyPaymentChanged: function(newTotalMonthlyPayment) {
+            this.totalMonthlyPayment = newTotalMonthlyPayment;
             loanService.setTotalMonthlyPayment(Number(newTotalMonthlyPayment));
-            this.totalMonthlyPayment = loanService.getTotalMonthlyPayment();
         }
     },
     template: `

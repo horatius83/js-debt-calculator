@@ -1,4 +1,5 @@
 import { Payment } from '../models/loan/payment.js';
+import { loanService } from '../services/loan-service.js';
 
 var MaxPayment = Vue.component('max-payment', {
     data: function() {
@@ -10,7 +11,7 @@ var MaxPayment = Vue.component('max-payment', {
         loans: Array
     },
     created: function() {
-        this.totalMonthlyPayment = this.minimumPayment;
+        this.totalMonthlyPayment = loanService.getTotalMonthlyPayment();
         this.$emit('total-monthly-payment-changed', this.totalMonthlyPayment);
     },
     computed: {
@@ -22,6 +23,13 @@ var MaxPayment = Vue.component('max-payment', {
             return payments.reduce((acc, x) => acc + x.amountPaid, 0);
         }
     },
+    methods: {
+        updateTotalMonthlyPayment: function(totalMonthlyPayment) {
+            this.totalMonthlyPayment = totalMonthlyPayment;
+            loanService.setTotalMonthlyPayment(totalMonthlyPayment);
+            this.$emit('total-monthly-payment-changed', totalMonthlyPayment);
+        }
+    },
     template: `
         <div class="card large col-sm">
             <label for="max-payment">Total monthly Payment</label>
@@ -31,7 +39,7 @@ var MaxPayment = Vue.component('max-payment', {
                 type="number" 
                 v-model.number="totalMonthlyPayment"
                 step="0.01"
-                v-on:change="$emit('total-monthly-payment-changed', $event.target.value)"
+                v-on:change="updateTotalMonthlyPayment($event.target.value)"
             ></input>
             <div v-if="minimumPayment > totalMonthlyPayment">
                 <span class="error-message">Total monthly payment must exceed minimum required payment.</span>
