@@ -2,8 +2,43 @@ import { Loan } from '../models/loan/loan.js';
 import { avalanche, snowball, double } from '../models/loan/paymentStrategy.js';
 import { Payment } from '../models/loan/payment.js';
 
+const loanServiceKey = 'debt-calculator-loans';
+
+function toBinary(string) {
+    const codeUnits = new Uint16Array(string.length);
+    for(let i=0; i<codeUnits.length; i++) {
+        codeUnits[i] = string.charCodeAt(i);
+    }
+    return String.fromCharCode(...new Uint8Array(codeUnits.buffer));
+}
+
+function fromBinary(binary) {
+    const bytes = new Uint8Array(binary.length);
+    for(let i=0; i<bytes.length; i++) {
+        bytes[i] = binary.charCodeAt(i);
+    }
+    return String.fromCharCode(...new Uint16Array(bytes.buffer));
+}
+
+function saveLoans(key, loans) {
+    const loansAsString = JSON.stringify(loans);
+    const loansAsBase64 = toBinary(loansAsString);
+    window.localStorage.setItem(key, loansAsBase64);
+}
+
+function getLoans(key) {
+    const loansAsBase64 = window.localStorage.getItem(key);
+    if(loansAsBase64 === null) {
+        return [];
+    }
+    const loansAsString = fromBinary(loansAsBase64);
+    const loanAsArrayOfStructs = JSON.parse(loansAsString);
+    return loanAsArrayOfStructs.map(x => new Loan(x.name, x.principal, x.interest, x.minimum));
+}
+
 class LoanService {
     constructor() {
+        /*
         this.loans = [
             new Loan("Monroe and Main", 60.36, 21.0, 20.0),
             new Loan("Blair", 124.87, 27.24, 51),
@@ -21,6 +56,8 @@ class LoanService {
             new Loan("Military Star", 799.68, 10.49, 45),
             new Loan("Sears", 3797.66, 25.44, 122)
         ];
+        */
+       this.loans = getLoans(loanServiceKey);
         this.paymentStategies = {
             avalanche: {name: 'avalanche', displayName: 'Avalanche', strategy: avalanche},
             snowball: {name: 'snowball', displayName: 'Snowball', strategy: snowball},
@@ -36,6 +73,7 @@ class LoanService {
 
     addLoan(loan) {
         this.loans.push(loan);
+        saveLoans(loanServiceKey, this.loans);
     }
 
     deleteLoan(loan) {
@@ -44,6 +82,7 @@ class LoanService {
         if(index > -1) {
             this.loans.splice(index,1);
         }
+        saveLoans(loanServiceKey, this.loans);
     }
 
     setPaymentStrategy(strategy) {
