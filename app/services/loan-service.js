@@ -57,7 +57,7 @@ class LoanService {
         ];
         */
        const json = getJsonObject(loanServiceKey);
-       this.loans = json?.loans.map(x => new Loan(x.name, x.principal, x.interest, x.minimum)) || [];
+       this.loans = json?.loans?.map(x => new Loan(x.name, x.principal, x.interest, x.minimum)) || [];
        this.totalMonthlyPayment = json?.totalMonthlyPayment || 0;
        const startingMonth = json?.startingMonth;
        if(startingMonth) {
