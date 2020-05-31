@@ -69,7 +69,7 @@ class LoanService {
        this.paymentStategies = {
             avalanche: {name: 'avalanche', displayName: 'Avalanche', strategy: avalanche},
             snowball: {name: 'snowball', displayName: 'Snowball', strategy: snowball},
-            double: {name: 'double', displayName: 'Double-Double', strategy: double}
+            //double: {name: 'double', displayName: 'Double-Double', strategy: double}
         };
         this.paymentStrategy = this.paymentStategies['avalanche'];
     }
