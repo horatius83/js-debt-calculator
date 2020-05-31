@@ -7,7 +7,8 @@ var NewLoan = Vue.component('new-loan', {
             name: '',
             principal: 0,
             interest: 0,
-            minimum: 0
+            minimum: 0,
+            errors: []
         };
     },
     methods: {
@@ -17,10 +18,27 @@ var NewLoan = Vue.component('new-loan', {
             this.principal = 0;
             this.interest = 0;
             this.minimum = 0;
+            this.errors = [];
         },
         addNewLoan: function() {
-            this.$emit('add-new-loan', new Loan(this.name, this.principal, this.interest, this.minimum));
-            this.clear();
+            this.validateForm();
+            if(this.errors.length === 0) {
+                this.$emit('add-new-loan', new Loan(this.name, this.principal, this.interest, this.minimum));
+                this.clear();
+            }
+        },
+        validateForm: function() {
+            this.errors = [];
+            if(!this.name) {
+                this.errors.push('Loan needs a name');
+            }
+            if(!this.principal) {
+                this.errors.push('Loan needs a principal amount');
+            }
+            if(!this.minimum) {
+                this.errors.push('Loan needs a minimum payment');
+            }
+            return this.errors.length === 0;
         }
     },
     template: `
@@ -30,16 +48,21 @@ var NewLoan = Vue.component('new-loan', {
             </div>
             <div v-if="shouldDisplayForm">
                 <label for="new-loan-name">Name</label>
-                <input name="new-loan-name" id="new-loan-name" v-model="name"></input>
+                <input name="new-loan-name" id="new-loan-name" v-model="name" required="required"></input>
                 <label for="new-loan-principal">Principal</label>
-                <input name="new-loan-principal" type="number" inputmode="decimal" v-model.number="principal" step="0.01"></input>
+                <input name="new-loan-principal" type="number" inputmode="decimal" v-model.number="principal" step="0.01" min="0"></input>
                 <label for="new-loan-interest">Interest</label>
-                <input name="new-loan-interest" id="new-loan-interest" type="number" inputmode="decimal" v-model.number="interest" step="0.01"></input>
+                <input name="new-loan-interest" id="new-loan-interest" type="number" inputmode="decimal" v-model.number="interest" step="0.01" min="0"></input>
                 <label for="new-loan-minimum">Minimum</label>
-                <input name="new-loan-minimum" id="new-loan-minimum" type="number" inputmode="decimal" v-model.number="minimum" step="0.01"></input>
+                <input name="new-loan-minimum" id="new-loan-minimum" type="number" inputmode="decimal" v-model.number="minimum" step="0.01" min="0"></input>
                 <div class="row">
                     <button class="primary" v-on:click="addNewLoan()">Create New Loan</button>
                     <button class="secondary" v-on:click="clear()">Cancel</button>
+                </div>
+                <div v-if="errors.length > 0">
+                    <ul>
+                        <li v-for="error in errors" class="error-message">{{ error }}</li>
+                    </ul>
                 </div>
             </div>
         </div>
