@@ -3,6 +3,7 @@ import { Loan } from '../../../app/models/loan/loan.js';
 import { LoanPaymentPlan } from '../../../app/models/loan/loanPaymentPlan.js';
 import { Payment, createPayment } from '../../../app/models/loan/payment.js';
 import { avalanche } from '../../../app/models/loan/paymentStrategy.js';
+import { calculateNewPrincipalForMonth } from '../../../app/models/util/interest.js';
 
 describe('paymentplan.model', () => {
     it('should be able to initialize', () => {
@@ -183,5 +184,40 @@ describe('paymentplan.model', () => {
                 expect(loanPaymentPlan.payments.length).toBeLessThanOrEqual(2);
             }
         });
+        
     });
+    describe('getTotalInterestPaid', () => {
+        it('should not have negative interest on a $1000 loan @ 10% interest and a minimum payment of $100', () => {
+            const originalPrincipal = 1000;
+            let principal = originalPrincipal;
+            const interest = 10;
+            const minimum = 100;
+            const loan = new Loan('Test', principal, interest, minimum);
+            const payments = [];
+            const dateOfPayment = new Date();
+            let totalAmountPaid = 0;
+            while(principal > 0) {
+                const principalWithInterest = calculateNewPrincipalForMonth(principal, interest);
+                const newPrincipal = minimum < principalWithInterest
+                    ? principalWithInterest - minimum
+                    : 0;
+                const amountPaid = minimum < principalWithInterest
+                    ? minimum
+                    : principalWithInterest;
+                payments.push(new Payment(loan, newPrincipal, amountPaid, dateOfPayment));
+                principal = newPrincipal;
+                totalAmountPaid += amountPaid;
+            }
+            const expectedInterestPaid = totalAmountPaid - originalPrincipal;
+            console.log(`total amount paid: ${totalAmountPaid}`);
+            console.log(`expected interest paid: ${expectedInterestPaid}`)
+            const paymentPlan = new PaymentPlan([loan]);
+            debugger;
+            paymentPlan.createPaymentPlan(dateOfPayment, 100, avalanche);
+
+            const interestPaid = paymentPlan.getTotalInterestPaid();
+
+            expect(interestPaid).toBeCloseTo(expectedInterestPaid);
+        });
+    })
 });

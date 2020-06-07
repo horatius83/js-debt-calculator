@@ -10,6 +10,25 @@ export class PaymentPlan {
         this.paymentPlans = new Map(loans.map(ln => [ln.name, new LoanPaymentPlan(ln)]));
     }
 
+    getTotalPrincipal() {
+        return [...this.paymentPlans.values()]
+            .map(plan => plan?.loan?.principal ?? 0)
+            .reduce((acc, x) => acc + x, 0);
+    }
+
+    getTotalInterestPaid() {
+        const totalPaid = [...this.paymentPlans.values()]
+            .map(plan => plan.payments?.reduce((acc, x) => acc + x.amountPaid, 0) ?? 0)
+            .reduce((acc, x) => acc + x, 0);
+        return totalPaid - this.getTotalPrincipal();
+    }
+
+    getNumberOfMonthsUntilZeroDebt() {
+        return [...this.paymentPlans.values()]
+            .map(plan => plan.payments.length)
+            .reduce((y, x) => x > y ? x : y)
+    }
+
     getMinimumPayments(paymentDate) {
         return [...this.paymentPlans.values()]
             .map(pp => pp.getMinimumPayment(paymentDate));
