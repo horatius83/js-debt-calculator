@@ -39,7 +39,7 @@ var MaxPayment = Vue.component('max-payment', {
                 type="number" 
                 v-model.number="totalMonthlyPayment"
                 step="0.01"
-                minimum="{{ minimumPayment }}"
+                v-bind:minimum="minimumPayment"
                 v-on:change="updateTotalMonthlyPayment($event.target.value)"
             ></input>
             <div v-if="minimumPayment > totalMonthlyPayment">

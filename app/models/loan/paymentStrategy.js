@@ -1,3 +1,5 @@
+import { Payment } from "./payment.js";
+
 export function avalanche(payments, totalMoney, dateofPayment) {
    return sortAndGetPayments(payments, totalMoney, dateofPayment, avalancheSort); 
 }
@@ -18,7 +20,7 @@ export function double(payments, totalMoney, dateOfPayment) {
     for(const payment of priorityList) {
         if(payment.principal > 0) {
             if(extraMoney == 0) {
-                newPayments.push(payment.getMinimumMonthlyPayment(dateOfPayment));
+                newPayments.push(new Payment(payment.loan, payment.principal, payment.amountPaid, payment.dateOfPayment));
             } else {
                 let minimumMonthlyPayment = payment.getMinimumMonthlyPayment(dateOfPayment);
                 if(minimumMonthlyPayment.amountPaid <= extraMoney) {
@@ -59,7 +61,7 @@ function sortAndGetPayments(
     for(const payment of priorityList) {
         if(payment.principal > 0) {
             if(extraMoney == 0) {
-                newPayments.push(payment.getMinimumMonthlyPayment(dateofPayment));
+                newPayments.push(new Payment(payment.loan, payment.principal, payment.amountPaid, payment.dateOfPayment));
             } else {
                 const minimumMonthlyPayment = payment.getMinimumMonthlyPayment(dateofPayment);
                 let [newPayment, bonusMoney] = minimumMonthlyPayment.createBonusMoneyPayment(extraMoney);
