@@ -42,5 +42,13 @@
             </main>
         </div>
         <script src="components/main.vue.js" type="module"></script>
+        <script>
+        window.onload = () => {
+            'use strict';
+            if('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('./js/serviceWorker.js');
+            }
+        } 
+        </script>
     </body>
 </html>
