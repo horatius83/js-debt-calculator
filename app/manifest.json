@@ -2,7 +2,7 @@
   "name": "Debt Calculator",
   "short_name": "Debt Calculator",
   "orientation": "portrait-primary",
-  "start_url": "/index.html",
+  "start_url": "index.html",
   "display": "standalone",
   "background_color": "#4CFF00",
   "theme_color": "#4CFF00",
