@@ -1,4 +1,4 @@
-import { calculateNewPrincipal, calculateNewPrincipalForMonth, getMinimumMonthlyPayment } from '../../../app/models/util/interest.js';
+import { calculateNewPrincipal, calculateNewPrincipalForMonth, getMinimumMonthlyPayment, getLoanPaymentAmount } from '../../../app/models/util/interest.js';
 
 describe('interest utility module', () => {
     describe('calculateNewPrincipal', () => {
@@ -48,6 +48,26 @@ describe('interest utility module', () => {
             const result = getMinimumMonthlyPayment(principal, rateInPercent, minimum);
 
             expect(result).toBeCloseTo(interest);
+        });
+    });
+    describe('getLoanPaymentAmount', () => {
+        it('should calculate payments correctly', () => {
+            const principal = 5000.0; // $5000
+            const interest = 10;
+            const rate = (interest / 100.0); // 10% 
+            const ratePerPeriod = rate / 12.0; // rate / 12 months
+            const numberOfYears = 5;
+            const paymentPeriods = numberOfYears * 12.0;
+
+            const payment = getLoanPaymentAmount(principal, ratePerPeriod, paymentPeriods);
+            console.log('Payment: ' + payment);
+
+            let currentPrincipal = principal;
+            for(let i=0; i<paymentPeriods; ++i) {
+                console.log(currentPrincipal);
+                currentPrincipal = calculateNewPrincipalForMonth(currentPrincipal, interest) - payment;
+            }
+            expect(currentPrincipal).toBeCloseTo(0);
         });
     });
 })
