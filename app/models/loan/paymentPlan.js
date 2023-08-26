@@ -1,5 +1,5 @@
 import { LoanPaymentPlan } from './loanPaymentPlan.js';
-import { getLoanPaymentAmount } from './interest.js';
+import { getLoanPaymentAmount } from '../util/interest.js';
 
 export class PaymentPlan {
     constructor(loans, maxNumberOfPayments) {
