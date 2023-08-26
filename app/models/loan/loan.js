@@ -1,6 +1,13 @@
 import { getMinimumMonthlyPayment } from '../util/interest.js';
 
 class Loan {
+    /**
+     * Class representing a loan
+     * @param {string} name 
+     * @param {number} principal 
+     * @param {number} interest 
+     * @param {number} minimum 
+     */
     constructor(
         name, 
         principal,
@@ -12,6 +19,10 @@ class Loan {
             this.minimum = minimum;
         }
 
+    /**
+     * Get the minimum required payment for this loan
+     * @returns {number}
+     */
     getMinimumPayment() {
         return getMinimumMonthlyPayment(this.principal, this.interest, this.minimum);
     }

@@ -1,13 +1,22 @@
+import { Loan } from './loan.js';
 import { LoanPaymentPlan } from './loanPaymentPlan.js';
 import { getLoanPaymentAmount } from '../util/interest.js';
 
 export class PaymentPlan {
+    /**
+     * Class representing all payment plans for all loans
+     * @param {Loan[]} loans 
+     * @param {number} maxNumberOfPayments 
+     */
     constructor(loans, maxNumberOfPayments) {
         this.loans = loans;
         this._maxNumberOfPayments = maxNumberOfPayments || 10 * 12;
         if(!loans) {
             throw new Error('Cannot create a payment plan with undefined loans');
         }
+        /**
+         * @type {[string, LoanPaymentPlan]}
+         */
         this.paymentPlans = new Map(loans.map(ln => [ln.name, new LoanPaymentPlan(ln)]));
     }
 
