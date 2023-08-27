@@ -41,17 +41,6 @@
                 <router-view></router-view>
             </main>
         </div>
-        <script src="components/main.vue.js" type="module"></script>
-        <script>
-        window.onload = () => {
-            'use strict';
-            console.log('Loaded!');
-            if('serviceWorker' in navigator) {
-                navigator.serviceWorker.register('./js/serviceWorker.js')
-                .then(res => console.log('Service worker registered'))
-                .catch(err => console.log('Service worker not registered', err))
-            }
-        } 
-        </script>
+        <script src="components/main.vue.mjs" type="module"></script>
     </body>
 </html>

@@ -1,0 +1,34 @@
+{
+  "name": "js-debt-calculator",
+  "version": "0.0.1",
+  "description": "Debt repayment calculator",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "jasmine",
+    "serve": "http-server ./app"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/horatius83/js-debt-calculator.git"
+  },
+  "keywords": [
+    "debt",
+    "vue",
+    "javascript"
+  ],
+  "author": "horatius83",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/horatius83/js-debt-calculator/issues"
+  },
+  "homepage": "https://github.com/horatius83/js-debt-calculator#readme",
+  "devDependencies": {
+    "jasmine": "^5.1.0"
+  },
+  "dependencies": {
+    "http-server": "^14.1.1"
+  }
+}
