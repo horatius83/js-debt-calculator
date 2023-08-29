@@ -5,7 +5,7 @@ export class LoanPaymentPlan {
     /**
      * Create a loan payment plan
      * @param {Loan} loan 
-     * @param {?Payment[]} payments 
+     * @param {Payment[]=} payments 
      */
     constructor(loan, payments) { 
         this.loan = loan;

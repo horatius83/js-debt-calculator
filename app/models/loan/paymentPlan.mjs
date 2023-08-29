@@ -1,6 +1,7 @@
 import { Loan } from './loan.mjs';
 import { LoanPaymentPlan } from './loanPaymentPlan.mjs';
 import { getLoanPaymentAmount } from '../util/interest.mjs';
+import { Payment } from '../loan/payment.mjs';
 
 export class PaymentPlan {
     /**
@@ -15,7 +16,7 @@ export class PaymentPlan {
             throw new Error('Cannot create a payment plan with undefined loans');
         }
         /**
-         * @type {[string, LoanPaymentPlan]}
+         * @type {Map<string, LoanPaymentPlan>}
          */
         this.paymentPlans = new Map(loans.map(ln => [ln.name, new LoanPaymentPlan(ln)]));
     }
@@ -39,6 +40,11 @@ export class PaymentPlan {
             .reduce((y, x) => x > y ? x : y)
     }
 
+    /**
+     * Date of payment
+     * @param {Date} paymentDate 
+     * @returns {Payment[]}
+     */
     getMinimumPayments(paymentDate) {
         return [...this.paymentPlans.values()]
             .map(pp => pp.getMinimumPayment(paymentDate));
@@ -50,6 +56,13 @@ export class PaymentPlan {
         .reduce((acc,x) => acc + x, 0);
     }
 
+    /**
+     * 
+     * @param {Date} dateOfPayment 
+     * @param {number} monthlyPaymentAmount 
+     * @param {(payments: Payment[], maxPaymentAmount: number, dateOfPayment: Date) => Payment[]} paymentStrategy 
+     * @returns 
+     */
     applyPaymentPlanForThisMonth(
         dateOfPayment, 
         monthlyPaymentAmount,
@@ -65,7 +78,7 @@ export class PaymentPlan {
         const newPayments = paymentStrategy(payments, monthlyPaymentAmount, dateOfPayment);
         const newPaymentsTotalAmountRemaining = newPayments.map(x => x.principal).reduce((acc, x) => acc + x, 0);
         for(const newPayment of newPayments) {
-            this.paymentPlans.get(newPayment.loan.name).payments.push(newPayment);
+            this.paymentPlans.get(newPayment.loan.name)?.payments.push(newPayment);
         }
         return newPaymentsTotalAmountRemaining > 0;
     }
@@ -118,7 +131,7 @@ export class PaymentPlanV2 {
             throw new Error('Cannot create a payment plan with undefined loans');
         }
         this.loans = loans;
-        this.maxNumberOfPayments = maxNumberOfPayments || 10 * 12;
+        this.maxNumberOfPayments = maxNumberOfPayments;
         this.minimumPerMonthPayments = new Map(loans.map(ln => {
             const interestPerPeriod = ln.interest / 12.0;
             const minimumPayment = Math.min(

@@ -26,6 +26,11 @@ function saveJsonObject(key, thingToSave) {
     window.localStorage.setItem(key, thingAsBase64);
 }
 
+/**
+ * Get JSON object from local storage
+ * @param {string} key 
+ * @returns { object }
+ */
 function getJsonObject(key) {
     const thingAsBase64 = window.localStorage.getItem(key);
     if(thingAsBase64 === null) {
@@ -56,6 +61,13 @@ class LoanService {
             new Loan("Sears", 3797.66, 25.44, 122)
         ];
         */
+       /** @typedef { object } LoanJson
+        * @property { string } name
+        * @property { number } principal
+        * @property { number } interest
+        * @property { number } minimum
+       */
+       /** @type { LoanJson[] } */
        const json = getJsonObject(loanServiceKey);
        this.loans = json?.loans?.map(x => new Loan(x.name, x.principal, x.interest, x.minimum)) || [];
        this.totalMonthlyPayment = json?.totalMonthlyPayment || 0;

@@ -22,18 +22,18 @@ export function calculateNewPrincipalForMonth(principal, interest) {
 
 /**
  * Get the minimum monthly payment
- * @param {number} principal - the amount of the loan
+ * @param {number} principalRemaining - the amount left on the loan
  * @param {number} interest - the interest rate (decimal)
  * @param {number} minimumPayment - the minimum payment specified on the loan
  */
-export function getMinimumMonthlyPayment(principal, interest, minimumPayment){
-    const newPrincipal = calculateNewPrincipalForMonth(principal, interest);
-    const minimumInterestPayment = newPrincipal - principal;
+export function getMinimumMonthlyPayment(principalRemaining, interest, minimumPayment){
+    const newPrincipal = calculateNewPrincipalForMonth(principalRemaining, interest);
+    const minimumInterestPayment = newPrincipal - principalRemaining;
     const minimum = Math.max(minimumInterestPayment, minimumPayment);
-    if(minimum < principal) {
+    if(minimum < principalRemaining) {
         return minimum;
     } else {
-        return principal;
+        return principalRemaining;
     }
 }
 
@@ -46,4 +46,18 @@ export function getMinimumMonthlyPayment(principal, interest, minimumPayment){
  */
 export function getLoanPaymentAmount(presentValue, ratePerPeriod, numberofPeriods) {
     return (ratePerPeriod * presentValue) / (1 - Math.pow(1 + ratePerPeriod, -1.0 * numberofPeriods));
+}
+
+/**
+ * Get the minimum payment needed to pay off a loan within a certain number of years
+ * @param {number} principal 
+ * @param {number} interest 
+ * @param {number} minimumPayment 
+ * @param {number} years 
+ */
+export function getMinimumMonthlyPaymentWithinPeriod(principal, interest, minimumPayment, years) {
+    return Math.max(
+        getLoanPaymentAmount(principal, interest / 12.0, 12 * years),
+        minimumPayment
+    );
 }
