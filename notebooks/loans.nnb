@@ -1,0 +1,104 @@
+{
+    "cells": [
+        {
+            "language": "markdown",
+            "source": [
+                "# Notebook for Loans / Payment Plans"
+            ],
+            "outputs": []
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "/**\r\n * Calculate the new principal of a loan using the simple interst formula\r\n * @param {number} principal - the amount of the loan\r\n * @param {number} rateInPercent - the interest rate (10%, 15%, etc)\r\n * @param {number} timeInYears - the number of years\r\n * @returns {number} the principal + any interest that has accrued\r\n */\r\nfunction calculateNewPrincipal(principal, rateInPercent, timeInYears) {\r\n    let rate = rateInPercent / 100.0;\r\n    return principal * (1.0 + rate * timeInYears);\r\n}\r\n\r\n/**\r\n * Get the new principal after calculating one month of interest\r\n * @param {number} principal - the amount of the loan\r\n * @param {number} interest - the interest rate (decmial)\r\n * @returns {number} - the new principal amount after adding the interest\r\n */\r\nfunction calculateNewPrincipalForMonth(principal, interest) {\r\n    return calculateNewPrincipal(principal, interest, 1.0/12.0);\r\n}\r\n\r\n/**\r\n * Get the minimum monthly payment\r\n * @param {number} principalRemaining - the amount left on the loan\r\n * @param {number} interest - the interest rate (decimal)\r\n * @param {number} minimumPayment - the minimum payment specified on the loan\r\n */\r\nfunction getMinimumMonthlyPayment(principalRemaining, interest, minimumPayment){\r\n    const newPrincipal = calculateNewPrincipalForMonth(principalRemaining, interest);\r\n    const minimumInterestPayment = newPrincipal - principalRemaining;\r\n    const minimum = Math.max(minimumInterestPayment, minimumPayment);\r\n    if(minimum < principalRemaining) {\r\n        return minimum;\r\n    } else {\r\n        return principalRemaining;\r\n    }\r\n}\r\n\r\n/**\r\n * Calculate the minimum payment needed to pay off a loan within the time period specified\r\n * @param {number} presentValue - the present value of the loan\r\n * @param {number} ratePerPeriod - the interest rate per period (per month would be APR / 12)\r\n * @param {number} numberofPeriods - number of periods (per month would be year * 12)\r\n * @returns {number} - payment amount per period to pay off the loan\r\n */\r\nfunction getLoanPaymentAmount(presentValue, ratePerPeriod, numberofPeriods) {\r\n    return (ratePerPeriod * presentValue) / (1 - Math.pow(1 + ratePerPeriod, -1.0 * numberofPeriods));\r\n}\r\n"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "class Loan {\r\n    /**\r\n     * Class representing a loan\r\n     * @param {string} name - the name of the loan\r\n     * @param {number} principal - the amount of money owed\r\n     * @param {number} interest - the amount of interest (APR)\r\n     * @param {number} minimum  - the minimum payment\r\n     */\r\n    constructor(\r\n        name, \r\n        principal,\r\n        interest,\r\n        minimum) {\r\n            this.name = name;\r\n            this.principal = principal;\r\n            this.interest = interest;\r\n            this.minimum = minimum;\r\n        }\r\n\r\n    /**\r\n     * Get the minimum required payment for this loan\r\n     * @returns {number}\r\n     */\r\n    getMinimumPayment() {\r\n        return getMinimumMonthlyPayment(this.principal, this.interest, this.minimum);\r\n    }\r\n}"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "let ln = new Loan(\"hi\", 10, 10, 10);"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "ln.name"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "items": [
+                        {
+                            "mime": "text/plain",
+                            "value": [
+                                "\u001b[32m'hi'\u001b[39m"
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "typescript",
+            "source": [
+                ""
+            ],
+            "outputs": []
+        }
+    ]
+}
