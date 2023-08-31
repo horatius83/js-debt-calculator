@@ -86,7 +86,7 @@ export class PaymentPlan {
         if (contributionAmount < minimumRequired) {
             throw new Error(`The minimum amount required is ${minimumRequired}`);
         }
-
-
     }
 }
+
+// sort items
