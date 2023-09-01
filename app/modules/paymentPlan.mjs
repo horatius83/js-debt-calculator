@@ -1,4 +1,5 @@
 import { getMinimumMonthlyPaymentWithinPeriod } from './interest.mjs';
+import { mustBeBetween, mustBeGreaterThan0, mustBeGreaterThanOrEqualTo0 } from './validation.mjs';
 
 export class Loan {
     /**
@@ -10,9 +11,9 @@ export class Loan {
      */
     constructor(name, principal, interest, minimum) {
         this.name = name;
-        this.principal = principal;
-        this.interest = interest;
-        this.minimum = minimum;
+        this.principal = mustBeGreaterThan0(principal, 'Principal');
+        this.interest = mustBeGreaterThanOrEqualTo0(interest, 'Interest');
+        this.minimum = mustBeGreaterThan0(minimum, 'Minimum');
     }
 }
 
@@ -24,14 +25,8 @@ export class Payment {
      * @param {boolean} isDoubled 
      */
     constructor(paid, remaining, isDoubled) {
-        if (paid < 0) {
-            throw new Error(`Payment - paid amount (${paid}) may not be less than 0`);
-        }
-        if (remaining < 0) {
-            throw new Error(`Payment - remaining amount (${remaining}) may not be less than 0`);
-        }
-        this.paid = paid;
-        this.remaining = remaining;
+        this.paid = mustBeGreaterThan0(paid, 'Paid');
+        this.remaining = mustBeGreaterThanOrEqualTo0(remaining, 'Remaining');
         this.isDoubled = isDoubled;
     }
 }
@@ -52,8 +47,10 @@ export class LoanRepayment {
      * Get the minimum payment needed to pay back loan
      * @param {number} years - the maximum number of years to pay back loan
      */
-    getMinimum = (years) =>
-        getMinimumMonthlyPaymentWithinPeriod(this.loan.principal, this.loan.interest, this.loan.minimum, years);
+    getMinimum = (years) => {
+        mustBeGreaterThan0(years, 'Years');
+        return getMinimumMonthlyPaymentWithinPeriod(this.loan.principal, this.loan.interest, this.loan.minimum, years);
+    }
 
     /**
      * Add a payment to this loan repayment plan
@@ -62,6 +59,7 @@ export class LoanRepayment {
      * @returns {number} leftover money if this loan is paid off
      */
     makePayment(amount, isDoubled = false) {
+        mustBeGreaterThan0(amount, 'Amount');
         if (this.isPaidOff) {
             return amount;
         }
@@ -93,7 +91,7 @@ export class LoanRepayment {
 export function avalancheRepayment(loans) {
     let newLoans = [...loans];
     newLoans.sort((a, b) => b.interest - a.interest);
-    return loans;
+    return newLoans;
 }
 
 /**
@@ -114,14 +112,8 @@ export class EmergencyFundPayment {
      * @param {number} amountRemaining 
      */
     constructor(payment, amountRemaining) {
-        if (payment < 0) {
-            throw new Error(`Emergency Fund - payment (${payment}) may not be less than 0`);
-        }
-        if (amountRemaining < 0) {
-            throw new Error(`Emergency Fund - amount remaining (${amountRemaining}) may not be less than 0`);
-        }
-        this.payment = payment;
-        this.amountRemaining = amountRemaining;
+        this.payment = mustBeGreaterThan0(payment, 'Payment');
+        this.amountRemaining = mustBeGreaterThanOrEqualTo0(amountRemaining, 'Amount Remaining');
     }
 }
 
@@ -133,14 +125,8 @@ export class EmergencyFund {
      * @param {number} percentageOfBonusFunds - the percentage of bonus funds to apply to the emergency fund
      */
     constructor(targetAmount, percentageOfBonusFunds) {
-        if (percentageOfBonusFunds < 0 || percentageOfBonusFunds > 1) {
-            throw new Error(`Emergency Fund percentage (${percentageOfBonusFunds * 100}%) may not be less than 0% or greater than 100%`)
-        }
-        if (targetAmount < 0) {
-            throw new Error(`Emergency Fund target amount (${targetAmount}) may not be less than 0`);
-        }
-        this.targetAmount = targetAmount;
-        this.percentageOfBonusFunds = percentageOfBonusFunds;
+        this.targetAmount = mustBeGreaterThan0(targetAmount, 'Target Amount');
+        this.percentageOfBonusFunds = mustBeBetween(0, percentageOfBonusFunds, 1, 'Percentage of Bonus Funds');
         /** @type {EmergencyFundPayment[]} */
         this.payments = [];
         this.isPaidOff = false;
@@ -152,6 +138,7 @@ export class EmergencyFund {
      * @returns {number} - amount leftover if this is paid off
      */
     addPayment(amount) {
+        mustBeGreaterThan0(amount, 'Amount');
         if (this.isPaidOff) {
             return amount;
         }
@@ -177,6 +164,8 @@ export class EmergencyFund {
     }
 }
 
+const MAXIMUM_NUMBER_OF_YEARS = 20;
+
 export class PaymentPlan {
     /**
      * A class represnting a plan to repay a group of loans
@@ -188,10 +177,9 @@ export class PaymentPlan {
      */
     constructor(loans, years, repaymentStrategy, emergencyFund, lowestInterestRate) {
         this.loanRepayments = repaymentStrategy(loans).map(ln => new LoanRepayment(ln));
-        this.years = years;
+        this.years = mustBeGreaterThan0(years, 'Years');
         this.emergencyFund = emergencyFund;
         this.lowestInterestRate = lowestInterestRate || 0;
-        this.MAXIMUM_NUMBER_OF_YEARS = 20;
     }
 
     /**
@@ -202,7 +190,7 @@ export class PaymentPlan {
     getMinimum(lr) {
         return lr.loan.interest >= this.lowestInterestRate
             ? lr.getMinimum(this.years)
-            : lr.getMinimum(this.MAXIMUM_NUMBER_OF_YEARS);
+            : lr.getMinimum(MAXIMUM_NUMBER_OF_YEARS);
     }
 
     /**
@@ -210,6 +198,7 @@ export class PaymentPlan {
      * @param {number} contributionAmount - the maximum amount of money that can be contributed to paying down the debt
      */
     createPlan(contributionAmount) {
+        mustBeGreaterThan0(contributionAmount, 'Contribution Amount');
         const minimumRequired = this.loanRepayments
             .map(lr => lr.getMinimum(this.years))
             .reduce((acc, x) => acc + x, 0);

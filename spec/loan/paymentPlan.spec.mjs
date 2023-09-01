@@ -5,7 +5,7 @@ import { Payment, createPayment } from '../../app/models/loan/payment.mjs';
 import { avalanche } from '../../app/models/loan/paymentStrategy.mjs';
 import { calculateNewPrincipalForMonth } from '../../app/models/util/interest.mjs';
 
-describe('paymentplan.model', () => {
+xdescribe('paymentplan.model', () => {
     it('should be able to initialize', () => {
         const loans = [1, 2, 3, 4, 5].map(i => new Loan(`Loan ${i}`, i * 100, i, i * 10));
         const paymentPlan = new PaymentPlan(loans);

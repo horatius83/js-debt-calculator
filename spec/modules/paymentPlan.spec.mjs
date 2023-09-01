@@ -1,0 +1,106 @@
+import { getMinimumMonthlyPaymentWithinPeriod } from "../../app/modules/interest.mjs";
+import { avalancheRepayment, snowballRepayment, Loan, LoanRepayment, Payment } from "../../app/modules/paymentPlan.mjs";
+
+describe('paymentPlan', () => {
+    describe('Loan', () => {
+        describe('principal', () => {
+            it('should be greater than 0', () => {
+                expect(() => new Loan('Test', 0, 0.1, 10))
+                .toThrow(new Error(`Principal (0) cannot be less than or equal to 0`));
+            })
+        }),
+        describe('interest', () => {
+            it('should be greater than or equal to 0', () => {
+                expect(() => new Loan('Test', 1000, -1, 10))
+                .toThrow(new Error('Interest (-1) cannot be less than 0'));
+            })
+        })
+        describe('minimum', () => {
+            it('should be greater than 0', () => {
+                expect(() => new Loan('Test', 1000, 0.1, 0))
+                .toThrow(new Error('Minimum (0) cannot be less than or equal to 0'));
+            })
+        })
+    }),
+    describe('Payment', () => {
+        describe('paid', () => {
+            it('should be greater than 0', () => {
+                expect(() => new Payment(0, 100, false))
+                .toThrow(new Error('Paid (0) cannot be less than or equal to 0'));
+            })
+        }),
+        describe('remaining', () => {
+            it('should be greater than or equal to 0', () => {
+                expect(() => new Payment(100, -1, false))
+                .toThrow(new Error('Remaining (-1) cannot be less than 0'));
+            });
+        })
+    }),
+    describe('LoanRepayment', () => {
+        it('should calculate minimum payment', () => {
+            const ln = new Loan('Test Loan', 1000, 0.1, 10);
+            const lnr = new LoanRepayment(ln);
+            const years = 6;
+            const minimum = getMinimumMonthlyPaymentWithinPeriod(ln.principal, ln.interest, ln.minimum, years);
+
+            const result = lnr.getMinimum(years);
+
+            expect(result).toBeCloseTo(minimum);
+        })
+    }),
+    describe('avalancheRepayment', () => {
+        it('should order loans by interest rate', () => {
+            let loans = [1,2,3,4,5]
+                .map(x => new Loan(`Test Loan ${x}`, 1000, x * 0.1, 100))
+
+            const result = avalancheRepayment(loans);
+
+            expect(result).toBeDefined();
+            expect(result.length).toBe(5);
+            expect(result[0].interest).toBeCloseTo(5 * 0.1);
+        }),
+        it('should not modify the input', () => {
+            let loans = [1,2,3,4,5].map(x => new Loan(`Test Loan ${x}`, 1000, x / 10.0, 100))
+
+            const result = avalancheRepayment(loans);
+
+            expect(loans[0].interest).toBeCloseTo(0.1);
+            expect(result[0].interest).toBeCloseTo(0.5);
+        }),
+        it('should handle empty arrays', () => {
+            const result = avalancheRepayment([]);
+
+            expect(result).toBeDefined();
+            expect(result.length).toBe(0);
+        })
+    }),
+    describe('snowballRepayment', () => {
+        it('should order loans by principal', () => {
+            let loans = [1,2,3,4,5]
+                .reverse()
+                .map(x => new Loan(`Test Loan ${x}`, 1000 * x, x / 10.0, 100));
+
+            const result = snowballRepayment(loans);
+
+            expect(result).toBeDefined();
+            expect(result.length).toBe(5);
+            expect(result[0].principal).toBeCloseTo(1000);
+        }),
+        it('should not modify the input', () => {
+            let loans = [1,2,3,4,5]
+                .reverse()
+                .map(x => new Loan(`Test Loan ${x}`, 1000 * x, x / 10.0, 100));
+
+            const result = snowballRepayment(loans);
+
+            expect(loans[0].principal).toBeCloseTo(5000);
+            expect(result[0].principal).toBeCloseTo(1000);
+        }),
+        it('should handle empty arrays', () => {
+            const result = snowballRepayment([]);
+
+            expect(result).toBeDefined();
+            expect(result.length).toBe(0);
+        })
+    })
+});

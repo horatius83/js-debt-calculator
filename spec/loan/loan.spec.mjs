@@ -1,7 +1,7 @@
 import { Loan } from '../../app/models/loan/loan.mjs';
 import { getMinimumMonthlyPayment } from '../../app/models/util/interest.mjs';
 
-describe('loan.model', () => {
+xdescribe('loan.model', () => {
   it('should be created', () => {
     const loan = new Loan('Test', 5000, 10, 50);
     expect(loan).toBeTruthy();
