@@ -158,6 +158,7 @@ export class EmergencyFund {
                 return 0;
             } else {
                 this.payments.push(new EmergencyFundPayment(this.targetAmount, 0));
+                this.isPaidOff = true;
                 return amount - this.targetAmount;
             }
         }

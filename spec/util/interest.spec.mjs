@@ -1,3 +1,4 @@
+/*
 import { calculateNewPrincipal, calculateNewPrincipalForMonth, getMinimumMonthlyPayment, getLoanPaymentAmount } 
 from '../../app/models/util/interest.mjs';
 
@@ -72,3 +73,4 @@ xdescribe('interest utility module', () => {
         });
     });
 })
+*/

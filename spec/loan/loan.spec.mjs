@@ -1,3 +1,4 @@
+/*
 import { Loan } from '../../app/models/loan/loan.mjs';
 import { getMinimumMonthlyPayment } from '../../app/models/util/interest.mjs';
 
@@ -34,3 +35,4 @@ xdescribe('loan.model', () => {
     expect(minimumMonthlyPayment).toBeCloseTo(expectedMonthlyPayment);
   });
 });
+*/

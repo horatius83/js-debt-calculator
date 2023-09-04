@@ -1,5 +1,5 @@
 import { getMinimumMonthlyPaymentWithinPeriod } from "../../app/modules/interest.mjs";
-import { avalancheRepayment, snowballRepayment, Loan, LoanRepayment, Payment } from "../../app/modules/paymentPlan.mjs";
+import { avalancheRepayment, snowballRepayment, Loan, LoanRepayment, Payment, EmergencyFund } from "../../app/modules/paymentPlan.mjs";
 
 describe('paymentPlan', () => {
     describe('Loan', () => {
@@ -101,6 +101,51 @@ describe('paymentPlan', () => {
 
             expect(result).toBeDefined();
             expect(result.length).toBe(0);
+        })
+    }),
+    describe('EmergencyFund', () => {
+        describe('constructor', () => {
+           it('should not accept a target amount less than or equal to 0', () => {
+                expect(() => new EmergencyFund(-1, 1)).toThrow(new Error('Target Amount (-1) cannot be less than or equal to 0'));
+           }),
+           it('cannot be less than 0', () => {
+                expect(() => new EmergencyFund(1000, -1)).toThrow(new Error('Percentage of Bonus Funds (-1) must be between (0) and (1)'));
+           }),
+           it('cannot be greater than 1', () => {
+                expect(() => new EmergencyFund(1000, 2)).toThrow(new Error('Percentage of Bonus Funds (2) must be between (0) and (1)'));
+           })
+        }),
+        describe('addPayment', () => {
+            it('must have an amount greater than 0', () => {
+                expect(() => new EmergencyFund(1000, 0.5).addPayment(0)).toThrow(new Error('Amount (0) cannot be less than or equal to 0'));
+            }),
+            it('must return amount if it is paid off', () => {
+                const amount = 5000;
+                let em = new EmergencyFund(1000,1.0);
+
+                const result = em.addPayment(amount);
+
+                expect(result).toBe(4000);
+                expect(em.payments.length).toBe(1);
+                expect(em.payments[0].amountRemaining).toBe(0);
+                expect(em.payments[0].payment).toBe(1000);
+                expect(em.isPaidOff).toBeTrue();
+            }),
+            it('must handle having previous payments', () => {
+                const amount = 100;
+                let em = new EmergencyFund(1000, 1.0);
+                const firstResult = em.addPayment(amount);
+
+                const secondResult = em.addPayment(amount);
+
+                expect(firstResult).toBe(0);
+                expect(secondResult).toBe(0);
+                expect(em.payments.length).toBe(2);
+                expect(em.payments[0].amountRemaining).toBe(900);
+                expect(em.payments[0].payment).toBe(100);
+                expect(em.payments[1].amountRemaining).toBe(800);
+                expect(em.payments[1].payment).toBe(100);
+            })
         })
     })
 });

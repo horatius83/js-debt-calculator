@@ -1,3 +1,4 @@
+/*
 import { Loan } from '../../app/models/loan/loan.mjs';
 import { LoanPaymentPlan } from '../../app/models/loan/loanPaymentPlan.mjs';
 import { calculateNewPrincipalForMonth } from '../../app/models/util/interest.mjs';
@@ -74,3 +75,4 @@ xdescribe('loan payment plan model', () => {
         });
     });
 });
+*/

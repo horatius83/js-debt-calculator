@@ -1,3 +1,4 @@
+/*
 import { PaymentPlan } from '../../app/models/loan/paymentPlan.mjs';
 import { Loan } from '../../app/models/loan/loan.mjs';
 import { LoanPaymentPlan } from '../../app/models/loan/loanPaymentPlan.mjs';
@@ -221,3 +222,4 @@ xdescribe('paymentplan.model', () => {
         });
     })
 });
+*/

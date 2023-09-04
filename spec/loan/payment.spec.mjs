@@ -1,3 +1,4 @@
+/*
 import { Payment, createPayment } from '../../app/models/loan/payment.mjs';
 import { getMinimumMonthlyPayment, calculateNewPrincipalForMonth } from '../../app/models/util/interest.mjs';
 import { Loan } from '../../app/models/loan/loan.mjs';
@@ -98,3 +99,4 @@ xdescribe('payment', () => {
         })
     });
 });
+*/
