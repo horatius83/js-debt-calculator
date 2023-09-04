@@ -147,5 +147,24 @@ describe('paymentPlan', () => {
                 expect(em.payments[1].payment).toBe(100);
             })
         })
+    }),
+    describe('PaymentPlan', () => {
+        it('should not have years-to-repay to be less than or equal to 0', () => {
+
+        }),
+        describe('getMinimum', () => {
+            it('should get the minimum if the interest rate is above the lowest interest rate', () => {
+
+            }),
+            it('should get the minimum if the interest rate is equal to the lowest interest rate', () => {
+
+            }),
+            it('should get the absolute minimum if the interest rate is below the lowest interest rate', () => {
+
+            })
+        }),
+        describe('createPlan', () => {
+
+        })
     })
 });
