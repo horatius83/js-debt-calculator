@@ -199,7 +199,6 @@ export class PaymentPlan {
      * @param {number} contributionAmount - the maximum amount of money that can be contributed to paying down the debt
      */
     createPlan(contributionAmount) {
-        mustBeGreaterThan0(contributionAmount, 'Contribution Amount');
         const minimumRequired = this.loanRepayments
             .map(lr => lr.getMinimum(this.years))
             .reduce((acc, x) => acc + x, 0);

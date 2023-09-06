@@ -196,7 +196,15 @@ describe('paymentPlan', () => {
             })
         }),
         describe('createPlan', () => {
-
+            it('should not accept contribution amounts that are too low', () => {}),
+            it('should exit if all loans are paid off', () => {}),
+            it('should handle not having an emergency fund', () => {}),
+            it('should pay emergency fund first', () => {}),
+            it('should handle not having a minimum interest rate', () => {}),
+            it('should pay the minimum on all loans with interest rates greater than the minimum', () => {}),
+            it('should roll over payments once one loan is paid off', () => {}),
+            it('should roll over payments once the emergency fund is paid off', () => {}),
+            it('should stop making the plan when all loans have an interest rate less than the minimum', () => {})
         })
     })
 });
