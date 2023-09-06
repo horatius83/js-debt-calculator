@@ -1,5 +1,5 @@
 import { getMinimumMonthlyPaymentWithinPeriod } from "../../app/modules/interest.mjs";
-import { avalancheRepayment, snowballRepayment, Loan, LoanRepayment, Payment, EmergencyFund } from "../../app/modules/paymentPlan.mjs";
+import { avalancheRepayment, snowballRepayment, Loan, LoanRepayment, Payment, EmergencyFund, PaymentPlan, MAXIMUM_NUMBER_OF_YEARS } from "../../app/modules/paymentPlan.mjs";
 
 describe('paymentPlan', () => {
     describe('Loan', () => {
@@ -150,17 +150,49 @@ describe('paymentPlan', () => {
     }),
     describe('PaymentPlan', () => {
         it('should not have years-to-repay to be less than or equal to 0', () => {
+            const loans = [new Loan("Test 1", 1000, 0.1, 10)];
+            const years = 0;
+            const repaymentStrategy = avalancheRepayment;
 
+            expect(() => new PaymentPlan(loans, years, repaymentStrategy))
+            .toThrow(new Error('Years (0) cannot be less than or equal to 0'));
         }),
         describe('getMinimum', () => {
             it('should get the minimum if the interest rate is above the lowest interest rate', () => {
+                const ln = new Loan('Test Loan', 1000, 0.1, 10);
+                const lnr = new LoanRepayment(ln);
+                const years = 6;
+                const minimum = getMinimumMonthlyPaymentWithinPeriod(ln.principal, ln.interest, ln.minimum, years);
+                const loans = [new Loan("Test 1", 1000, 0.1, 10)];
+                const pp = new PaymentPlan(loans, years, avalancheRepayment, undefined, 0.01);
 
+                const result = pp.getMinimum(lnr);
+
+                expect(result).toBeCloseTo(minimum);               
             }),
             it('should get the minimum if the interest rate is equal to the lowest interest rate', () => {
+                const ln = new Loan('Test Loan', 1000, 0.1, 10);
+                const lnr = new LoanRepayment(ln);
+                const years = 6;
+                const minimum = getMinimumMonthlyPaymentWithinPeriod(ln.principal, ln.interest, ln.minimum, years);
+                const loans = [new Loan("Test 1", 1000, 0.1, 10)];
+                const pp = new PaymentPlan(loans, years, avalancheRepayment, undefined, 0.1);
 
+                const result = pp.getMinimum(lnr);
+
+                expect(result).toBeCloseTo(minimum);
             }),
             it('should get the absolute minimum if the interest rate is below the lowest interest rate', () => {
+                const ln = new Loan('Test Loan', 1000, 0.1, 10);
+                const lnr = new LoanRepayment(ln);
+                const years = 6;
+                const minimum = getMinimumMonthlyPaymentWithinPeriod(ln.principal, ln.interest, ln.minimum, MAXIMUM_NUMBER_OF_YEARS);
+                const loans = [new Loan("Test 1", 1000, 0.1, 10)];
+                const pp = new PaymentPlan(loans, years, avalancheRepayment, undefined, 0.2);
 
+                const result = pp.getMinimum(lnr);
+
+                expect(result).toBeCloseTo(minimum);
             })
         }),
         describe('createPlan', () => {

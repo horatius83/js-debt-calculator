@@ -165,7 +165,7 @@ export class EmergencyFund {
     }
 }
 
-const MAXIMUM_NUMBER_OF_YEARS = 20;
+export const MAXIMUM_NUMBER_OF_YEARS = 20;
 
 export class PaymentPlan {
     /**
