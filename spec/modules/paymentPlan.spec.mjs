@@ -196,7 +196,15 @@ describe('paymentPlan', () => {
             })
         }),
         describe('createPlan', () => {
-            it('should not accept contribution amounts that are too low', () => {}),
+            it('should not accept contribution amounts that are too low', () => {
+                const loans = [new Loan("Test 1", 1000, 0.1, 10)];
+                const years = 6;
+                const pp = new PaymentPlan(loans, years, avalancheRepayment);
+                const minimumRequired = loans
+                    .map(ln => getMinimumMonthlyPaymentWithinPeriod(ln.principal, ln.interest, ln.minimum, years))
+                    .reduce((acc, x) => acc + x, 0);
+                expect(() => pp.createPlan(0)).toThrow(`The minimum amount required is ${minimumRequired}`);
+            }),
             it('should exit if all loans are paid off', () => {}),
             it('should handle not having an emergency fund', () => {}),
             it('should pay emergency fund first', () => {}),
