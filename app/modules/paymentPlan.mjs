@@ -1,4 +1,5 @@
 import { getMinimumMonthlyPaymentWithinPeriod } from './interest.mjs';
+import { round } from './mathutil.mjs';
 import { mustBeBetween, mustBeGreaterThan0, mustBeGreaterThanOrEqualTo0 } from './validation.mjs';
 
 export class Loan {
@@ -203,9 +204,9 @@ export class PaymentPlan {
             .map(lr => lr.getMinimum(this.years))
             .reduce((acc, x) => acc + x, 0);
         if (contributionAmount < minimumRequired) {
-            throw new Error(`The minimum amount required is ${minimumRequired}`);
+            throw new Error(`The minimum amount required is $${round(minimumRequired, 2)}`);
         }
-        let allLoansPaidOff = false;
+        let allLoansPaidOff = this.loanRepayments.some(lr => !lr.isPaidOff);
         while (!allLoansPaidOff) {
             allLoansPaidOff = true;
             let totalBonus = this.loanRepayments
