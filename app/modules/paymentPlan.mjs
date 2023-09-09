@@ -206,7 +206,7 @@ export class PaymentPlan {
         if (contributionAmount < minimumRequired) {
             throw new Error(`The minimum amount required is $${round(minimumRequired, 2)}`);
         }
-        let allLoansPaidOff = this.loanRepayments.some(lr => !lr.isPaidOff);
+        let allLoansPaidOff = this.loanRepayments.every(lr => lr.isPaidOff);
         while (!allLoansPaidOff) {
             allLoansPaidOff = true;
             let totalBonus = this.loanRepayments
