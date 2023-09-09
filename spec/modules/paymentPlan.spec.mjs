@@ -221,8 +221,34 @@ describe('paymentPlan', () => {
                 expect(pp.loanRepayments[0].payments.length).toBe(0);
                 expect(pp.loanRepayments[0].isPaidOff).toBe(true);
             }),
-            it('should handle not having an emergency fund', () => {}),
-            it('should pay emergency fund first', () => {}),
+            it('should handle not having an emergency fund', () => {
+                const loans = [new Loan("Test 1", 1000, 0.1, 10)];
+                const years = 6;
+                const pp = new PaymentPlan(loans, years, avalancheRepayment);
+
+                pp.createPlan(600);
+
+                expect(pp.emergencyFund).toBeFalsy();
+                expect(pp.loanRepayments.length).toBe(1);
+                expect(pp.loanRepayments[0].payments.length).toBe(2);
+                expect(pp.loanRepayments[0].isPaidOff).toBe(true);
+            }),
+            it('should pay emergency fund first', () => {
+                const loans = [new Loan("Test 1", 1000, 0.1, 10)];
+                const years = 6;
+                const emergencyFund = new EmergencyFund(1000, 0.5);
+                const pp = new PaymentPlan(loans, years, avalancheRepayment, emergencyFund);
+
+                debugger;
+                pp.createPlan(600);
+
+                expect(pp.emergencyFund).toBeDefined();
+                expect(pp.emergencyFund?.payments.length).toBe(4);
+                expect(pp.emergencyFund?.isPaidOff).toBe(true);
+                expect(pp.loanRepayments.length).toBe(1);
+                expect(pp.loanRepayments[0].payments.length).toBe(4);
+                expect(pp.loanRepayments[0].isPaidOff).toBe(true);
+            }),
             it('should handle not having a minimum interest rate', () => {}),
             it('should pay the minimum on all loans with interest rates greater than the minimum', () => {}),
             it('should roll over payments once one loan is paid off', () => {}),
