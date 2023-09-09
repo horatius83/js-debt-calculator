@@ -1,5 +1,4 @@
 import { getMinimumMonthlyPaymentWithinPeriod } from './interest.mjs';
-import { round } from './mathutil.mjs';
 import { mustBeBetween, mustBeGreaterThan0, mustBeGreaterThanOrEqualTo0 } from './validation.mjs';
 
 export class Loan {
@@ -200,19 +199,21 @@ export class PaymentPlan {
      * @param {number} contributionAmount - the maximum amount of money that can be contributed to paying down the debt
      */
     createPlan(contributionAmount) {
-        const minimumRequired = this.loanRepayments
-            .map(lr => lr.getMinimum(this.years))
+        let minimumRequired = this.loanRepayments
+            .filter(lr => !lr.isPaidOff)
+            .map((x) => this.getMinimum(x))
             .reduce((acc, x) => acc + x, 0);
         if (contributionAmount < minimumRequired) {
-            throw new Error(`The minimum amount required is $${round(minimumRequired, 2)}`);
+            throw new Error(`The minimum amount required is $${minimumRequired.toFixed(2)}`);
         }
         let allLoansPaidOff = this.loanRepayments.every(lr => lr.isPaidOff);
         while (!allLoansPaidOff) {
             allLoansPaidOff = true;
-            let totalBonus = this.loanRepayments
+            minimumRequired = this.loanRepayments
                 .filter(lr => !lr.isPaidOff)
-                .map(this.getMinimum)
+                .map((x) => this.getMinimum(x))
                 .reduce((acc, x) => acc + x, 0);
+            let totalBonus = contributionAmount - minimumRequired;
             let leftoverEmergencyFundBonus = this.emergencyFund && !this.emergencyFund.isPaidOff
                 ? this.emergencyFund.addPayment(totalBonus * this.emergencyFund.percentageOfBonusFunds)
                 : 0;
@@ -221,13 +222,14 @@ export class PaymentPlan {
                 : totalBonus;
 
             for (let lr of this.loanRepayments) {
+                const minimumPayment = this.getMinimum(lr);
                 if (lr.isPaidOff) {
                     // Since we don't need to pay this off, roll that amount into the bonus
-                    bonus += this.getMinimum(lr); 
+                    bonus += minimumPayment;
                     continue;
                 }
                 allLoansPaidOff = false;
-                bonus = lr.makePayment(bonus);
+                bonus = lr.makePayment(minimumPayment + bonus);
             }
         }
     }

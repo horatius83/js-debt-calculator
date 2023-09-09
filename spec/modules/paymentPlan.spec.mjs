@@ -1,5 +1,4 @@
 import { getMinimumMonthlyPaymentWithinPeriod } from "../../app/modules/interest.mjs";
-import { round } from "../../app/modules/mathutil.mjs";
 import { avalancheRepayment, snowballRepayment, Loan, LoanRepayment, Payment, EmergencyFund, PaymentPlan, MAXIMUM_NUMBER_OF_YEARS } from "../../app/modules/paymentPlan.mjs";
 
 describe('paymentPlan', () => {
@@ -204,12 +203,13 @@ describe('paymentPlan', () => {
                 const minimumRequired = loans
                     .map(ln => getMinimumMonthlyPaymentWithinPeriod(ln.principal, ln.interest, ln.minimum, years))
                     .reduce((acc, x) => acc + x, 0);
-                expect(() => pp.createPlan(0)).toThrow(new Error(`The minimum amount required is $${round(minimumRequired, 2)}`));
+                expect(() => pp.createPlan(0)).toThrow(new Error(`The minimum amount required is $${minimumRequired.toFixed(2)}`));
             }),
             it('should exit if all loans are paid off', () => {
                 const loans = [new Loan("Test 1", 1000, 0.1, 10)];
                 const years = 6;
                 const pp = new PaymentPlan(loans, years, avalancheRepayment);
+                pp.loanRepayments[0].isPaidOff = true;
                 const minimumRequired = loans
                     .map(ln => getMinimumMonthlyPaymentWithinPeriod(ln.principal, ln.interest, ln.minimum, years))
                     .reduce((acc, x) => acc + x, 0);
