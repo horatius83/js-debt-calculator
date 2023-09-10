@@ -227,6 +227,8 @@ describe('paymentPlan', () => {
                 const remainingBonus = bonus - firstPayment + loanPaymentMinimums[0];
                 const secondPrincipal = getPrincipalPlusMonthlyInterest(loans[1].principal, loans[1].interest);
                 const secondPayment = loanPaymentMinimums[1] + remainingBonus;
+                const thirdPrincipal = getPrincipalPlusMonthlyInterest(secondPrincipal - secondPayment, loans[1].interest);
+                const thirdPayment = totalContribution;
                 
                 const pp = new PaymentPlan(loans, years, snowballRepayment);
 
@@ -242,6 +244,8 @@ describe('paymentPlan', () => {
                 expect(pp.loanRepayments[1].payments.length).toBe(3);
                 expect(pp.loanRepayments[1].payments[0].paid).toBeCloseTo(secondPayment, PRECISION);
                 expect(pp.loanRepayments[1].payments[0].remaining).toBeCloseTo(secondPrincipal - secondPayment, PRECISION);
+                expect(pp.loanRepayments[1].payments[1].paid).toBeCloseTo(thirdPayment);
+                expect(pp.loanRepayments[1].payments[1].remaining).toBeCloseTo(thirdPrincipal - thirdPayment, PRECISION);
             }),
             it('should roll over payments once the emergency fund is paid off', () => {
 
