@@ -218,7 +218,6 @@ export class PaymentPlan {
                 const minimumPayment = lr.getMinimum(this.years);
                 if (lr.isPaidOff) {
                     // Since we don't need to pay this off, roll that amount into the bonus
-                    bonus += minimumPayment;
                     continue;
                 }
                 allLoansPaidOff = false;
