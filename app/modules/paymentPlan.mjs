@@ -1,4 +1,4 @@
-import { getMinimumMonthlyPaymentWithinPeriod } from './interest.mjs';
+import { getMinimumMonthlyPaymentWithinPeriod, getPrincipalPlusMonthlyInterest } from './interest.mjs';
 import { mustBeBetween, mustBeGreaterThan0, mustBeGreaterThanOrEqualTo0 } from './validation.mjs';
 
 export class Loan {
@@ -64,17 +64,18 @@ export class LoanRepayment {
             return amount;
         }
         const principalRemaining = this.payments.at(-1)?.remaining ?? this.loan.principal;
+        const newPrincipal = getPrincipalPlusMonthlyInterest(principalRemaining, this.loan.interest);
         /**
          * Create a new loan payment
          * @returns {[number, Payment]} - the amount remaining and the Payment to add
          */
         const createPayment = () => {
-            if (principalRemaining > amount) {
-                return [0, new Payment(amount, principalRemaining - amount, isDoubled)];
+            if (newPrincipal > amount) {
+                return [0, new Payment(amount, newPrincipal - amount, isDoubled)];
             } else {
-                const amountRemaining = amount - principalRemaining;
+                const amountRemaining = amount - newPrincipal;
                 this.isPaidOff = true;
-                return [amountRemaining, new Payment(principalRemaining, 0, isDoubled)]
+                return [amountRemaining, new Payment(newPrincipal, 0, isDoubled)]
             }
         }
         const [remainder, payment] = createPayment();
@@ -174,24 +175,22 @@ export class PaymentPlan {
      * @param {number} years - the maximum number of years to repay those loans
      * @param {(loans: Loan[]) => Loan[]} repaymentStrategy - determines how to prioritize the loans for repayment
      * @param {EmergencyFund=} emergencyFund - optional emergency fund to prioritize while paying down debt
-     * @param {number=} lowestInterestRate - any loans under this APR, just pay the minimum
      */
-    constructor(loans, years, repaymentStrategy, emergencyFund, lowestInterestRate) {
+    constructor(loans, years, repaymentStrategy, emergencyFund) {
         this.loanRepayments = repaymentStrategy(loans).map(ln => new LoanRepayment(ln));
         this.years = mustBeGreaterThan0(years, 'Years');
         this.emergencyFund = emergencyFund;
-        this.lowestInterestRate = lowestInterestRate || 0;
     }
 
     /**
-     * Get the minimum amount to pay on a loan (taking minimum interest into account)
-     * @param {LoanRepayment} lr 
+     * Get the minimum payment required for all the loans
      * @returns {number} 
      */
-    getMinimum(lr) {
-        return lr.loan.interest >= this.lowestInterestRate
-            ? lr.getMinimum(this.years)
-            : lr.getMinimum(MAXIMUM_NUMBER_OF_YEARS);
+    getMinimumRequiredPayment() {
+        return this.loanRepayments
+            .filter(lr => !lr.isPaidOff)
+            .map((x) => x.getMinimum(this.years))
+            .reduce((acc, x) => acc + x, 0);
     }
 
     /**
@@ -199,20 +198,14 @@ export class PaymentPlan {
      * @param {number} contributionAmount - the maximum amount of money that can be contributed to paying down the debt
      */
     createPlan(contributionAmount) {
-        let minimumRequired = this.loanRepayments
-            .filter(lr => !lr.isPaidOff)
-            .map((x) => this.getMinimum(x))
-            .reduce((acc, x) => acc + x, 0);
+        let minimumRequired = this.getMinimumRequiredPayment();
         if (contributionAmount < minimumRequired) {
             throw new Error(`The minimum amount required is $${minimumRequired.toFixed(2)}`);
         }
         let allLoansPaidOff = this.loanRepayments.every(lr => lr.isPaidOff);
         while (!allLoansPaidOff) {
             allLoansPaidOff = true;
-            minimumRequired = this.loanRepayments
-                .filter(lr => !lr.isPaidOff)
-                .map((x) => this.getMinimum(x))
-                .reduce((acc, x) => acc + x, 0);
+            minimumRequired = this.getMinimumRequiredPayment();
             let totalBonus = contributionAmount - minimumRequired;
             let leftoverEmergencyFundBonus = this.emergencyFund && !this.emergencyFund.isPaidOff
                 ? this.emergencyFund.addPayment(totalBonus * this.emergencyFund.percentageOfBonusFunds)
@@ -222,7 +215,7 @@ export class PaymentPlan {
                 : totalBonus;
 
             for (let lr of this.loanRepayments) {
-                const minimumPayment = this.getMinimum(lr);
+                const minimumPayment = lr.getMinimum(this.years);
                 if (lr.isPaidOff) {
                     // Since we don't need to pay this off, roll that amount into the bonus
                     bonus += minimumPayment;

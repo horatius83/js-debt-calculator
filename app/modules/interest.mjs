@@ -11,14 +11,24 @@ export function getLoanPaymentAmount(principal, ratePerPeriod, numberofPeriods) 
 
 /**
  * Get the minimum payment needed to pay off a loan within a certain number of years
- * @param {number} principal 
- * @param {number} interest 
- * @param {number} minimumPayment 
- * @param {number} years 
+ * @param {number} principal - the amount owed
+ * @param {number} interest - the APR as a fraction (so 10% -> 0.1)
+ * @param {number} minimumPayment - the minimum payment on the bill
+ * @param {number} years - the maximum number of years to pay off loans
  */
 export function getMinimumMonthlyPaymentWithinPeriod(principal, interest, minimumPayment, years) {
     return Math.max(
         getLoanPaymentAmount(principal, interest / 12.0, 12 * years),
         minimumPayment
     );
+}
+
+/**
+ * Get principal plus monthly interest
+ * @param {number} principal 
+ * @param {number} interest 
+ * @returns {number}
+ */
+export function getPrincipalPlusMonthlyInterest(principal, interest) {
+    return principal + (principal * (interest / 12.0));
 }
