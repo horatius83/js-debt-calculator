@@ -1,5 +1,5 @@
 import { getMinimumMonthlyPaymentWithinPeriod, getPrincipalPlusMonthlyInterest } from "../../app/modules/interest.mjs";
-import { avalancheRepayment, snowballRepayment, Loan, LoanRepayment, Payment, EmergencyFund, PaymentPlan, MAXIMUM_NUMBER_OF_YEARS } from "../../app/modules/paymentPlan.mjs";
+import { avalancheRepayment, snowballRepayment, Loan, LoanRepayment, Payment, EmergencyFund, PaymentPlan } from "../../app/modules/paymentPlan.mjs";
 
 const PRECISION = 0.01;
 
@@ -201,6 +201,9 @@ describe('paymentPlan', () => {
                 const loans = [new Loan("Test 1", 1000, 0.1, 10)];
                 const years = 6;
                 const emergencyFund = new EmergencyFund(1000, 0.5);
+                const contribution = 600;
+                const minimumMonthlyPayment = getMinimumMonthlyPaymentWithinPeriod(loans[0].principal, loans[0].interest, loans[0].minimum, years);
+                const bonus = contribution - minimumMonthlyPayment;
                 const pp = new PaymentPlan(loans, years, avalancheRepayment, emergencyFund);
 
                 pp.createPlan(600);
@@ -208,9 +211,13 @@ describe('paymentPlan', () => {
                 expect(pp.emergencyFund).toBeDefined();
                 expect(pp.emergencyFund?.payments.length).toBe(4);
                 expect(pp.emergencyFund?.isPaidOff).toBe(true);
+                expect(emergencyFund.payments[0].payment).toBe(bonus / 2.0);
+                expect(emergencyFund.payments[3].payment).toBe(1000 - (3.0 * bonus / 2.0));
                 expect(pp.loanRepayments.length).toBe(1);
                 expect(pp.loanRepayments[0].payments.length).toBe(4);
                 expect(pp.loanRepayments[0].isPaidOff).toBe(true);
+                expect(pp.loanRepayments[0].payments[0].paid).toBe(minimumMonthlyPayment + (bonus / 2.0));
+                expect(pp.loanRepayments[0].payments[3].paid).toBe(getPrincipalPlusMonthlyInterest(pp.loanRepayments[0].payments[2].remaining, loans[0].interest));
             }),
             it('should roll over payments once one loan is paid off', () => {
                 const loans = [
@@ -246,9 +253,6 @@ describe('paymentPlan', () => {
                 expect(pp.loanRepayments[1].payments[0].remaining).toBeCloseTo(secondPrincipal - secondPayment, PRECISION);
                 expect(pp.loanRepayments[1].payments[1].paid).toBeCloseTo(thirdPayment);
                 expect(pp.loanRepayments[1].payments[1].remaining).toBeCloseTo(thirdPrincipal - thirdPayment, PRECISION);
-            }),
-            it('should roll over payments once the emergency fund is paid off', () => {
-
             })
         })
     })

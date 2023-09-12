@@ -166,8 +166,6 @@ export class EmergencyFund {
     }
 }
 
-export const MAXIMUM_NUMBER_OF_YEARS = 20;
-
 export class PaymentPlan {
     /**
      * A class represnting a plan to repay a group of loans
