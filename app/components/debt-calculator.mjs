@@ -82,6 +82,7 @@ export const DebtCalculator = {
             const y = x / 100.0;
             return `$${y.toFixed(2)}`;
         },
+
         /**
          * Format a value as a percentage
          * @param {number} value 
@@ -90,6 +91,7 @@ export const DebtCalculator = {
         asPercentage(value) {
             return `${value.toFixed(2)}%`;
         },
+
         /**
          * Delete a Loan
          * @param { string } loanName - name of th eloan
@@ -106,12 +108,21 @@ export const DebtCalculator = {
                 this.newLoan.minimum);
             if (loan) {
                 this.loans.push(loan);
+                this.clear();
             }
+        },
+
+        clear() {
+            this.newLoan.name = ""; 
+            this.newLoan.principal = ""; 
+            this.newLoan.interest = "";
+            this.newLoan.minimum = "";
         }
     },
     template: 
 /* html */`
 <div>
+    <h2>Debt Calculator</h2>
     <table id="loans-table">
         <thead>
             <th class="loans-table-name-column">Name</th>
