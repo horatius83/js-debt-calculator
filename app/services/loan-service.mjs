@@ -4,6 +4,25 @@ import { Payment } from '../models/loan/payment.mjs';
 
 const loanServiceKey = 'debt-calculator-loans';
 
+class LoansJson {
+    /**
+     * Format for saving / loading state information
+     * @param {Loan[]=} loans 
+     * @param {number=} totalMonthlyPayment 
+     * @param {Date=} startingMonth 
+     */
+    constructor(loans, totalMonthlyPayment, startingMonth) {
+        this.loans = loans;
+        this.totalMonthlyPayment = totalMonthlyPayment;
+        this.startingMonth = startingMonth;
+    }
+}
+
+/**
+ * Convert string to base64 encoding
+ * @param {string} string 
+ * @returns {string}
+ */
 function toBinary(string) {
     const codeUnits = new Uint16Array(string.length);
     for(let i=0; i<codeUnits.length; i++) {
@@ -12,6 +31,11 @@ function toBinary(string) {
     return String.fromCharCode(...new Uint8Array(codeUnits.buffer));
 }
 
+/**
+ * Convert base-64 encoded string to string
+ * @param {string} binary 
+ * @returns {string} 
+ */
 function fromBinary(binary) {
     const bytes = new Uint8Array(binary.length);
     for(let i=0; i<bytes.length; i++) {
@@ -20,6 +44,11 @@ function fromBinary(binary) {
     return String.fromCharCode(...new Uint16Array(bytes.buffer));
 }
 
+/**
+ * Save Loan Information
+ * @param {string} key 
+ * @param {LoansJson} thingToSave 
+ */
 function saveJsonObject(key, thingToSave) {
     const thingAsString = JSON.stringify(thingToSave);
     const thingAsBase64 = toBinary(thingAsString);
@@ -29,7 +58,7 @@ function saveJsonObject(key, thingToSave) {
 /**
  * Get JSON object from local storage
  * @param {string} key 
- * @returns { object }
+ * @returns { LoansJson? }
  */
 function getJsonObject(key) {
     const thingAsBase64 = window.localStorage.getItem(key);
@@ -61,13 +90,7 @@ class LoanService {
             new Loan("Sears", 3797.66, 25.44, 122)
         ];
         */
-       /** @typedef { object } LoanJson
-        * @property { string } name
-        * @property { number } principal
-        * @property { number } interest
-        * @property { number } minimum
-       */
-       /** @type { LoanJson[] } */
+
        const json = getJsonObject(loanServiceKey);
        this.loans = json?.loans?.map(x => new Loan(x.name, x.principal, x.interest, x.minimum)) || [];
        this.totalMonthlyPayment = json?.totalMonthlyPayment || 0;
@@ -105,10 +128,7 @@ class LoanService {
     }
 
     save() {
-        saveJsonObject(loanServiceKey, {
-            loans: this.loans,
-            totalMonthlyPayment: this.totalMonthlyPayment
-        });
+       saveJsonObject(loanServiceKey, new LoansJson(this.loans, this.totalMonthlyPayment));
     }
 
     setPaymentStrategy(strategy) {
