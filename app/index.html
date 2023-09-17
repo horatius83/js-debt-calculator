@@ -23,11 +23,20 @@
         <link rel="stylesheet" href="css/mini-dark.min.css">
         <link rel="stylesheet" href="css/loans.css">
 
+        <script type="importmap">
+            {
+                "imports": {
+                    "vue": "https://unpkg.com/vue@3/dist/vue.esm-browser.js"
+                }
+            }
+        </script>
+
         <!-- JS -->
         <script src="js/vue.js"></script>
         <script src="js/vue-router.js"></script>
         <script src="js/Chart.js"></script>
         <script src="js/accounting.min.js"></script>
+
     </head>
     <body>
         <div id="main">
@@ -41,6 +50,12 @@
                 <router-view></router-view>
             </main>
         </div>
+        <div id="debt-calculator"></div>
         <script src="components/main.vue.mjs" type="module"></script>
+        <script type="module">
+            import { createApp } from 'vue';
+            import { DebtCalculator } from './components/debt-calculator.mjs';
+            createApp(DebtCalculator).mount('#debt-calculator');
+        </script>
     </body>
 </html>
