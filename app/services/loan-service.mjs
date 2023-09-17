@@ -152,6 +152,11 @@ class LoanService {
         this.save();
     }
 
+    /**
+     * Get the minimum monthly payment
+     * @param {Date} date 
+     * @returns {number}
+     */
     getMinimumMonthlyPayment(date) {
         if(!date) {
             date = new Date();
@@ -165,4 +170,4 @@ class LoanService {
 
 var loanService = new LoanService();
 
-export { loanService }
+export { loanService, LoanService }
