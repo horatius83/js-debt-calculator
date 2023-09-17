@@ -1,10 +1,9 @@
-/*
 import { Loan } from '../../app/models/loan/loan.mjs';
 import { LoanPaymentPlan } from '../../app/models/loan/loanPaymentPlan.mjs';
 import { calculateNewPrincipalForMonth } from '../../app/models/util/interest.mjs';
 import { Payment, createPayment } from '../../app/models/loan/payment.mjs';
 
-xdescribe('loan payment plan model', () => {
+describe('loan payment plan model', () => {
     describe('getMinimumPayment', () => {
         it('should create a new minimum payment if none is found', () => {
             const loan = new Loan('test loan', 5000, 10, 50);
@@ -75,4 +74,3 @@ xdescribe('loan payment plan model', () => {
         });
     });
 });
-*/

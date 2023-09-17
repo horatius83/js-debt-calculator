@@ -1,9 +1,8 @@
-/*
 import { Loan } from '../../app/models/loan/loan.mjs';
 import { Payment, createPayment } from '../../app/models/loan/payment.mjs';
 import { avalanche, snowball, double } from '../../app/models/loan/paymentStrategy.mjs';
 
-xdescribe('paymentstrategy.model', () => {
+describe('paymentstrategy.model', () => {
     describe('avalanche', () => {
         it('should handle empty lists', () => {
             const payments = [];
@@ -268,4 +267,3 @@ xdescribe('paymentstrategy.model', () => {
         });
     });
 });
-*/

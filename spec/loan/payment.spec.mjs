@@ -1,9 +1,8 @@
-/*
 import { Payment, createPayment } from '../../app/models/loan/payment.mjs';
 import { getMinimumMonthlyPayment, calculateNewPrincipalForMonth } from '../../app/models/util/interest.mjs';
 import { Loan } from '../../app/models/loan/loan.mjs';
 
-xdescribe('payment', () => {
+describe('payment', () => {
     it('should instantiate', () => {
         const loan = new Loan('test loan', 5000, 10, 50);
         const principal = 4000.0;
@@ -99,4 +98,3 @@ xdescribe('payment', () => {
         })
     });
 });
-*/

@@ -1,8 +1,7 @@
-/*
 import { calculateNewPrincipal, calculateNewPrincipalForMonth, getMinimumMonthlyPayment, getLoanPaymentAmount } 
 from '../../app/models/util/interest.mjs';
 
-xdescribe('interest utility module', () => {
+describe('interest utility module', () => {
     describe('calculateNewPrincipal', () => {
         it('should calculate correctly', () => {
             const principal = 10000;
@@ -73,4 +72,3 @@ xdescribe('interest utility module', () => {
         });
     });
 })
-*/

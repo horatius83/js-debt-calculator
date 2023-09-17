@@ -1,8 +1,7 @@
-/*
 import { Loan } from '../../app/models/loan/loan.mjs';
 import { getMinimumMonthlyPayment } from '../../app/models/util/interest.mjs';
 
-xdescribe('loan.model', () => {
+describe('loan.model', () => {
   it('should be created', () => {
     const loan = new Loan('Test', 5000, 10, 50);
     expect(loan).toBeTruthy();
@@ -35,4 +34,3 @@ xdescribe('loan.model', () => {
     expect(minimumMonthlyPayment).toBeCloseTo(expectedMonthlyPayment);
   });
 });
-*/
