@@ -145,7 +145,7 @@ export const DebtCalculator = {
             </tr>
         </tbody>
     </table>
-    <div id="summary">
+    <div id="summary" class="d-grid gap-2 d-md-flex justify-content-md-end">
         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#new-loan-modal">
             Add New Loan 
         </button>
@@ -158,7 +158,7 @@ export const DebtCalculator = {
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <div class="form-floating mb-3">
+                    <div class="mb-3">
                         <input 
                             class="form-control"
                             name="new-loan-name" 
@@ -167,18 +167,17 @@ export const DebtCalculator = {
                             required="required" 
                             placeholder="Name"
                         >
-                        <label for="new-loan-name" class="form-label">Name</label>
                     </div>
-                    <div class="form-floating mb-3">
+                    <div class="input-group mb-3">
+                        <span class="input-group-text">$</span>
                         <input 
                             class="form-control"
                             name="new-loan-principal" 
                             v-model="newLoan.principal" 
                             placeholder="Principal"
                         >
-                        <label for="new-loan-principal" class="form-label">Principal</label>
                     </div>
-                    <div class="form-floating mb-3">
+                    <div class="input-group mb-3">
                         <input 
                             class="form-control"
                             name="new-loan-interest" 
@@ -186,9 +185,10 @@ export const DebtCalculator = {
                             v-model="newLoan.interest" 
                             placeholder="Interest"
                         >
-                        <label for="new-loan-interest" class="form-label">Interest</label>
+                        <span class="input-group-text">%</span>
                     </div>
-                    <div class="form-floating mb-3">
+                    <div class="input-group mb-3">
+                        <span class="input-group-text">$</span>
                         <input 
                             class="form-control"
                             name="new-loan-minimum" 
@@ -196,7 +196,6 @@ export const DebtCalculator = {
                             v-model="newLoan.minimum" 
                             placeholder="Minimum"
                         >
-                        <label for="new-loan-minimum" class="form-label">Minimum</label>
                     </div>            
                 </div>
                 <div class="modal-footer">
