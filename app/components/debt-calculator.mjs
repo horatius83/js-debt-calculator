@@ -1,5 +1,4 @@
 import { Loan } from "../modules/paymentPlan.mjs";
-import { LoanService } from "../services/loan-service.mjs";
 
 class NewLoanState {
     constructor() {
@@ -45,7 +44,7 @@ function deleteLoan(loanName, loans) {
     const index = loans.findIndex(x => x.name === loanName);
 
     if (index >= 0) {
-        loans.splice(index, 2);
+        loans.splice(index, 1);
     }
     return loans;
 }
@@ -123,7 +122,7 @@ export const DebtCalculator = {
 /* html */`
 <div>
     <h2>Debt Calculator</h2>
-    <table id="loans-table" class="striped">
+    <table id="loans-table" class="table">
         <thead>
             <th class="loans-table-name-column">Name</th>
             <th class="loans-table-principal-column">Principal</th>
@@ -131,21 +130,21 @@ export const DebtCalculator = {
             <th class="loans-table-minimum-column">Minimum</th>
             <th class="loans-table-delete-column"></th>
         </thead>
-        <tr v-for="loan in loans">
-            <td data-label="Name">{{ loan.name }}</td>
-            <td data-label="Principal">{{ asCurrency(loan.principal) }}</td>
-            <td data-label="Interest">{{ asPercentage(loan.interest) }}</td>
-            <td data-label="Minimum">{{ asCurrency(loan.minimum) }}</td>
-            <td>
-                <div class="row">
-                    <button class="secondary" v-on:click="removeLoan(loan.name)">Delete</button>
-                    <button class="inverse">Edit</button>
-                </div>
-            </td>
-        </tr>
+        <tbody>
+            <tr v-for="loan in loans">
+                <td data-label="Name">{{ loan.name }}</td>
+                <td data-label="Principal">{{ asCurrency(loan.principal) }}</td>
+                <td data-label="Interest">{{ asPercentage(loan.interest) }}</td>
+                <td data-label="Minimum">{{ asCurrency(loan.minimum) }}</td>
+                <td>
+                    <button class="btn" v-on:click="removeLoan(loan.name)">Delete</button>
+                    <button class="btn">Edit</button>
+                </td>
+            </tr>
+        </tbody>
     </table>
-    <div id="summary" class="container">
-        <div class="row">
+    <div id="summary">
+        <div class="mb-3">
             <label for="new-loan-name">Name</label>
             <input 
                 name="new-loan-name" 
@@ -170,8 +169,8 @@ export const DebtCalculator = {
                 id="new-loan-minimum" 
                 v-model="newLoan.minimum" 
             >
-            <button class="primary" v-on:click="addLoan">Create New Loan</button>
-            <button class="secondary" v-on:click="clear()">Cancel</button>
+            <button class="btn" v-on:click="addLoan">Create New Loan</button>
+            <button class="btn" v-on:click="clear()">Cancel</button>
         </div>
     </div>
 </div>
