@@ -138,7 +138,7 @@ export const DebtCalculator = {
                 <td data-label="Interest">{{ asPercentage(loan.interest) }}</td>
                 <td data-label="Minimum">{{ asCurrency(loan.minimum) }}</td>
                 <td>
-                    <div class="btn-group" role="group">
+                    <div class="btn-group d-flex justify-content-end" role="group">
                         <button type="button" class="btn btn-secondary">Edit</button>
                         <button type="button" class="btn btn-danger" v-on:click="removeLoan(loan.name)">Delete</button>
                     </div>
@@ -155,9 +155,18 @@ export const DebtCalculator = {
             <span class="input-group-text" id="years-to-payoff-display">Years to Payoff</span>
             <input type="text" readonly class="form-control" placeholder="Years to Payoff" aria-label="Years to Payoff" aria-describedby="years-to-payoff-display">
         </div>
-        <div class="col mb-3">
+        <div class="col mb-3 btn-group">
             <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#new-loan-modal">
                 Add New Loan 
+            </button>
+            <button type="button" class="btn btn-success">
+                Generate Payment Plan 
+            </button>
+            <button type="button" class="btn btn-primary">
+                Save Loans 
+            </button>
+            <button type="button" class="btn btn-primary">
+                Load Loans 
             </button>
         </div>
     </div>
@@ -210,8 +219,8 @@ export const DebtCalculator = {
                     </div>            
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" v-on:click="clear">Close</button>
                     <button type="button" class="btn btn-primary" data-bs-dismiss="modal" v-on:click="addLoan">Save changes</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" v-on:click="clear">Close</button>
                 </div>
             </div>
         </div>
