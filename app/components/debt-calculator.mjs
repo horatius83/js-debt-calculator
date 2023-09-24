@@ -100,6 +100,7 @@ export const DebtCalculator = {
         },
 
         addLoan() {
+            debugger;
             const loan = getLoan(
                 this.newLoan.name, 
                 this.newLoan.principal, 
@@ -199,8 +200,8 @@ export const DebtCalculator = {
                     </div>            
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" v-on:click="addLoan">Close</button>
-                    <button type="button" class="btn btn-primary" v-on:click="clear">Save changes</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" v-on:click="clear">Close</button>
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal" v-on:click="addLoan">Save changes</button>
                 </div>
             </div>
         </div>
