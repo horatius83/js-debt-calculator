@@ -122,7 +122,7 @@ export const DebtCalculator = {
 /* html */`
 <div>
     <h2>Debt Calculator</h2>
-    <table id="loans-table" class="table">
+    <table id="loans-table" class="table table-striped">
         <thead>
             <th class="loans-table-name-column">Name</th>
             <th class="loans-table-principal-column">Principal</th>
@@ -137,42 +137,75 @@ export const DebtCalculator = {
                 <td data-label="Interest">{{ asPercentage(loan.interest) }}</td>
                 <td data-label="Minimum">{{ asCurrency(loan.minimum) }}</td>
                 <td>
-                    <button class="btn" v-on:click="removeLoan(loan.name)">Delete</button>
-                    <button class="btn">Edit</button>
+                    <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-secondary">Edit</button>
+                        <button type="button" class="btn btn-danger" v-on:click="removeLoan(loan.name)">Delete</button>
+                    </div>
                 </td>
             </tr>
         </tbody>
     </table>
     <div id="summary">
-        <div class="mb-3">
-            <label for="new-loan-name">Name</label>
-            <input 
-                name="new-loan-name" 
-                id="new-loan-name" 
-                v-model="newLoan.name" 
-                required="required" 
-            >
-            <label for="new-loan-principal">Principal</label>
-            <input 
-                name="new-loan-principal" 
-                v-model="newLoan.principal" 
-            >
-            <label for="new-loan-interest">Interest</label>
-            <input 
-                name="new-loan-interest" 
-                id="new-loan-interest" 
-                v-model="newLoan.interest" 
-            >
-            <label for="new-loan-minimum">Minimum</label>
-            <input 
-                name="new-loan-minimum" 
-                id="new-loan-minimum" 
-                v-model="newLoan.minimum" 
-            >
-            <button class="btn" v-on:click="addLoan">Create New Loan</button>
-            <button class="btn" v-on:click="clear()">Cancel</button>
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#new-loan-modal">
+            Add New Loan 
+        </button>
+    </div>
+    <div class="modal" tabindex="-1" id="new-loan-modal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">New Loan</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-floating mb-3">
+                        <input 
+                            class="form-control"
+                            name="new-loan-name" 
+                            id="new-loan-name" 
+                            v-model="newLoan.name" 
+                            required="required" 
+                            placeholder="Name"
+                        >
+                        <label for="new-loan-name" class="form-label">Name</label>
+                    </div>
+                    <div class="form-floating mb-3">
+                        <input 
+                            class="form-control"
+                            name="new-loan-principal" 
+                            v-model="newLoan.principal" 
+                            placeholder="Principal"
+                        >
+                        <label for="new-loan-principal" class="form-label">Principal</label>
+                    </div>
+                    <div class="form-floating mb-3">
+                        <input 
+                            class="form-control"
+                            name="new-loan-interest" 
+                            id="new-loan-interest" 
+                            v-model="newLoan.interest" 
+                            placeholder="Interest"
+                        >
+                        <label for="new-loan-interest" class="form-label">Interest</label>
+                    </div>
+                    <div class="form-floating mb-3">
+                        <input 
+                            class="form-control"
+                            name="new-loan-minimum" 
+                            id="new-loan-minimum" 
+                            v-model="newLoan.minimum" 
+                            placeholder="Minimum"
+                        >
+                        <label for="new-loan-minimum" class="form-label">Minimum</label>
+                    </div>            
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" v-on:click="addLoan">Close</button>
+                    <button type="button" class="btn btn-primary" v-on:click="clear">Save changes</button>
+                </div>
+            </div>
+        </div>
         </div>
     </div>
-</div>
 `
 };
