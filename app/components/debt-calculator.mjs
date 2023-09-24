@@ -146,10 +146,20 @@ export const DebtCalculator = {
             </tr>
         </tbody>
     </table>
-    <div id="summary" class="d-grid gap-2 d-md-flex justify-content-md-end">
-        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#new-loan-modal">
-            Add New Loan 
-        </button>
+    <div id="summary" class="row">
+        <div class="col input-group mb-3">
+            <span class="input-group-text" id="minimum-required-payment-display">Minimum Required Payment $</span>
+            <input type="text" readonly class="form-control" placeholder="Minimum Required Payment" aria-label="Minimum Required Payment" aria-describedby="minimum-required-payment-display">
+        </div>
+        <div class="col input-group mb-3">
+            <span class="input-group-text" id="years-to-payoff-display">Years to Payoff</span>
+            <input type="text" readonly class="form-control" placeholder="Years to Payoff" aria-label="Years to Payoff" aria-describedby="years-to-payoff-display">
+        </div>
+        <div class="col mb-3">
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#new-loan-modal">
+                Add New Loan 
+            </button>
+        </div>
     </div>
     <div class="modal" tabindex="-1" id="new-loan-modal">
         <div class="modal-dialog">
