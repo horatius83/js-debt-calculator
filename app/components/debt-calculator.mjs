@@ -80,9 +80,7 @@ export const DebtCalculator = {
          * @returns {string} - value formatted as a currency ($3.14)
          */
         asCurrency(value) {
-            const x = Math.round(value * 100)
-            const y = x / 100.0;
-            return `$${y.toFixed(2)}`;
+            return accounting.formatMoney(value);
         },
 
         /**
@@ -124,7 +122,7 @@ export const DebtCalculator = {
     },
     computed: {
         /**
-         * returns {number} - the sum of all the principal amounts
+         * @returns {number} - the sum of all the principal amounts
          */
         totalPrincipal: function() {
             return this.loans.map(x => x.principal).reduce((acc, x) => acc + x, 0);
@@ -139,62 +137,73 @@ export const DebtCalculator = {
     template: 
 /* html */`
 <div class="container">
-    <h2>Debt Calculator</h2>
-    <table id="loans-table" class="table table-striped">
-        <thead>
-            <th class="loans-table-name-column">Name</th>
-            <th class="loans-table-principal-column">Principal</th>
-            <th class="loans-table-interest-column">Interest</th>
-            <th class="loans-table-minimum-column">Minimum</th>
-            <th class="loans-table-delete-column"></th>
-        </thead>
-        <tbody class="table-group-divider">
-            <tr v-for="loan in loans">
-                <td data-label="Name">{{ loan.name }}</td>
-                <td data-label="Principal">{{ asCurrency(loan.principal) }}</td>
-                <td data-label="Interest">{{ asPercentage(loan.interest) }}</td>
-                <td data-label="Minimum">{{ asCurrency(loan.minimum) }}</td>
+    <header>
+        <h2>Debt Calculator</h2>
+    </header>
+    <div class="container" id="loans-table">
+        <table id="loans-table" class="table table-striped">
+            <thead>
+                <th class="loans-table-name-column">Name</th>
+                <th class="loans-table-principal-column">Principal</th>
+                <th class="loans-table-interest-column">Interest</th>
+                <th class="loans-table-minimum-column">Minimum</th>
+                <th class="loans-table-delete-column"></th>
+            </thead>
+            <tbody class="table-group-divider">
+                <tr v-for="loan in loans">
+                    <td data-label="Name">{{ loan.name }}</td>
+                    <td data-label="Principal">{{ asCurrency(loan.principal) }}</td>
+                    <td data-label="Interest">{{ asPercentage(loan.interest) }}</td>
+                    <td data-label="Minimum">{{ asCurrency(loan.minimum) }}</td>
+                    <td>
+                        <div class="btn-group d-flex justify-content-end" role="group">
+                            <button type="button" class="btn btn-secondary">Edit</button>
+                            <button type="button" class="btn btn-danger" v-on:click="removeLoan(loan.name)">Delete</button>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+            <tfoot class="table-group-divider">
+                <td>Total</td>
+                <td>{{ asCurrency(totalPrincipal) }}</td>
+                <td /> 
+                <td>{{ asCurrency(totalMinimum) }}</td>
                 <td>
-                    <div class="btn-group d-flex justify-content-end" role="group">
-                        <button type="button" class="btn btn-secondary">Edit</button>
-                        <button type="button" class="btn btn-danger" v-on:click="removeLoan(loan.name)">Delete</button>
+                    <div class="btn-group d-flex justify-content-end">
+                        <button type="button" class="btn btn-success">
+                            Save Loans 
+                        </button>
+                        <button type="button" class="btn btn-info">
+                            Load Loans 
+                        </button>
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#new-loan-modal">
+                            Add New Loan 
+                        </button>
                     </div>
                 </td>
-            </tr>
-        </tbody>
-        <tfoot class="table-group-divider">
-            <td>Total</td>
-            <td>{{ asCurrency(totalPrincipal) }}</td>
-            <td /> 
-            <td>{{ asCurrency(totalMinimum) }}</td>
-            <td>
-                <div class="btn-group d-flex justify-content-end">
-                    <button type="button" class="btn btn-primary">
-                        Save Loans 
-                    </button>
-                    <button type="button" class="btn btn-primary">
-                        Load Loans 
-                    </button>
-                </div>
-            </td>
-        </tfoot>
-    </table>
-    <div id="summary" class="row">
-        <div class="col input-group mb-6">
-            <span class="input-group-text" id="years-to-payoff-display">Years to Payoff</span>
-            <input type="text" readonly class="form-control" placeholder="Years to Payoff" aria-label="Years to Payoff" aria-describedby="years-to-payoff-display">
-        </div>
-        <div class="col mb-3 btn-group">
-            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#new-loan-modal">
-                Add New Loan 
-            </button>
-        </div>
-        <div class="col mb-3 btn-group">
-            <button type="button" class="btn btn-success">
-                Generate Payment Plan 
-            </button>
+            </tfoot>
+        </table>
+    </div>
+    <div class="container">
+        <div class="mb-3">
+            <label for="avalanche-select" class="form-label">Payment Strategy</label>
+            <select class="form-select" aria-label="Strategy Selection" id="avalanche-select">
+                <option value="avalanche" selected>Avalanche (Highest Interest First)</option>
+                <option value="snowball">Snowball (Lowest Principal First)</option>
+            </select>
+            <label for="total-monthly-payment" class="form-label">Total Monthly Payment</label>
+            <input class="form-control" type="text" id="total-monthly-payment">
+            <label for="years-range" class="form-label">Maximum Months to Pay Off Loans</label>
+            <input type="range" class="form-range" min="3" max="240" step="3" id="years-range">
+            <div class="col mb-3 btn-group">
+                <button type="button" class="btn btn-success">
+                    Generate Payment Plan 
+                </button>
+            </div>
         </div>
     </div>
+
+    <!-- New Loan Popup -->
     <div class="modal" tabindex="-1" id="new-loan-modal">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -249,7 +258,7 @@ export const DebtCalculator = {
                 </div>
             </div>
         </div>
-        </div>
     </div>
+</div>
 `
 };
