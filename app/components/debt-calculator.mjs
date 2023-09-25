@@ -9,6 +9,8 @@ class NewLoanState {
     }
 }
 
+const MAX_YEARS = 20;
+
 class DebtCalculatorState {
     constructor() {
         /** @type {Array<Loan>} */
@@ -31,6 +33,7 @@ class DebtCalculatorState {
             new Loan("Sears", 3797.66, 25.44, 122)
         ];
         this.newLoan = new NewLoanState();
+        this.paymentPeriodInYears = MAX_YEARS;
     }
 }
 
@@ -119,6 +122,20 @@ export const DebtCalculator = {
             this.newLoan.minimum = "";
         }
     },
+    computed: {
+        /**
+         * returns {number} - the sum of all the principal amounts
+         */
+        totalPrincipal: function() {
+            return this.loans.map(x => x.principal).reduce((acc, x) => acc + x, 0);
+        },
+        /**
+         * @returns {number} - the minimum payment required every month
+         */
+        totalMinimum: function() {
+            return this.loans.map(x => x.minimum).reduce((acc, x) => acc + x, 0);
+        }
+    },
     template: 
 /* html */`
 <div>
@@ -131,7 +148,7 @@ export const DebtCalculator = {
             <th class="loans-table-minimum-column">Minimum</th>
             <th class="loans-table-delete-column"></th>
         </thead>
-        <tbody>
+        <tbody class="table-group-divider">
             <tr v-for="loan in loans">
                 <td data-label="Name">{{ loan.name }}</td>
                 <td data-label="Principal">{{ asCurrency(loan.principal) }}</td>
@@ -145,13 +162,25 @@ export const DebtCalculator = {
                 </td>
             </tr>
         </tbody>
+        <tfoot>
+            <td>Total</td>
+            <td>Principal: {{ asCurrency(totalPrincipal) }}</td>
+            <td /> 
+            <td>Minimum: {{ asCurrency(totalMinimum) }}</td>
+            <td>
+                <div class="btn-group d-flex justify-content-end">
+                    <button type="button" class="btn btn-primary">
+                        Save Loans 
+                    </button>
+                    <button type="button" class="btn btn-primary">
+                        Load Loans 
+                    </button>
+                </div>
+            </td>
+        </tfoot>
     </table>
     <div id="summary" class="row">
-        <div class="col input-group mb-3">
-            <span class="input-group-text" id="minimum-required-payment-display">Minimum Required Payment $</span>
-            <input type="text" readonly class="form-control" placeholder="Minimum Required Payment" aria-label="Minimum Required Payment" aria-describedby="minimum-required-payment-display">
-        </div>
-        <div class="col input-group mb-3">
+        <div class="col input-group mb-6">
             <span class="input-group-text" id="years-to-payoff-display">Years to Payoff</span>
             <input type="text" readonly class="form-control" placeholder="Years to Payoff" aria-label="Years to Payoff" aria-describedby="years-to-payoff-display">
         </div>
@@ -159,14 +188,10 @@ export const DebtCalculator = {
             <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#new-loan-modal">
                 Add New Loan 
             </button>
+        </div>
+        <div class="col mb-3 btn-group">
             <button type="button" class="btn btn-success">
                 Generate Payment Plan 
-            </button>
-            <button type="button" class="btn btn-primary">
-                Save Loans 
-            </button>
-            <button type="button" class="btn btn-primary">
-                Load Loans 
             </button>
         </div>
     </div>
