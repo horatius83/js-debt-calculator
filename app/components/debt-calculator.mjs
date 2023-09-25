@@ -138,7 +138,7 @@ export const DebtCalculator = {
     },
     template: 
 /* html */`
-<div>
+<div class="container">
     <h2>Debt Calculator</h2>
     <table id="loans-table" class="table table-striped">
         <thead>
@@ -162,11 +162,11 @@ export const DebtCalculator = {
                 </td>
             </tr>
         </tbody>
-        <tfoot>
+        <tfoot class="table-group-divider">
             <td>Total</td>
-            <td>Principal: {{ asCurrency(totalPrincipal) }}</td>
+            <td>{{ asCurrency(totalPrincipal) }}</td>
             <td /> 
-            <td>Minimum: {{ asCurrency(totalMinimum) }}</td>
+            <td>{{ asCurrency(totalMinimum) }}</td>
             <td>
                 <div class="btn-group d-flex justify-content-end">
                     <button type="button" class="btn btn-primary">
