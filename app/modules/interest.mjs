@@ -6,6 +6,9 @@
  * @returns {number} - payment amount per period to pay off the loan
  */
 export function getLoanPaymentAmount(principal, ratePerPeriod, numberofPeriods) {
+    if (ratePerPeriod === 0) {
+        return principal / numberofPeriods;
+    }
     return (ratePerPeriod * principal) / (1 - Math.pow(1 + ratePerPeriod, -1.0 * numberofPeriods));
 }
 

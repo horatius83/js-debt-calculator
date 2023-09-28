@@ -1,3 +1,4 @@
+import { getMinimumMonthlyPaymentWithinPeriod } from "../modules/interest.mjs";
 import { Loan } from "../modules/paymentPlan.mjs";
 
 class NewLoanState {
@@ -33,7 +34,7 @@ class DebtCalculatorState {
             new Loan("Sears", 3797.66, 25.44, 122)
         ];
         this.newLoan = new NewLoanState();
-        this.paymentPeriodInYears = MAX_YEARS;
+        this.paymentPeriodInMonths = 5 * 12;
     }
 }
 
@@ -101,7 +102,6 @@ export const DebtCalculator = {
         },
 
         addLoan() {
-            debugger;
             const loan = getLoan(
                 this.newLoan.name, 
                 this.newLoan.principal, 
@@ -131,8 +131,17 @@ export const DebtCalculator = {
          * @returns {number} - the minimum payment required every month
          */
         totalMinimum: function() {
-            return this.loans.map(x => x.minimum).reduce((acc, x) => acc + x, 0);
-        }
+            const r = this.loans
+            .map(x => getMinimumMonthlyPaymentWithinPeriod(x.principal, x.interest / 100.0, x.minimum, this.paymentPeriodInMonths))
+            .reduce((acc, x) => acc + x, 0);
+            console.log(r);
+            return r;
+            /*
+            return this.loans
+            .map(x => getMinimumMonthlyPaymentWithinPeriod(x.principal, x.interest / 100.0, x.minimum, this.paymentPeriodInMonths))
+            .reduce((acc, x) => acc + x, 0);
+            */
+        },
     },
     template: 
 /* html */`
@@ -193,8 +202,8 @@ export const DebtCalculator = {
             </select>
             <label for="total-monthly-payment" class="form-label">Total Monthly Payment</label>
             <input class="form-control" type="text" id="total-monthly-payment">
-            <label for="years-range" class="form-label">Maximum Months to Pay Off Loans</label>
-            <input type="range" class="form-range" min="3" max="240" step="3" id="years-range">
+            <label for="years-range" class="form-label">Repayment Period ({{ paymentPeriodInMonths }} Months) </label>
+            <input type="range" class="form-range" min="3" max="240" step="3" id="years-range" v-model=paymentPeriodInMonths>
             <div class="col mb-3 btn-group">
                 <button type="button" class="btn btn-success">
                     Generate Payment Plan 
