@@ -35,6 +35,7 @@ class DebtCalculatorState {
         ];
         this.newLoan = new NewLoanState();
         this.paymentPeriodInMonths = 5 * 12;
+        this.totalMonthlyPaymentInput = "";
     }
 }
 
@@ -68,6 +69,20 @@ function getLoan(name, principal, interest, minimum) {
     if (p && i && m && name) {
         return new Loan(name, p, i, m);
     }
+}
+
+/**
+ * Set a function call after a certain number of ms after the last time the function is called
+ * @param {() => void} func - function to execute after an amount of time has passed
+ * @param {number=} timeoutInMs - time in ms to wait before executing the function
+ * @returns {() => void}
+ */
+function debounce(func, timeoutInMs=300) {
+    let timer;
+    return () => {
+        clearTimeout(timer);
+        timer = setTimeout(func, timeoutInMs);
+    };
 }
 
 export const DebtCalculator = {
@@ -153,8 +168,19 @@ export const DebtCalculator = {
             const r = this.loans
             .map(x => getMinimumMonthlyPaymentWithinPeriod(x.principal, x.interest / 100.0, x.minimum, this.paymentPeriodInMonths))
             .reduce((acc, x) => acc + x, 0);
-            console.log(r);
             return r;
+        },
+        totalMinimumToNearestDollar: function() {
+            return Math.ceil(this.totalMinimum);
+        },
+        maxMonths: () => MAX_YEARS * 12,
+        totalMonthlyPayment() {
+            return Number(this.totalMonthlyPaymentInput);
+        },
+        validateTotalMonthlyPayment() {
+            if (!this.totalMonthlyPayment) {
+                console.error('totalMonthlyPayment is invalid');
+            }
         }
     },
     template: 
@@ -217,10 +243,17 @@ export const DebtCalculator = {
             <label for="total-monthly-payment" class="form-label">Total Monthly Payment</label>
             <div class="input-group mb-3">
                 <span class="input-group-text">$</span>
-                <input class="form-control" type="text" id="total-monthly-payment" :placeholder="totalMinimum">
+                <input 
+                    class="form-control" 
+                    type="text" 
+                    id="total-monthly-payment" 
+                    :value="totalMonthlyPaymentInput"
+                    :placeholder="totalMinimumToNearestDollar"
+                    @keyup="validateTotalMonthlyPayment"
+                >
             </div>
             <label for="years-range" class="form-label">Repayment Period ({{ asYearsAndMonths(paymentPeriodInMonths) }})</label>
-            <input type="range" class="form-range" min="3" max="240" step="3" id="years-range" v-model=paymentPeriodInMonths>
+            <input type="range" class="form-range" min="3" :max=maxMonths step="3" id="years-range" v-model=paymentPeriodInMonths>
             <div class="col mb-3 btn-group">
                 <button type="button" class="btn btn-success">
                     Generate Payment Plan 
