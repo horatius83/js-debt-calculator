@@ -94,6 +94,25 @@ export const DebtCalculator = {
         },
 
         /**
+         * Convert number of months into a string of years and months
+         * @param {number} months
+         * @returns {string} - X years Y months
+         */
+        asYearsAndMonths(months) {
+            const years = Math.floor(months / 12);
+            const remainingMonths = months % 12;
+            const yearsLabel = years !== 1 ? 'years' : 'year';
+            const monthsLabel = remainingMonths !== 1 ? 'months': 'month';
+            if (years === 0) {
+                return `${remainingMonths} ${monthsLabel}`;
+            }
+            if (remainingMonths === 0) {
+                return `${years} ${yearsLabel}`
+            }
+            return `${years} ${yearsLabel} ${remainingMonths} ${monthsLabel}`;
+        },
+
+        /**
          * Delete a Loan
          * @param { string } loanName - name of th eloan
          */
@@ -136,12 +155,7 @@ export const DebtCalculator = {
             .reduce((acc, x) => acc + x, 0);
             console.log(r);
             return r;
-            /*
-            return this.loans
-            .map(x => getMinimumMonthlyPaymentWithinPeriod(x.principal, x.interest / 100.0, x.minimum, this.paymentPeriodInMonths))
-            .reduce((acc, x) => acc + x, 0);
-            */
-        },
+        }
     },
     template: 
 /* html */`
@@ -201,8 +215,11 @@ export const DebtCalculator = {
                 <option value="snowball">Snowball (Lowest Principal First)</option>
             </select>
             <label for="total-monthly-payment" class="form-label">Total Monthly Payment</label>
-            <input class="form-control" type="text" id="total-monthly-payment">
-            <label for="years-range" class="form-label">Repayment Period ({{ paymentPeriodInMonths }} Months) </label>
+            <div class="input-group mb-3">
+                <span class="input-group-text">$</span>
+                <input class="form-control" type="text" id="total-monthly-payment" :placeholder="totalMinimum">
+            </div>
+            <label for="years-range" class="form-label">Repayment Period ({{ asYearsAndMonths(paymentPeriodInMonths) }})</label>
             <input type="range" class="form-range" min="3" max="240" step="3" id="years-range" v-model=paymentPeriodInMonths>
             <div class="col mb-3 btn-group">
                 <button type="button" class="btn btn-success">
