@@ -1,5 +1,6 @@
 import { getMinimumMonthlyPaymentWithinPeriod } from "../modules/interest.mjs";
 import { Loan } from "../modules/paymentPlan.mjs";
+import { debounce, deleteItem, getLoan } from "../modules/util.mjs";
 
 class NewLoanState {
     constructor() {
@@ -37,52 +38,6 @@ class DebtCalculatorState {
         this.paymentPeriodInMonths = 5 * 12;
         this.totalMonthlyPaymentInput = "";
     }
-}
-
-/**
- * Delete a loan by name
- * @param {string} loanName - the name of the loan
- * @param {Loan[]} loans - an array of loans that may contain a loan with the loan name
- * @returns {Loan[]} - Either the loans array without loan or the original array if loan was not found
- */
-function deleteLoan(loanName, loans) {
-    const index = loans.findIndex(x => x.name === loanName);
-
-    if (index >= 0) {
-        loans.splice(index, 1);
-    }
-    return loans;
-}
-
-/**
- * Attempt to create a loan from a name, principal, interest, and minimum value
- * @param {string} name - the name of the loan
- * @param {string} principal - the amount of money owed on the loan
- * @param {string} interest - the interest on the loan
- * @param {string} minimum - the minimum monthly payment on the loan
- * @returns {Loan | undefined} - Either a Loan if the values are valid or undefined
- */
-function getLoan(name, principal, interest, minimum) {
-    const p = Number(principal);
-    const i = Number(interest);
-    const m = Number(minimum);
-    if (p && i && m && name) {
-        return new Loan(name, p, i, m);
-    }
-}
-
-/**
- * Set a function call after a certain number of ms after the last time the function is called
- * @param {() => void} func - function to execute after an amount of time has passed
- * @param {number=} timeoutInMs - time in ms to wait before executing the function
- * @returns {() => void}
- */
-function debounce(func, timeoutInMs=300) {
-    let timer;
-    return () => {
-        clearTimeout(timer);
-        timer = setTimeout(func, timeoutInMs);
-    };
 }
 
 export const DebtCalculator = {
@@ -132,7 +87,7 @@ export const DebtCalculator = {
          * @param { string } loanName - name of th eloan
          */
         removeLoan(loanName) {
-            this.loans = deleteLoan(loanName, this.loans);
+            this.loans = deleteItem(this.loans, x => x.name == loanName);
         },
 
         addLoan() {
@@ -146,7 +101,12 @@ export const DebtCalculator = {
                 this.clear();
             }
         },
-
+        validateTotalMonthlyPayment: debounce(function() {
+            debugger;
+            if (!this.totalMonthlyPayment) {
+                console.error('totalMonthlyPayment is invalid');
+            }
+        }, 1000),
         clear() {
             this.newLoan.name = ""; 
             this.newLoan.principal = ""; 
@@ -159,7 +119,9 @@ export const DebtCalculator = {
          * @returns {number} - the sum of all the principal amounts
          */
         totalPrincipal: function() {
-            return this.loans.map(x => x.principal).reduce((acc, x) => acc + x, 0);
+            return this.loans
+            .map(x => x.principal)
+            .reduce((acc, x) => acc + x, 0);
         },
         /**
          * @returns {number} - the minimum payment required every month
@@ -176,11 +138,6 @@ export const DebtCalculator = {
         maxMonths: () => MAX_YEARS * 12,
         totalMonthlyPayment() {
             return Number(this.totalMonthlyPaymentInput);
-        },
-        validateTotalMonthlyPayment() {
-            if (!this.totalMonthlyPayment) {
-                console.error('totalMonthlyPayment is invalid');
-            }
         }
     },
     template: 
