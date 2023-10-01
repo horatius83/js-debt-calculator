@@ -102,11 +102,10 @@ export const DebtCalculator = {
             }
         },
         validateTotalMonthlyPayment: debounce(function() {
-            debugger;
-            if (!this.totalMonthlyPayment) {
+            if (!this.totalMonthlyPayment || this.totalMonthlyPayment < this.totalMinimum) {
                 console.error('totalMonthlyPayment is invalid');
             }
-        }, 1000),
+        }, 300),
         clear() {
             this.newLoan.name = ""; 
             this.newLoan.principal = ""; 
@@ -204,7 +203,7 @@ export const DebtCalculator = {
                     class="form-control" 
                     type="text" 
                     id="total-monthly-payment" 
-                    :value="totalMonthlyPaymentInput"
+                    v-model="totalMonthlyPaymentInput"
                     :placeholder="totalMinimumToNearestDollar"
                     @keyup="validateTotalMonthlyPayment"
                 >
