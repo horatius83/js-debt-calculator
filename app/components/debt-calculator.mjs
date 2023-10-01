@@ -139,6 +139,21 @@ export const DebtCalculator = {
         maxMonths: () => MAX_YEARS * 12,
         totalMonthlyPayment() {
             return Number(this.totalMonthlyPaymentInput);
+        },
+        cannotAddNewLoan() {
+            if (!this.newLoan.name) {
+                return true;
+            }
+            if (!Number(this.newLoan.principal)) {
+                return true;
+            }
+            if (!Number(this.newLoan.interest)) {
+                return true;
+            }
+            if (!Number(this.newLoan.minimum)) {
+                return true;
+            }
+            return false;
         }
     },
     template: 
@@ -271,7 +286,13 @@ export const DebtCalculator = {
                     </div>            
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal" v-on:click="addLoan">Save changes</button>
+                    <button 
+                        type="button" 
+                        class="btn btn-primary" 
+                        data-bs-dismiss="modal" 
+                        v-on:click="addLoan"
+                        :disabled="cannotAddNewLoan"
+                    >Save changes</button>
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" v-on:click="clear">Close</button>
                 </div>
             </div>
