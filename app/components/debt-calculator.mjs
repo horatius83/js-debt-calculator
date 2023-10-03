@@ -107,12 +107,46 @@ export const DebtCalculator = {
             } else {
                 this.$refs.totalMonthlyPaymentInputRef.classList.remove('is-invalid');
             }
-        }, 300),
+        }),
+        validateNewLoanName: debounce(function() {
+            if (!this.newLoan.name) {
+                this.$refs.newLoanNameRef.classList.add('is-invalid');
+            } else {
+                this.$refs.newLoanNameRef.classList.remove('is-invalid');
+            }
+        }),
+        validateNewLoanPrincipal: debounce(function() {
+            const p = Number(this.newLoan.principal);
+            if (p === NaN || p <= 0) {
+                this.$refs.newLoanPrincipalRef.classList.add('is-invalid');
+            } else {
+                this.$refs.newLoanPrincipalRef.classList.remove('is-invalid');
+            }
+        }),
+        validateNewLoanInterest: debounce(function() {
+            const i = Number(this.newLoan.interest);
+            if (i === NaN || i < 0) {
+                this.$refs.newLoanInterestRef.classList.add('is-invalid');
+            } else {
+                this.$refs.newLoanInterestRef.classList.remove('is-invalid');
+            }
+        }),
+        validateNewLoanMinimum: debounce(function() {
+            const m = Number(this.newLoan.minimum);
+             if (m === NaN || m < 0) {
+                this.$refs.newLoanMinimumRef.classList.add('is-invalid');
+            } else {
+                this.$refs.newLoanMinimumRef.classList.remove('is-invalid');
+            }
+        }),
         clear() {
-            this.newLoan.name = ""; 
-            this.newLoan.principal = ""; 
-            this.newLoan.interest = "";
-            this.newLoan.minimum = "";
+            for (const x of ['name', 'principal', 'interest', 'minimum']) {
+                this.newLoan[x] = "";
+            }
+
+            for (const r of ['Name', 'Principal', 'Interest', 'Minimum']) {
+                this.$refs[`newLoan${r}Ref`].classList.remove('is-invalid');
+            }
         }
     },
     computed: {
@@ -141,19 +175,13 @@ export const DebtCalculator = {
             return Number(this.totalMonthlyPaymentInput);
         },
         cannotAddNewLoan() {
-            if (!this.newLoan.name) {
-                return true;
-            }
-            if (!Number(this.newLoan.principal)) {
-                return true;
-            }
-            if (!Number(this.newLoan.interest)) {
-                return true;
-            }
-            if (!Number(this.newLoan.minimum)) {
-                return true;
-            }
-            return false;
+            const newLoan = getLoan(
+                this.newLoan.name, 
+                this.newLoan.principal,
+                this.newLoan.interest,
+                this.newLoan.minimum
+            );
+            return newLoan === undefined;
         }
     },
     template: 
@@ -225,6 +253,7 @@ export const DebtCalculator = {
                     :placeholder="totalMinimumToNearestDollar"
                     @keyup="validateTotalMonthlyPayment"
                 >
+                <div class="invalid-feedback">Value cannot be lower than {{ totalMinimumToNearestDollar }}</div>
             </div>
             <label for="years-range" class="form-label">Repayment Period ({{ asYearsAndMonths(paymentPeriodInMonths) }})</label>
             <input type="range" class="form-range" min="3" :max=maxMonths step="3" id="years-range" v-model=paymentPeriodInMonths>
@@ -249,40 +278,52 @@ export const DebtCalculator = {
                         <input 
                             class="form-control"
                             name="new-loan-name" 
-                            id="new-loan-name" 
+                            id="newLoanName" 
                             v-model="newLoan.name" 
-                            required="required" 
+                            ref="newLoanNameRef"
+                            @keyup="validateNewLoanName"
+                            required
                             placeholder="Name"
                         >
+                        <div class="invalid-feedback">Loan name is required</div>
                     </div>
                     <div class="input-group mb-3">
                         <span class="input-group-text">$</span>
                         <input 
                             class="form-control"
-                            name="new-loan-principal" 
+                            name="newLoanPrincipal" 
                             v-model="newLoan.principal" 
+                            ref="newLoanPrincipalRef"
+                            @keyup="validateNewLoanPrincipal"
                             placeholder="Principal"
                         >
+                        <div class="invalid-feedback">Loan principal is required</div>
                     </div>
                     <div class="input-group mb-3">
                         <input 
                             class="form-control"
                             name="new-loan-interest" 
-                            id="new-loan-interest" 
+                            id="newLoanInterest" 
                             v-model="newLoan.interest" 
+                            ref="newLoanInterestRef" 
+                            @keyup="validateNewLoanInterest"
                             placeholder="Interest"
                         >
                         <span class="input-group-text">%</span>
+                        <div class="invalid-feedback">Loan interest is required</div>
                     </div>
                     <div class="input-group mb-3">
                         <span class="input-group-text">$</span>
                         <input 
                             class="form-control"
                             name="new-loan-minimum" 
-                            id="new-loan-minimum" 
+                            id="newLoanMinimum" 
                             v-model="newLoan.minimum" 
+                            ref="newLoanMinimumRef" 
+                            @keyup="validateNewLoanMinimum"
                             placeholder="Minimum"
                         >
+                        <div class="invalid-feedback">Loan minimum is required</div>
                     </div>            
                 </div>
                 <div class="modal-footer">
