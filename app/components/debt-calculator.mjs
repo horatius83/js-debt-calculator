@@ -163,7 +163,7 @@ export const DebtCalculator = {
          */
         totalMinimum: function() {
             const r = this.loans
-            .map(x => getMinimumMonthlyPaymentWithinPeriod(x.principal, x.interest / 100.0, x.minimum, this.paymentPeriodInMonths))
+            .map(x => getMinimumMonthlyPaymentWithinPeriod(x.principal, x.interest / 100.0, x.minimum, this.paymentPeriodInMonths / 12.0))
             .reduce((acc, x) => acc + x, 0);
             return r;
         },
@@ -207,8 +207,8 @@ export const DebtCalculator = {
                     <td data-label="Minimum">{{ asCurrency(loan.minimum) }}</td>
                     <td>
                         <div class="btn-group d-flex justify-content-end" role="group">
-                            <button type="button" class="btn btn-secondary">Edit</button>
-                            <button type="button" class="btn btn-danger" v-on:click="removeLoan(loan.name)">Delete</button>
+                            <button type="button" class="btn btn-outline-secondary">Edit</button>
+                            <button type="button" class="btn btn-outline-danger" v-on:click="removeLoan(loan.name)">Delete</button>
                         </div>
                     </td>
                 </tr>
@@ -220,12 +220,6 @@ export const DebtCalculator = {
                 <td>{{ asCurrency(totalMinimum) }}</td>
                 <td>
                     <div class="btn-group d-flex justify-content-end">
-                        <button type="button" class="btn btn-success">
-                            Save Loans 
-                        </button>
-                        <button type="button" class="btn btn-info">
-                            Load Loans 
-                        </button>
                         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#new-loan-modal">
                             Add New Loan 
                         </button>
