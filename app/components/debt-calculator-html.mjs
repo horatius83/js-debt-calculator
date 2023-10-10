@@ -71,6 +71,9 @@ export const html = /* html */`
             </div>
         </div>
     </div>
+    <div v-if="paymentPlan" class="container">
+        <h1>Payment Plan</h1>
+    </div>
 
     <!-- New Loan Popup -->
     <div class="modal" tabindex="-1" id="new-loan-modal">
