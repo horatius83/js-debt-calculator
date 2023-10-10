@@ -72,7 +72,8 @@ export const html = /* html */`
         </div>
     </div>
     <div v-if="paymentPlan" class="container">
-        <h1>Payment Plan</h1>
+        <div v-for="repayment in paymentPlan.loanRepayments">
+        </div> 
     </div>
 
     <!-- New Loan Popup -->
