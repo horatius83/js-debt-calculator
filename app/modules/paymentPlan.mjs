@@ -20,14 +20,14 @@ export class Loan {
 export class Payment {
     /**
      * Represents a payment on a loan
-     * @param {number} paid 
-     * @param {number} remaining 
-     * @param {boolean} isDoubled 
+     * @param {number} paid - how much was paid
+     * @param {number} remaining - principal remaining
+     * @param {number=} multiplier - multiplier (2 = 200% payment, 3 = 300% etc.)
      */
-    constructor(paid, remaining, isDoubled) {
+    constructor(paid, remaining, multiplier) {
         this.paid = mustBeGreaterThan0(paid, 'Paid');
         this.remaining = mustBeGreaterThanOrEqualTo0(remaining, 'Remaining');
-        this.isDoubled = isDoubled;
+        this.multiplier = multiplier;
     }
 }
 
@@ -55,10 +55,10 @@ export class LoanRepayment {
     /**
      * Add a payment to this loan repayment plan
      * @param {number} amount - the amount available to pay on this loan
-     * @param {boolean=} isDoubled - is this a doubled payment
+     * @param {number=} multiplier - is this a doubled / tripled / etc. payment
      * @returns {number} leftover money if this loan is paid off
      */
-    makePayment(amount, isDoubled = false) {
+    makePayment(amount, multiplier) {
         mustBeGreaterThan0(amount, 'Amount');
         if (this.isPaidOff) {
             return amount;
@@ -71,11 +71,11 @@ export class LoanRepayment {
          */
         const createPayment = () => {
             if (newPrincipal > amount) {
-                return [0, new Payment(amount, newPrincipal - amount, isDoubled)];
+                return [0, new Payment(amount, newPrincipal - amount, multiplier)];
             } else {
                 const amountRemaining = amount - newPrincipal;
                 this.isPaidOff = true;
-                return [amountRemaining, new Payment(newPrincipal, 0, isDoubled)]
+                return [amountRemaining, new Payment(newPrincipal, 0, multiplier)]
             }
         }
         const [remainder, payment] = createPayment();
@@ -222,5 +222,33 @@ export class PaymentPlan {
                 bonus = lr.makePayment(minimumPayment + bonus);
             }
         }
+    }
+
+    /**
+     * Convert a payment plan into an output-friendly format with dates, the name of the loans and what to pay
+     * @param {Date} startDate - when the payment plan will begin
+     * @returns {Generator<[Date, Map<string, [number, number]>]>}
+     */
+    getPaymentPlanSeries(startDate) {
+        const longestPaymentPlan = Math.max(...this.loanRepayments.map(x => x.payments.length));
+        const startingMonth = startDate.getMonth();
+        const startingYear = startDate.getFullYear();
+        const pps = this.loanRepayments;
+
+        return (function* () {
+            for (let i=0; i<longestPaymentPlan; i++) {
+                const month = (startingMonth + i) % 12;
+                const year = startingYear + (i / 12);
+                const date = new Date(year, month, 15);
+                const m = new Map();
+
+                for(const pp of pps) {
+                    if (i < pp.payments.length) {
+                        m.set(pp.loan.name, [pp.payments[i].paid, pp.payments[i].multiplier]);
+                    }
+                }
+                yield [date, m];
+            }
+        })();
     }
 }

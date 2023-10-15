@@ -27,13 +27,13 @@ describe('paymentPlan', () => {
     describe('Payment', () => {
         describe('paid', () => {
             it('should be greater than 0', () => {
-                expect(() => new Payment(0, 100, false))
+                expect(() => new Payment(0, 100))
                 .toThrow(new Error('Paid (0) cannot be less than or equal to 0'));
             })
         }),
         describe('remaining', () => {
             it('should be greater than or equal to 0', () => {
-                expect(() => new Payment(100, -1, false))
+                expect(() => new Payment(100, -1))
                 .toThrow(new Error('Remaining (-1) cannot be less than 0'));
             });
         })
@@ -254,6 +254,34 @@ describe('paymentPlan', () => {
                 expect(pp.loanRepayments[1].payments[1].paid).toBeCloseTo(thirdPayment);
                 expect(pp.loanRepayments[1].payments[1].remaining).toBeCloseTo(thirdPrincipal - thirdPayment, PRECISION);
             })
+        }),
+        describe('getPaymentPlanSeries', () => {
+            it('should produce a generator that has dates, and a series of loan-names and payments', () => {
+                const loans = [new Loan("Test 1", 10000, 0.1, 10), new Loan("Test 2", 12000, 0.1, 10)];
+                const years = 6;
+                const pp = new PaymentPlan(loans, years, avalancheRepayment);
+                pp.createPlan(600);
+
+                const g = pp.getPaymentPlanSeries(new Date(1970, 0, 1));
+
+                const xs = Array.from(g);
+                expect(xs[0][0].getFullYear()).toBe(1970);
+                expect(xs[12][0].getFullYear()).toBe(1971);
+                expect(xs[0][0].getMonth()).toBe(0);
+                expect(xs[1][0].getMonth()).toBe(1);
+                expect(xs[12][0].getMonth()).toBe(0);
+                const entries = Array.from(xs[0][1].entries());
+                expect(entries.length).toBe(2);
+                expect(xs[0][1].has("Test 1")).toBeTrue();
+                expect(xs[0][1].has("Test 2")).toBeTrue();
+                const test1 = xs[0][1].get("Test 1");
+                expect(test1).toBeDefined();
+                /*
+                if (test1) {
+                    expect(test1[0]).toBe(pp.loanRepayments)
+                }
+                */
+            });
         })
     })
 }); 
