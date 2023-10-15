@@ -276,11 +276,20 @@ describe('paymentPlan', () => {
                 expect(xs[0][1].has("Test 2")).toBeTrue();
                 const test1 = xs[0][1].get("Test 1");
                 expect(test1).toBeDefined();
-                /*
-                if (test1) {
-                    expect(test1[0]).toBe(pp.loanRepayments)
+                /** @type { Map<string, Payment> } */
+                const lps = pp.loanRepayments.reduce((m, x, _, __) => m.set(x.loan.name, x.payments[0]), new Map());
+                if (test1 && lps) {
+                    expect(test1[0]).toBe(lps.get('Test 1')?.paid);
+                } else {
+                    throw new Error(`Either test1 (${test1}) or lps (${lps}) were invalid.`);
                 }
-                */
+                const test2 = xs[0][1].get("Test 2");
+                expect(test2).toBeDefined();
+                if (test2 && lps) {
+                    expect(test2[0]).toBe(lps.get('Test 2')?.paid);
+                } else {
+                    throw new Error(`Either test2 (${test2}) or lps (${lps}) were invalid.`);
+                }
             });
         })
     })
