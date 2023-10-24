@@ -50,7 +50,7 @@ export const DebtCalculator = {
 
         /**
          * Delete a Loan
-         * @param { string } loanName - name of the loan
+         * @param {string} loanName - name of the loan
          */
         removeLoan(loanName) {
             this.loans = deleteItem(this.loans, x => x.name == loanName);
@@ -67,6 +67,7 @@ export const DebtCalculator = {
                 this.clear();
             }
         },
+
         validateTotalMonthlyPayment: debounce(function() {
             if (!this.totalMonthlyPayment || this.totalMonthlyPayment < this.totalMinimum) {
                 this.$refs.totalMonthlyPaymentInputRef.classList.add('is-invalid');
