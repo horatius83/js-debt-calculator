@@ -34,5 +34,6 @@ export class DebtCalculatorState {
         this.paymentPeriodInMonths = 5 * 12;
         this.totalMonthlyPaymentInput = "";
         this.paymentPlan = undefined;
+        this.editLoanIndex = -1;
     }
 }

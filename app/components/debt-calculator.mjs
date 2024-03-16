@@ -56,6 +56,15 @@ export const DebtCalculator = {
             this.loans = deleteItem(this.loans, x => x.name == loanName);
         },
 
+        editLoan(loanName) {
+            const loanIndex = this.loans.findIndex(x => x.name === loanName);
+            if (loanIndex >= 0) {
+                this.editLoanIndex = loanIndex;
+            } else {
+                console.error(`editLoan: Loan ${loanName} could not be found`)
+            }
+        },
+
         addLoan() {
             const loan = getLoan(
                 this.newLoan.name, 
@@ -83,7 +92,7 @@ export const DebtCalculator = {
         }),
         validateNewLoanPrincipal: debounce(function() {
             const p = Number(this.newLoan.principal);
-            if (p === NaN || p <= 0) {
+            if (Number.isNaN(p) || p <= 0) {
                 this.$refs.newLoanPrincipalRef.classList.add('is-invalid');
             } else {
                 this.$refs.newLoanPrincipalRef.classList.remove('is-invalid');
@@ -91,7 +100,7 @@ export const DebtCalculator = {
         }),
         validateNewLoanInterest: debounce(function() {
             const i = Number(this.newLoan.interest);
-            if (i === NaN || i < 0) {
+            if (Number.isNaN(i) || i < 0) {
                 this.$refs.newLoanInterestRef.classList.add('is-invalid');
             } else {
                 this.$refs.newLoanInterestRef.classList.remove('is-invalid');
@@ -99,7 +108,7 @@ export const DebtCalculator = {
         }),
         validateNewLoanMinimum: debounce(function() {
             const m = Number(this.newLoan.minimum);
-             if (m === NaN || m < 0) {
+             if (Number.isNaN(m) || m < 0) {
                 this.$refs.newLoanMinimumRef.classList.add('is-invalid');
             } else {
                 this.$refs.newLoanMinimumRef.classList.remove('is-invalid');
@@ -137,7 +146,7 @@ export const DebtCalculator = {
             return r;
         },
         totalMinimumToNearestDollar: function() {
-            return Math.ceil(this.totalMinimum);
+            return Math.ceil(this.totalMinimum());
         },
         maxMonths: () => MAX_YEARS * 12,
         totalMonthlyPayment() {

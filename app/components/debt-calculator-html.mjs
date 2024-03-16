@@ -13,14 +13,14 @@ export const html = /* html */`
                 <th class="loans-table-delete-column"></th>
             </thead>
             <tbody class="table-group-divider">
-                <tr v-for="loan in loans">
+                <tr v-for="(loan, index) in loans" :key="index">
                     <td data-label="Name">{{ loan.name }}</td>
                     <td data-label="Principal">{{ asCurrency(loan.principal) }}</td>
                     <td data-label="Interest">{{ asPercentage(loan.interest) }}</td>
                     <td data-label="Minimum">{{ asCurrency(loan.minimum) }}</td>
                     <td>
                         <div class="btn-group d-flex justify-content-end" role="group">
-                            <button type="button" class="btn btn-outline-secondary">Edit</button>
+                            <button type="button" class="btn btn-outline-secondary" v-on:click="editLoan(loan.name)">Edit</button>
                             <button type="button" class="btn btn-outline-danger" v-on:click="removeLoan(loan.name)">Delete</button>
                         </div>
                     </td>
