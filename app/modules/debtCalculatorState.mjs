@@ -1,4 +1,4 @@
-import { Loan } from "./paymentPlan.mjs";
+import { Loan, PaymentPlan } from "./paymentPlan.mjs";
 
 export class NewLoanState {
     constructor() {
@@ -30,9 +30,13 @@ export class DebtCalculatorState {
             new Loan("Military Star", 799.68, 10.49, 45),
             new Loan("Sears", 3797.66, 25.44, 122)
         ];
+        /** @type {NewLoanState} */
         this.newLoan = new NewLoanState();
+        /** @type {number} */
         this.paymentPeriodInMonths = 5 * 12;
+        /** @type {string} */
         this.totalMonthlyPaymentInput = "";
+        /** @type {PaymentPlan|undefined} */
         this.paymentPlan = undefined;
         this.editLoanIndex = -1;
     }
