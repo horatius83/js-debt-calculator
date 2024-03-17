@@ -10,6 +10,14 @@ export const DebtCalculator = {
     data() {
         return new DebtCalculatorState();
     },
+    mounted() {
+        this.$refs.editLoanModal.addEventListener('show.bs.modal', (/** @type { MouseEvent }*/ event) => {
+            console.log('show.bs.modal');
+            const button = /** @type {HTMLElement} */ (event?.relatedTarget);
+            const index = Number(button?.getAttribute('data-loan-index'));
+            this.openEditLoanDialog(index);
+        });
+    },
     methods: {
         /**
          * Format a value as dollars and cents
