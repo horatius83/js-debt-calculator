@@ -20,7 +20,7 @@ export const html = /* html */`
                     <td data-label="Minimum">{{ asCurrency(loan.minimum) }}</td>
                     <td>
                         <div class="btn-group d-flex justify-content-end" role="group">
-                            <button type="button" class="btn btn-outline-secondary" v-on:click="editLoan(loan.name)">Edit</button>
+                            <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#edit-loan-modal" :data-loan-index="index">Edit</button>
                             <button type="button" class="btn btn-outline-danger" v-on:click="removeLoan(loan.name)">Delete</button>
                         </div>
                     </td>
@@ -146,6 +146,69 @@ export const html = /* html */`
                         :disabled="cannotAddNewLoan"
                     >Save changes</button>
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" v-on:click="clear">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Loan Modal -->
+    <div class="modal" tabindex="-1" id="edit-loan-modal" ref="editLoanModal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit "{{ currentEditLoan.name }}"</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="input-group mb-3">
+                        <span class="input-group-text">$</span>
+                        <input 
+                            class="form-control"
+                            name="edit-loan-principal" 
+                            id="editLoanPrincipal" 
+                            v-model="currentEditLoan.principal" 
+                            ref="editLoanPrincipalRef"
+                            @keyup="validateEditLoanPrincipal"
+                            placeholder="Principal"
+                        >
+                        <div class="invalid-feedback">Loan principal is required</div>
+                    </div>
+                    <div class="input-group mb-3">
+                        <input 
+                            class="form-control"
+                            name="edit-loan-interest" 
+                            id="editLoanInterest" 
+                            v-model="currentEditLoan.interest" 
+                            ref="editLoanInterestRef" 
+                            @keyup="validateEditLoanInterest"
+                            placeholder="Interest"
+                        >
+                        <span class="input-group-text">%</span>
+                        <div class="invalid-feedback">Loan interest is required</div>
+                    </div>
+                    <div class="input-group mb-3">
+                        <span class="input-group-text">$</span>
+                        <input 
+                            class="form-control"
+                            name="edit-loan-minimum" 
+                            id="editLoanMinimum" 
+                            v-model="currentEditLoan.minimum" 
+                            ref="editLoanMinimumRef" 
+                            @keyup="validateEditLoanMinimum"
+                            placeholder="Minimum"
+                        >
+                        <div class="invalid-feedback">Loan minimum is required</div>
+                    </div>            
+                </div>
+                <div class="modal-footer">
+                    <button 
+                        type="button" 
+                        class="btn btn-primary" 
+                        data-bs-dismiss="modal" 
+                        v-on:click="editLoan(currentEditLoan.index)"
+                        :disabled="cannotEditLoan"
+                    >Save changes</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" v-on:click="clearEdit">Close</button>
                 </div>
             </div>
         </div>

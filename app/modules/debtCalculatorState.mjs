@@ -9,6 +9,16 @@ export class NewLoanState {
     }
 }
 
+export class EditLoanState {
+    constructor() {
+        this.name = "";
+        this.principal = "";
+        this.interest = "";
+        this.minimum = "";
+        this.loanIndex = -1;
+    }
+}
+
 export class DebtCalculatorState {
     constructor() {
         /** @type {Array<Loan>} */
@@ -38,6 +48,7 @@ export class DebtCalculatorState {
         this.totalMonthlyPaymentInput = "";
         /** @type {PaymentPlan|undefined} */
         this.paymentPlan = undefined;
-        this.editLoanIndex = -1;
+        /** @type { EditLoanState } */
+        this.currentEditLoan = new EditLoanState();
     }
 }

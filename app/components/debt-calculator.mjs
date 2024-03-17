@@ -56,13 +56,48 @@ export const DebtCalculator = {
             this.loans = deleteItem(this.loans, x => x.name == loanName);
         },
 
-        editLoan(loanName) {
-            const loanIndex = this.loans.findIndex(x => x.name === loanName);
+        /**
+         * Open the edit loan dialog
+         * @param {number} loanIndex 
+         */
+        openEditLoanDialog(loanIndex) {
             if (loanIndex >= 0) {
-                this.editLoanIndex = loanIndex;
+                const loan = this.loans[loanIndex];
+                this.currentEditLoan.name = loan.name;
+                this.currentEditLoan.principal = loan.principal;
+                this.currentEditLoan.interest = loan.interest;
+                this.currentEditLoan.minimum = loan.minimum;
+                this.currentEditLoan.loanIndex = loanIndex;
             } else {
-                console.error(`editLoan: Loan ${loanName} could not be found`)
+                console.error(`openEditLoanDialog: Loan index ${loanIndex} is invalid`)
             }
+        },
+
+        /**
+         * Edit the loan
+         * @param {number} loanIndex 
+         */
+        editLoan(loanIndex) {
+            if (loanIndex >= 0) {
+                // Set the loan data
+                const loan = this.loans[loanIndex];
+                loan.principal = this.currentEditLoan.principal;
+                loan.interest = this.currentEditLoan.interest;
+                loan.minimum = this.currentEditLoan.minimum;
+
+                this.clearEdit();
+            } else {
+                console.error(`editLoan: Loan index ${loanIndex} is invalid`)
+            }           
+        },
+
+        clearEdit() {
+            // Clear out edit loan information
+            this.currentEditLoan.name = "";
+            this.currentEditLoan.principal = "";
+            this.currentEditLoan.interest = "";
+            this.currentEditLoan.minimum = "";
+            this.currentEditLoan.loanIndex = "";
         },
 
         addLoan() {
@@ -84,6 +119,7 @@ export const DebtCalculator = {
                 this.$refs.totalMonthlyPaymentInputRef.classList.remove('is-invalid');
             }
         }),
+
         validateNewLoanName: debounce(function() {
             if (!this.newLoan.name) {
                 this.$refs.newLoanNameRef.classList.add('is-invalid');
@@ -91,30 +127,30 @@ export const DebtCalculator = {
                 this.$refs.newLoanNameRef.classList.remove('is-invalid');
             }
         }),
-        validateNewLoanPrincipal: debounce(function() {
-            const p = Number(this.newLoan.principal);
-            if (Number.isNaN(p) || p <= 0) {
-                this.$refs.newLoanPrincipalRef.classList.add('is-invalid');
+
+        /**
+         * Validate a number value
+         * @param {HTMLElement} element - the element to add or remove the classes to
+         * @param {string} value - the value in the form
+         * @param { (value: number) => boolean } validator - returns true if valid value
+         */
+        validateNumber(element, value, validator) {
+            const x = Number(value);
+            if (Number.isNaN(x) || !validator(x)) {
+                element.classList.add('is-invalid');
             } else {
-                this.$refs.newLoanPrincipalRef.classList.remove('is-invalid');
+                element.classList.remove('is-invalid');
             }
-        }),
-        validateNewLoanInterest: debounce(function() {
-            const i = Number(this.newLoan.interest);
-            if (Number.isNaN(i) || i < 0) {
-                this.$refs.newLoanInterestRef.classList.add('is-invalid');
-            } else {
-                this.$refs.newLoanInterestRef.classList.remove('is-invalid');
-            }
-        }),
-        validateNewLoanMinimum: debounce(function() {
-            const m = Number(this.newLoan.minimum);
-             if (Number.isNaN(m) || m < 0) {
-                this.$refs.newLoanMinimumRef.classList.add('is-invalid');
-            } else {
-                this.$refs.newLoanMinimumRef.classList.remove('is-invalid');
-            }
-        }),
+        },
+
+        validateNewLoanPrincipal: debounce(function() { this.validateNumber(this.$refs.newLoanPrincipalRef, this.newLoan.principal, (x) => x > 0)}),
+        validateNewLoanInterest: debounce(function() { this.validateNumber(this.$refs.newLoanInterestRef, this.newLoan.interest, (x) => x >= 0)}),
+        validateNewLoanMinimum: debounce(function() { this.validateNumber(this.$refs.newLoanMinimumRef, this.newLoan.minimum, (x) => x >= 0)}),
+
+        validateEditLoanPrincipal: debounce(function() { this.validateNumber(this.$refs.editLoanPrincipalRef, this.currentEditLoan.principal, (x) => x > 0)}),
+        validateEditLoanInterest: debounce(function() { this.validateNumber(this.$refs.editLoanInterestRef, this.currentEditLoan.interest, (x) => x >= 0)}),
+        validateEditLoanMinimum: debounce(function() { this.validateNumber(this.$refs.editLoanMinimumRef, this.currentEditLoan.minimum, (x) => x >= 0)}),
+        
         clear() {
             for (const x of ['name', 'principal', 'interest', 'minimum']) {
                 this.newLoan[x] = "";
@@ -147,20 +183,37 @@ export const DebtCalculator = {
             return r;
         },
         totalMinimumToNearestDollar: function() {
-            return Math.ceil(this.totalMinimum());
+            return Math.ceil(this.totalMinimum);
         },
         maxMonths: () => MAX_YEARS * 12,
         totalMonthlyPayment() {
             return Number(this.totalMonthlyPaymentInput);
         },
         cannotAddNewLoan() {
-            const newLoan = getLoan(
-                this.newLoan.name, 
-                this.newLoan.principal,
-                this.newLoan.interest,
-                this.newLoan.minimum
-            );
-            return newLoan === undefined;
+            try {
+                const newLoan = getLoan(
+                    this.newLoan.name, 
+                    this.newLoan.principal,
+                    this.newLoan.interest,
+                    this.newLoan.minimum
+                );
+                return newLoan === undefined;
+            } catch(e) {
+                return true;
+            }
+        },
+        cannotEditLoan() {
+            try {
+                const editLoan = getLoan(
+                    this.editLoan.name, 
+                    this.editLoan.principal,
+                    this.editLoan.interest,
+                    this.editLoan.minimum
+                );
+                return editLoan === undefined;
+            } catch(e) {
+                return true;
+            }
         }
     },
     template: html
