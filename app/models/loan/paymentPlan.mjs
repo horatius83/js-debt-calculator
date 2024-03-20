@@ -50,6 +50,11 @@ export class PaymentPlan {
             .map(pp => pp.getMinimumPayment(paymentDate));
     }
 
+    /**
+     * 
+     * @param {Array<Payment>} payments 
+     * @returns {number}
+     */
     getTotalAmountPaid(payments) {
        return payments
         .map(x => x.amountPaid)
@@ -61,7 +66,7 @@ export class PaymentPlan {
      * @param {Date} dateOfPayment 
      * @param {number} monthlyPaymentAmount 
      * @param {(payments: Payment[], maxPaymentAmount: number, dateOfPayment: Date) => Payment[]} paymentStrategy 
-     * @returns 
+     * @returns {boolean}
      */
     applyPaymentPlanForThisMonth(
         dateOfPayment, 
@@ -155,6 +160,10 @@ export class PaymentPlanV2 {
         // (paymentStrategy) :: Loans -> TotalAmount -> {Loan.Name -> [{newPrincipal: number, amountPaid: number}]}
     }
 
+    /**
+     * 
+     * @returns {number}
+     */
     getMinimumTotalPayment() {
         return this.minimumTotalPayment;
     }
