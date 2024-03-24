@@ -15,7 +15,7 @@ export class EditLoanState {
         this.principal = "";
         this.interest = "";
         this.minimum = "";
-        this.loanIndex = -1;
+        this.index = -1;
     }
 }
 
