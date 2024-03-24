@@ -49,7 +49,7 @@ export class LoanRepayment {
      */
     getMinimum = (years) => {
         mustBeGreaterThan0(years, 'Years');
-        return getMinimumMonthlyPaymentWithinPeriod(this.loan.principal, this.loan.interest, this.loan.minimum, years);
+        return getMinimumMonthlyPaymentWithinPeriod(this.loan.principal, this.loan.interest / 100.0, this.loan.minimum, years);
     }
 
     /**

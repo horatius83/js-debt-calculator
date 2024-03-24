@@ -1,6 +1,6 @@
 import { DebtCalculatorState } from "../modules/debtCalculatorState.mjs";
 import { getMinimumMonthlyPaymentWithinPeriod } from "../modules/interest.mjs";
-import { avalancheRepayment, PaymentPlan } from "../modules/paymentPlan.mjs";
+import { avalancheRepayment, snowballRepayment, PaymentPlan } from "../modules/paymentPlan.mjs";
 import { debounce, deleteItem, getLoan } from "../modules/util.mjs";
 import { html } from "./debt-calculator-html.mjs";
 
@@ -169,7 +169,18 @@ export const DebtCalculator = {
             }
         },
         generatePaymentPlan() {
-            this.paymentPlan = new PaymentPlan(this.loans, this.paymentPeriodInMonths / 12.0, avalancheRepayment);
+            const getStrategy = (/** @type {string} */ s) => {
+                switch(s) {
+                    case "avalanche": return avalancheRepayment;
+                    case "snowball": return snowballRepayment;
+                    default: throw Error(`Strategy ${s} not supported`);
+                }
+            };
+            let strategy = getStrategy(this.strategy);
+            this.paymentPlan = new PaymentPlan(this.loans, this.paymentPeriodInMonths / 12.0, strategy);
+            debugger;
+            this.paymentPlan.createPlan(Number(this.totalMonthlyPaymentInput));
+            debugger;
         }
     },
     computed: {

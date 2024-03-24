@@ -2,20 +2,20 @@ import { Loan, PaymentPlan } from "./paymentPlan.mjs";
 
 export class NewLoanState {
     constructor() {
-        this.name = "";
-        this.principal = "";
-        this.interest = "";
-        this.minimum = "";
+        /** @type {string} */this.name = "";
+        /** @type {string} */this.principal = "";
+        /** @type {string} */this.interest = "";
+        /** @type {string} */this.minimum = "";
     }
 }
 
 export class EditLoanState {
     constructor() {
-        this.name = "";
-        this.principal = "";
-        this.interest = "";
-        this.minimum = "";
-        this.index = -1;
+        /** @type {string} */this.name = "";
+        /** @type {string} */this.principal = "";
+        /** @type {string} */this.interest = "";
+        /** @type {string} */this.minimum = "";
+        /** @type {number} */this.index = -1;
     }
 }
 
@@ -50,5 +50,7 @@ export class DebtCalculatorState {
         this.paymentPlan = undefined;
         /** @type { EditLoanState } */
         this.currentEditLoan = new EditLoanState();
+        /** @type { string } */
+        this.strategy = "avalanche";
     }
 }
