@@ -225,16 +225,16 @@ describe('paymentPlan', () => {
                     new Loan("Test 2", 2000, 0.2, 20)
                 ];
                 const years = 6;
-                const loanPaymentMinimums = loans.map(x => getMinimumMonthlyPaymentWithinPeriod(x.principal, x.interest, x.minimum, years));
+                const loanPaymentMinimums = loans.map(x => getMinimumMonthlyPaymentWithinPeriod(x.principal, x.interest / 100.0, x.minimum, years));
                 const totalMinimum = loanPaymentMinimums.reduce((acc, x) => acc + x, 0);
                 const totalContribution = 1300;
                 const bonus = totalContribution - totalMinimum;
-                const firstPrincipal = getPrincipalPlusMonthlyInterest(loans[0].principal, loans[0].interest);
+                const firstPrincipal = getPrincipalPlusMonthlyInterest(loans[0].principal, loans[0].interest / 100.0);
                 const firstPayment = firstPrincipal;
                 const remainingBonus = bonus - firstPayment + loanPaymentMinimums[0];
-                const secondPrincipal = getPrincipalPlusMonthlyInterest(loans[1].principal, loans[1].interest);
+                const secondPrincipal = getPrincipalPlusMonthlyInterest(loans[1].principal, loans[1].interest / 100.0);
                 const secondPayment = loanPaymentMinimums[1] + remainingBonus;
-                const thirdPrincipal = getPrincipalPlusMonthlyInterest(secondPrincipal - secondPayment, loans[1].interest);
+                const thirdPrincipal = getPrincipalPlusMonthlyInterest(secondPrincipal - secondPayment, loans[1].interest / 100.0);
                 const thirdPayment = totalContribution;
                 
                 const pp = new PaymentPlan(loans, years, snowballRepayment);
