@@ -177,10 +177,10 @@ export const DebtCalculator = {
                 }
             };
             let strategy = getStrategy(this.strategy);
-            this.paymentPlan = new PaymentPlan(this.loans, this.paymentPeriodInMonths / 12.0, strategy);
             debugger;
-            this.paymentPlan.createPlan(Number(this.totalMonthlyPaymentInput));
-            debugger;
+            const paymentPlan = new PaymentPlan(this.loans, this.paymentPeriodInMonths / 12.0, strategy);
+            paymentPlan.createPlan(Number(this.totalMonthlyPaymentInput));
+            this.paymentPlan = paymentPlan;
         }
     },
     computed: {
