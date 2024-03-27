@@ -50,9 +50,10 @@ export const html = /* html */`
     <div class="container">
         <div class="mb-3">
             <label for="avalanche-select" class="form-label">Payment Strategy</label>
-            <select class="form-select" aria-label="Strategy Selection" id="avalanche-select">
+            <select class="form-select" aria-label="Strategy Selection" id="avalanche-select" v-model="strategy">
                 <option value="avalanche" selected>Avalanche (Highest Interest First)</option>
                 <option value="snowball">Snowball (Lowest Principal First)</option>
+                <option value="double">Multiplier (Pay Multiples of Amount Owed)</option>
             </select>
             <label for="total-monthly-payment" class="form-label">Total Monthly Payment</label>
             <div class="input-group mb-3">

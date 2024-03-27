@@ -1,6 +1,6 @@
 import { DebtCalculatorState } from "../modules/debtCalculatorState.mjs";
 import { getMinimumMonthlyPaymentWithinPeriod } from "../modules/interest.mjs";
-import { avalancheRepayment, PaymentPlan } from "../modules/paymentPlan.mjs";
+import { avalancheRepayment, snowballRepayment, PaymentPlan } from "../modules/paymentPlan.mjs";
 import { debounce, deleteItem, getLoan } from "../modules/util.mjs";
 import { html } from "./debt-calculator-html.mjs";
 
@@ -72,10 +72,10 @@ export const DebtCalculator = {
             if (loanIndex >= 0) {
                 const loan = this.loans[loanIndex];
                 this.currentEditLoan.name = loan.name;
-                this.currentEditLoan.principal = loan.principal;
-                this.currentEditLoan.interest = loan.interest;
-                this.currentEditLoan.minimum = loan.minimum;
-                this.currentEditLoan.loanIndex = loanIndex;
+                this.currentEditLoan.principal = String(loan.principal);
+                this.currentEditLoan.interest = String(loan.interest);
+                this.currentEditLoan.minimum = String(loan.minimum);
+                this.currentEditLoan.index = loanIndex;
             } else {
                 console.error(`openEditLoanDialog: Loan index ${loanIndex} is invalid`)
             }
@@ -89,9 +89,9 @@ export const DebtCalculator = {
             if (loanIndex >= 0) {
                 // Set the loan data
                 const loan = this.loans[loanIndex];
-                loan.principal = this.currentEditLoan.principal;
-                loan.interest = this.currentEditLoan.interest;
-                loan.minimum = this.currentEditLoan.minimum;
+                loan.principal = Number(this.currentEditLoan.principal);
+                loan.interest = Number(this.currentEditLoan.interest);
+                loan.minimum = Number(this.currentEditLoan.minimum);
 
                 this.clearEdit();
             } else {
@@ -105,7 +105,7 @@ export const DebtCalculator = {
             this.currentEditLoan.principal = "";
             this.currentEditLoan.interest = "";
             this.currentEditLoan.minimum = "";
-            this.currentEditLoan.loanIndex = "";
+            this.currentEditLoan.index = -1;
         },
 
         addLoan() {
@@ -169,7 +169,18 @@ export const DebtCalculator = {
             }
         },
         generatePaymentPlan() {
-            this.paymentPlan = new PaymentPlan(this.loans, this.paymentPeriodInMonths / 12.0, avalancheRepayment);
+            const getStrategy = (/** @type {string} */ s) => {
+                switch(s) {
+                    case "avalanche": return avalancheRepayment;
+                    case "snowball": return snowballRepayment;
+                    default: throw Error(`Strategy ${s} not supported`);
+                }
+            };
+            let strategy = getStrategy(this.strategy);
+            debugger;
+            const paymentPlan = new PaymentPlan(this.loans, this.paymentPeriodInMonths / 12.0, strategy);
+            paymentPlan.createPlan(Number(this.totalMonthlyPaymentInput));
+            this.paymentPlan = paymentPlan;
         }
     },
     computed: {
@@ -213,10 +224,10 @@ export const DebtCalculator = {
         cannotEditLoan() {
             try {
                 const editLoan = getLoan(
-                    this.editLoan.name, 
-                    this.editLoan.principal,
-                    this.editLoan.interest,
-                    this.editLoan.minimum
+                    this.currentEditLoan.name, 
+                    this.currentEditLoan.principal,
+                    this.currentEditLoan.interest,
+                    this.currentEditLoan.minimum
                 );
                 return editLoan === undefined;
             } catch(e) {

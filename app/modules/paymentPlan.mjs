@@ -49,7 +49,7 @@ export class LoanRepayment {
      */
     getMinimum = (years) => {
         mustBeGreaterThan0(years, 'Years');
-        return getMinimumMonthlyPaymentWithinPeriod(this.loan.principal, this.loan.interest, this.loan.minimum, years);
+        return getMinimumMonthlyPaymentWithinPeriod(this.loan.principal, this.loan.interest / 100.0, this.loan.minimum, years);
     }
 
     /**
@@ -64,7 +64,7 @@ export class LoanRepayment {
             return amount;
         }
         const principalRemaining = this.payments.at(-1)?.remaining ?? this.loan.principal;
-        const newPrincipal = getPrincipalPlusMonthlyInterest(principalRemaining, this.loan.interest);
+        const newPrincipal = getPrincipalPlusMonthlyInterest(principalRemaining, this.loan.interest / 100.0);
         /**
          * Create a new loan payment
          * @returns {[number, Payment]} - the amount remaining and the Payment to add
