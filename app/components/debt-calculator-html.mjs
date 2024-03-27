@@ -41,6 +41,12 @@ export const html = /* html */`
             </tfoot>
         </table>
     </div>
+    <div class="container mb-3">
+        <details>
+            <summary>Emergency Fund</summary>
+            Emergency fund form
+        </details>
+    </div>
     <div class="container">
         <div class="mb-3">
             <label for="avalanche-select" class="form-label">Payment Strategy</label>
