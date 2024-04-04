@@ -42,10 +42,35 @@ export const html = /* html */`
         </table>
     </div>
     <div class="container mb-3">
-        <details>
-            <summary>Emergency Fund</summary>
-            Emergency fund form
-        </details>
+        <div class="container">
+            <div class="form-check">
+                <input type="checkbox" id="emergency-fund-is-enabled" class="form-check-input">
+                <label for="emergency-fund-is-enabled" class="form-check-label">Build Emergency Fund</label>
+            </div>
+            <div class="mb-3">
+                <label for="emergency-fund-maximum-amount" class="form-label">Max Amount</label>
+                <div class="input-group mb-3">
+                    <span class="input-group-text">$</span>
+                    <input 
+                        class="form-control"
+                        type="text"
+                        id="emergency-fund-maximum-amount"
+                        ref="emergencyFundMaximumAmount"
+                    >
+                </div>
+                <label for="emergency-fund-percentage" class="form-label">Percentage of Bonus Funds</label>
+                <div class="input-group mb-3">
+                    <input 
+                        class="form-control"
+                        type="text"
+                        id="emergency-fund-percentage"
+                        ref="emergencyFundPercentage"
+                    >
+                    <span class="input-group-text">%</span>
+
+                </div>
+            </div>
+        </div>
     </div>
     <div class="container">
         <div class="mb-3">
@@ -79,8 +104,11 @@ export const html = /* html */`
         </div>
     </div>
     <div v-if="paymentPlan" class="container">
-        <div v-for="repayment in paymentPlan.loanRepayments">
-        </div> 
+        <ul>
+            <li v-for="repayment in paymentPlan.loanRepayments">
+                {{ repayment.loan.name }}
+            </li> 
+        </ul>
     </div>
 
     <!-- New Loan Popup -->
