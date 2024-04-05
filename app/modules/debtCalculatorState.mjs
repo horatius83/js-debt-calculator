@@ -54,6 +54,9 @@ export class DebtCalculatorState {
         this.strategy = "avalanche";
         /** @type { boolean } */
         this.shouldCreateEmergencyFund = false;
-
+        /** @type { number } */
+        this.emergencyFundMaxAmount = 3000 * 6;
+        /** @type { number } */
+        this.emergencyFundPercentage = 50;
     }
 }
