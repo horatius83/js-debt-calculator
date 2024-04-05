@@ -52,5 +52,8 @@ export class DebtCalculatorState {
         this.currentEditLoan = new EditLoanState();
         /** @type { string } */
         this.strategy = "avalanche";
+        /** @type { boolean } */
+        this.shouldCreateEmergencyFund = false;
+
     }
 }

@@ -3,51 +3,59 @@ export const html = /* html */`
     <header>
         <h2>Debt Calculator</h2>
     </header>
-    <div class="container" id="loans-table">
-        <table id="loans-table" class="table table-striped">
-            <thead>
-                <th class="loans-table-name-column">Name</th>
-                <th class="loans-table-principal-column">Principal</th>
-                <th class="loans-table-interest-column">Interest</th>
-                <th class="loans-table-minimum-column">Minimum</th>
-                <th class="loans-table-delete-column"></th>
-            </thead>
-            <tbody class="table-group-divider">
-                <tr v-for="(loan, index) in loans" :key="index">
-                    <td data-label="Name">{{ loan.name }}</td>
-                    <td data-label="Principal">{{ asCurrency(loan.principal) }}</td>
-                    <td data-label="Interest">{{ asPercentage(loan.interest) }}</td>
-                    <td data-label="Minimum">{{ asCurrency(loan.minimum) }}</td>
+    <div class="card mb-3" id="loans-table">
+        <div class="card-header">
+            Loans
+        </div>
+        <div class="card-body">
+            <table id="loans-table" class="table table-striped">
+                <thead>
+                    <th class="loans-table-name-column">Name</th>
+                    <th class="loans-table-principal-column">Principal</th>
+                    <th class="loans-table-interest-column">Interest</th>
+                    <th class="loans-table-minimum-column">Minimum</th>
+                    <th class="loans-table-delete-column"></th>
+                </thead>
+                <tbody class="table-group-divider">
+                    <tr v-for="(loan, index) in loans" :key="index">
+                        <td data-label="Name">{{ loan.name }}</td>
+                        <td data-label="Principal">{{ asCurrency(loan.principal) }}</td>
+                        <td data-label="Interest">{{ asPercentage(loan.interest) }}</td>
+                        <td data-label="Minimum">{{ asCurrency(loan.minimum) }}</td>
+                        <td>
+                            <div class="btn-group d-flex justify-content-end" role="group">
+                                <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#edit-loan-modal" :data-loan-index="index">Edit</button>
+                                <button type="button" class="btn btn-outline-danger" v-on:click="removeLoan(loan.name)">Delete</button>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+                <tfoot class="table-group-divider">
+                    <td>Total</td>
+                    <td>{{ asCurrency(totalPrincipal) }}</td>
+                    <td /> 
+                    <td>{{ asCurrency(totalMinimum) }}</td>
                     <td>
-                        <div class="btn-group d-flex justify-content-end" role="group">
-                            <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#edit-loan-modal" :data-loan-index="index">Edit</button>
-                            <button type="button" class="btn btn-outline-danger" v-on:click="removeLoan(loan.name)">Delete</button>
+                        <div class="btn-group d-flex justify-content-end">
+                            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#new-loan-modal">
+                                Add New Loan 
+                            </button>
                         </div>
                     </td>
-                </tr>
-            </tbody>
-            <tfoot class="table-group-divider">
-                <td>Total</td>
-                <td>{{ asCurrency(totalPrincipal) }}</td>
-                <td /> 
-                <td>{{ asCurrency(totalMinimum) }}</td>
-                <td>
-                    <div class="btn-group d-flex justify-content-end">
-                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#new-loan-modal">
-                            Add New Loan 
-                        </button>
-                    </div>
-                </td>
-            </tfoot>
-        </table>
+                </tfoot>
+            </table>
+        </div>
     </div>
-    <div class="container mb-3">
-        <div class="container">
+    <div class="card mb-3">
+        <div class="card-header">
+            Emergency Fund
+        </div>
+        <div class="card-body mb-3">
             <div class="form-check">
-                <input type="checkbox" id="emergency-fund-is-enabled" class="form-check-input">
+                <input type="checkbox" id="emergency-fund-is-enabled" class="form-check-input" v-model="shouldCreateEmergencyFund">
                 <label for="emergency-fund-is-enabled" class="form-check-label">Build Emergency Fund</label>
             </div>
-            <div class="mb-3">
+            <div v-if="shouldCreateEmergencyFund" class="mb-3">
                 <label for="emergency-fund-maximum-amount" class="form-label">Max Amount</label>
                 <div class="input-group mb-3">
                     <span class="input-group-text">$</span>
@@ -67,13 +75,15 @@ export const html = /* html */`
                         ref="emergencyFundPercentage"
                     >
                     <span class="input-group-text">%</span>
-
                 </div>
             </div>
         </div>
     </div>
-    <div class="container">
-        <div class="mb-3">
+    <div class="card">
+        <div class="card-header">
+            Payment Plan
+        </div>
+        <div class="card-body">
             <label for="avalanche-select" class="form-label">Payment Strategy</label>
             <select class="form-select" aria-label="Strategy Selection" id="avalanche-select" v-model="strategy">
                 <option value="avalanche" selected>Avalanche (Highest Interest First)</option>
