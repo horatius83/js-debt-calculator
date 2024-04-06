@@ -85,7 +85,7 @@ export const html = /* html */`
             </div>
         </div>
     </div>
-    <div class="card">
+    <div class="card mb-3">
         <div class="card-header">
             Payment Plan
         </div>
