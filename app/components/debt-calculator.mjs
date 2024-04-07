@@ -6,6 +6,11 @@ import { html } from "./debt-calculator-html.mjs";
 
 const MAX_YEARS = 20;
 
+const usdFormatter = Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD' 
+});
+
 export const DebtCalculator = {
     data() {
         return new DebtCalculatorState();
@@ -24,7 +29,7 @@ export const DebtCalculator = {
          * @returns {string} - value formatted as a currency ($3.14)
          */
         asCurrency(value) {
-            return accounting.formatMoney(value);
+            return usdFormatter.format(value);
         },
 
         /**
