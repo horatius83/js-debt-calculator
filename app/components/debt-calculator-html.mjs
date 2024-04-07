@@ -63,10 +63,11 @@ export const html = /* html */`
                         class="form-control"
                         type="text"
                         id="emergency-fund-maximum-amount"
-                        ref="emergencyFundMaximumAmount"
+                        ref="emergencyFundMaximumAmountRef"
                         v-model="emergencyFundMaxAmount"
+                        @keyup='validateEmergencyFundMaxAmount'
                     >
-                    <div class="invalid-feedback">Value cannot be less than 0</div>
+                    <div class="invalid-feedback">{{ emergencyFundMaxAmountErrorMessage }}</div>
                 </div>
                 <label for="emergency-fund-percentage" class="form-label">Percentage of Bonus Funds</label>
                 <div class="input-group mb-3">

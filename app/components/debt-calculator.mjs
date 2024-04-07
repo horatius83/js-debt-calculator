@@ -181,6 +181,22 @@ export const DebtCalculator = {
                 element.classList.remove('is-invalid');
             }
         }),
+
+        validateEmergencyFundMaxAmount: debounce(function() {
+            const element = this.$refs.emergencyFundMaximumAmountRef;
+            const number = Number(element.value);
+            if (number) {
+                if (number >= 0) {
+                    this.emergencyFundMaxAmountErrorMessage = '';
+                    element.classList.remove('is-invalid');
+                    return
+                }
+                this.emergencyFundMaxAmountErrorMessage = 'Value must be greater than 0';
+            } else {
+                this.emergencyFundMaxAmountErrorMessage = 'Value must be a number';
+            }
+            element.classList.add('is-invalid');
+        }),
         
         clear() {
             for (const x of ['name', 'principal', 'interest', 'minimum']) {
@@ -200,7 +216,6 @@ export const DebtCalculator = {
                 }
             };
             let strategy = getStrategy(this.strategy);
-            debugger;
             const paymentPlan = new PaymentPlan(this.loans, this.paymentPeriodInMonths / 12.0, strategy);
             paymentPlan.createPlan(Number(this.totalMonthlyPaymentInput));
             this.paymentPlan = paymentPlan;
