@@ -158,6 +158,29 @@ export const DebtCalculator = {
         validateEditLoanPrincipal: debounce(function() { this.validateNumber(this.$refs.editLoanPrincipalRef, this.currentEditLoan.principal, (x) => x > 0)}),
         validateEditLoanInterest: debounce(function() { this.validateNumber(this.$refs.editLoanInterestRef, this.currentEditLoan.interest, (x) => x >= 0)}),
         validateEditLoanMinimum: debounce(function() { this.validateNumber(this.$refs.editLoanMinimumRef, this.currentEditLoan.minimum, (x) => x >= 0)}),
+
+        validateEmergencyFundPercentage: debounce(function() {
+            const element = this.$refs.emergencyFundPercentageRef;
+            const number = Number(element.value);
+            let hasError = false;
+            if (number) {
+                if (number < 0) {
+                    this.emergencyFundPercentageErrorMessage = 'Percentage cannot be less than 0%'
+                    hasError = true;
+                } else if (number > 100) {
+                    this.emergencyFundPercentageErrorMessage = 'Percentage cannot be above 100%'
+                    hasError = true;
+                }
+            } else {
+                this.emergencyFundPercentageErrorMessage = 'Percentage must be a number';
+                hasError = true;
+            }
+            if (hasError) {
+                element.classList.add('is-invalid');
+            } else {
+                element.classList.remove('is-invalid');
+            }
+        }),
         
         clear() {
             for (const x of ['name', 'principal', 'interest', 'minimum']) {

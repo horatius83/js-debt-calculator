@@ -74,13 +74,12 @@ export const html = /* html */`
                         class="form-control"
                         type="text"
                         id="emergency-fund-percentage"
-                        ref="emergencyFundPercentage"
+                        ref="emergencyFundPercentageRef"
                         v-model="emergencyFundPercentage"
+                        @keyup="validateEmergencyFundPercentage"
                     >
                     <span class="input-group-text">%</span>
-                    <div class="invalid-feedback">Percentage cannot be less than 0%</div>
-                    <div class="invalid-feedback">Percentage cannot be above 100%</div>
-                    <div class="invalid-feedback">Percentage must be a number</div>
+                    <div class="invalid-feedback">{{ emergencyFundPercentageErrorMessage }}</div>
                 </div>
             </div>
         </div>
