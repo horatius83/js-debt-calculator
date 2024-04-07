@@ -12,7 +12,6 @@ export const DebtCalculator = {
     },
     mounted() {
         this.$refs.editLoanModal.addEventListener('show.bs.modal', (/** @type { MouseEvent }*/ event) => {
-            console.log('show.bs.modal');
             const button = /** @type {HTMLElement} */ (event?.relatedTarget);
             const index = Number(button?.getAttribute('data-loan-index'));
             this.openEditLoanDialog(index);
@@ -219,6 +218,9 @@ export const DebtCalculator = {
             const paymentPlan = new PaymentPlan(this.loans, this.paymentPeriodInMonths / 12.0, strategy);
             paymentPlan.createPlan(Number(this.totalMonthlyPaymentInput));
             this.paymentPlan = paymentPlan;
+        },
+        getPaymentPlanSeries() {
+            return this.paymentPlan.getPaymentPlanSeries(new Date());
         }
     },
     computed: {

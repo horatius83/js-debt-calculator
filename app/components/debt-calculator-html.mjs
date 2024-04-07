@@ -120,11 +120,18 @@ export const html = /* html */`
         </div>
     </div>
     <div v-if="paymentPlan" class="container">
-        <ul>
-            <li v-for="repayment in paymentPlan.loanRepayments">
-                {{ repayment.loan.name }}
-            </li> 
-        </ul>
+        <div class="card mb-3" v-for="payment in getPaymentPlanSeries()">
+            <div class="card-header">
+                Date {{ payment[0] }}
+            </div>
+            <div class="card-body">
+                <ul>
+                    <li v-for="loan in payment[1]">
+                        {{ loan }}
+                    </li>
+                </ul>
+            </div>
+        </div> 
     </div>
 
     <!-- New Loan Popup -->
