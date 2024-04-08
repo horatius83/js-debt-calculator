@@ -238,7 +238,7 @@ export class PaymentPlan {
         return (function* () {
             for (let i=0; i<longestPaymentPlan; i++) {
                 const month = (startingMonth + i) % 12;
-                const year = startingYear + (i / 12);
+                const year = startingYear + ((startingMonth + i) / 12);
                 const date = new Date(year, month, 15);
                 const m = new Map();
 

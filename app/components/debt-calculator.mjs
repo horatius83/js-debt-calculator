@@ -61,6 +61,22 @@ export const DebtCalculator = {
         },
 
         /**
+         * Convert a date to month / year (December 14th 2024 -> 12 / 2024)
+         * @param {Date} d - the date to convert
+         * @returns {string} - 
+         */
+        dateAsYearAndMonth(d) {
+            /*
+            const month = (d.getMonth() + 1).toString().padStart(2, '0');
+            const year = d.getFullYear().toString();
+            return `${month} / ${year}`;
+            */
+           const options = /** @type { DateTimeFormatOptions }*/{ month: 'long', year: "numeric"};
+           const formatter = new Intl.DateTimeFormat('en-US', options);
+           return formatter.format(d);
+        },
+
+        /**
          * Delete a Loan
          * @param {string} loanName - name of the loan
          */

@@ -122,12 +122,12 @@ export const html = /* html */`
     <div v-if="paymentPlan" class="container">
         <div class="card mb-3" v-for="payment in getPaymentPlanSeries()">
             <div class="card-header">
-                Date {{ payment[0] }}
+                {{ dateAsYearAndMonth(payment[0]) }}
             </div>
             <div class="card-body">
                 <ul>
                     <li v-for="loan in payment[1]">
-                        {{ loan }}
+                        {{ loan[0] }}: {{ asCurrency(loan[1][0])}}
                     </li>
                 </ul>
             </div>

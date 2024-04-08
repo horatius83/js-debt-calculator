@@ -56,6 +56,8 @@ export class DebtCalculatorState {
         this.shouldCreateEmergencyFund = false;
         /** @type { number } */
         this.emergencyFundMaxAmount = 3000 * 6;
+        /** @type { string} */
+        this.emergencyFundMaxAmountErrorMessage = '';
         /** @type { number } */
         this.emergencyFundPercentage = 50;
         /** @type { string } */
