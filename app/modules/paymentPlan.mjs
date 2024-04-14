@@ -23,11 +23,13 @@ export class Payment {
      * @param {number} paid - how much was paid
      * @param {number} remaining - principal remaining
      * @param {number=} multiplier - multiplier (2 = 200% payment, 3 = 300% etc.)
+     * @param {boolean=} paidMoreThanMinimum - user paid more than the minimum required
      */
-    constructor(paid, remaining, multiplier) {
+    constructor(paid, remaining, multiplier, paidMoreThanMinimum) {
         this.paid = mustBeGreaterThan0(paid, 'Paid');
         this.remaining = mustBeGreaterThanOrEqualTo0(remaining, 'Remaining');
         this.multiplier = multiplier;
+        this.paidMoreThanMinimum = paidMoreThanMinimum;
     }
 }
 
@@ -56,9 +58,10 @@ export class LoanRepayment {
      * Add a payment to this loan repayment plan
      * @param {number} amount - the amount available to pay on this loan
      * @param {number=} multiplier - is this a doubled / tripled / etc. payment
+     * @param {boolean=} paidMoreThanMinimum - is this payment more than the minimum required
      * @returns {number} leftover money if this loan is paid off
      */
-    makePayment(amount, multiplier) {
+    makePayment(amount, multiplier, paidMoreThanMinimum) {
         mustBeGreaterThan0(amount, 'Amount');
         if (this.isPaidOff) {
             return amount;
@@ -71,11 +74,11 @@ export class LoanRepayment {
          */
         const createPayment = () => {
             if (newPrincipal > amount) {
-                return [0, new Payment(amount, newPrincipal - amount, multiplier)];
+                return [0, new Payment(amount, newPrincipal - amount, multiplier, paidMoreThanMinimum)];
             } else {
                 const amountRemaining = amount - newPrincipal;
                 this.isPaidOff = true;
-                return [amountRemaining, new Payment(newPrincipal, 0, multiplier)]
+                return [amountRemaining, new Payment(newPrincipal, 0, multiplier, paidMoreThanMinimum)]
             }
         }
         const [remainder, payment] = createPayment();
@@ -219,7 +222,7 @@ export class PaymentPlan {
                     continue;
                 }
                 allLoansPaidOff = false;
-                bonus = lr.makePayment(minimumPayment + bonus);
+                bonus = lr.makePayment(minimumPayment + bonus, 1, bonus > 0);
             }
         }
     }
