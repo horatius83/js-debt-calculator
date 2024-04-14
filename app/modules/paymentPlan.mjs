@@ -227,7 +227,7 @@ export class PaymentPlan {
     /**
      * Convert a payment plan into an output-friendly format with dates, the name of the loans and what to pay
      * @param {Date} startDate - when the payment plan will begin
-     * @returns {Generator<[Date, Map<string, [number, number]>]>}
+     * @returns {Generator<[Date, Map<string, Payment>]>}
      */
     getPaymentPlanSeries(startDate) {
         const longestPaymentPlan = Math.max(...this.loanRepayments.map(x => x.payments.length));
@@ -244,7 +244,7 @@ export class PaymentPlan {
 
                 for(const pp of pps) {
                     if (i < pp.payments.length) {
-                        m.set(pp.loan.name, [pp.payments[i].paid, pp.payments[i].multiplier]);
+                        m.set(pp.loan.name, pp.payments[i]);
                     }
                 }
                 yield [date, m];

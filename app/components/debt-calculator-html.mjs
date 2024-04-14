@@ -127,7 +127,7 @@ export const html = /* html */`
             <div class="card-body">
                 <ul>
                     <li v-for="loan in payment[1]">
-                        {{ loan[0] }}: {{ asCurrency(loan[1][0])}}
+                        {{ loan[0] }}: {{ asCurrency(loan[1].paid) }}
                     </li>
                 </ul>
             </div>
