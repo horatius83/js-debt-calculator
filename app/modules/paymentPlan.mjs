@@ -198,7 +198,7 @@ export class PaymentPlan {
     createPlan(contributionAmount) {
         let minimumRequired = this.getMinimumRequiredPayment();
         if (contributionAmount < minimumRequired) {
-            throw new Error(`The minimum amount required is $${minimumRequired.toFixed(2)}`);
+            throw new Error(`The minimum amount required is $${minimumRequired.toFixed(2)} but contribution amount was $${contributionAmount}`);
         }
         let allLoansPaidOff = this.loanRepayments.every(lr => lr.isPaidOff);
         while (!allLoansPaidOff) {

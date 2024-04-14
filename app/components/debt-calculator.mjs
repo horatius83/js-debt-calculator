@@ -66,11 +66,6 @@ export const DebtCalculator = {
          * @returns {string} - 
          */
         dateAsYearAndMonth(d) {
-            /*
-            const month = (d.getMonth() + 1).toString().padStart(2, '0');
-            const year = d.getFullYear().toString();
-            return `${month} / ${year}`;
-            */
            const options = /** @type { DateTimeFormatOptions }*/{ month: 'long', year: "numeric"};
            const formatter = new Intl.DateTimeFormat('en-US', options);
            return formatter.format(d);
@@ -237,6 +232,7 @@ export const DebtCalculator = {
             };
             let strategy = getStrategy(this.strategy);
             const paymentPlan = new PaymentPlan(this.loans, this.paymentPeriodInMonths / 12.0, strategy);
+            this.totalMonthlyPaymentInput = this.totalMonthlyPaymentInput || this.totalMinimumToNearestDollar;
             paymentPlan.createPlan(Number(this.totalMonthlyPaymentInput));
             this.paymentPlan = paymentPlan;
         },
