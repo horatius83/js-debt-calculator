@@ -167,7 +167,7 @@ describe('paymentPlan', () => {
                 const minimumRequired = loans
                     .map(ln => getMinimumMonthlyPaymentWithinPeriod(ln.principal, ln.interest / 100.0, ln.minimum, years))
                     .reduce((acc, x) => acc + x, 0);
-                expect(() => pp.createPlan(0)).toThrow(new Error(`The minimum amount required is $${minimumRequired.toFixed(2)}`));
+                expect(() => pp.createPlan(0)).toThrow(new Error(`The minimum amount required is $${minimumRequired.toFixed(2)} but contribution amount was $0`));
             }),
             it('should exit if all loans are paid off', () => {
                 const loans = [new Loan("Test 1", 1000, 0.1, 10)];
@@ -278,10 +278,10 @@ describe('paymentPlan', () => {
                 expect(test1).toBeDefined();
                 /** @type { Map<string, Payment> } */
                 const lps = pp.loanRepayments.reduce((m, x, _, __) => m.set(x.loan.name, x.payments[0]), new Map());
-                expect(test1[0]).toBe(lps.get('Test 1')?.paid);
+                expect(test1?.paid).toBe(lps.get('Test 1')?.paid);
                 const test2 = xs[0][1].get("Test 2");
                 expect(test2).toBeDefined();
-                expect(test2[0]).toBe(lps.get('Test 2')?.paid);
+                expect(test2?.paid).toBe(lps.get('Test 2')?.paid);
             });
         })
     })
