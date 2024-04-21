@@ -238,6 +238,9 @@ export const DebtCalculator = {
         },
         getPaymentPlanSeries() {
             return this.paymentPlan.getPaymentPlanSeries(new Date());
+        },
+        updatePlan() {
+            this.paymentPlan = undefined;
         }
     },
     computed: {
