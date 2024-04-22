@@ -269,14 +269,15 @@ describe('paymentPlan', () => {
                 const firstLoanAmountPaid = loanPaymentMinimums[0] + bonus;
                 
                 const pp = new PaymentPlan(loans, years, avalancheRepayment);
-
                 pp.createPlan(1300);
 
                 expect(pp.loanRepayments.length).toBe(2);
                 expect(pp.loanRepayments[0].loan.name).toBe('Test 1');
                 expect(pp.loanRepayments[0].payments[0].paid).toBe(firstLoanAmountPaid);
+                expect(pp.loanRepayments[0].payments[0].paidMoreThanMinimum).toBe(true);
                 expect(pp.loanRepayments[1].loan.name).toBe('Test 2');
                 expect(pp.loanRepayments[1].payments[0].paid).toBe(secondLoanAmountPaid);
+                expect(pp.loanRepayments[1].payments[0].remaining).toBe(0);
             })
         }),
         describe('getPaymentPlanSeries', () => {
