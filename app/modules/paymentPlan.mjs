@@ -188,9 +188,20 @@ export class PaymentPlan {
      * @returns {number} 
      */
     getMinimumRequiredPayment() {
+        const getMinimum = (/** @type {LoanRepayment} */repayment) => {
+            const minimum = repayment.getMinimum(this.years);
+            if (repayment.payments.length) {
+                const remaining = repayment.payments?.at(-1)?.remaining || minimum;
+                const remainingPlusInterest = getPrincipalPlusMonthlyInterest(remaining, repayment.loan.interest / 100.0);
+                if (remainingPlusInterest < minimum) {
+                    return remainingPlusInterest;
+                }
+            }
+            return minimum;
+        };
         return this.loanRepayments
             .filter(lr => !lr.isPaidOff)
-            .map((x) => x.getMinimum(this.years))
+            .map(getMinimum)
             .reduce((acc, x) => acc + x, 0);
     }
 
