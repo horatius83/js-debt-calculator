@@ -167,7 +167,7 @@ describe('paymentPlan', () => {
                 const minimumRequired = loans
                     .map(ln => getMinimumMonthlyPaymentWithinPeriod(ln.principal, ln.interest / 100.0, ln.minimum, years))
                     .reduce((acc, x) => acc + x, 0);
-                expect(() => pp.createPlan(0)).toThrow(new Error(`The minimum amount required is $${minimumRequired.toFixed(2)}`));
+                expect(() => pp.createPlan(0)).toThrow(new Error(`The minimum amount required is $${minimumRequired.toFixed(2)} but contribution amount was $0`));
             }),
             it('should exit if all loans are paid off', () => {
                 const loans = [new Loan("Test 1", 1000, 0.1, 10)];
@@ -253,6 +253,31 @@ describe('paymentPlan', () => {
                 expect(pp.loanRepayments[1].payments[0].remaining).toBeCloseTo(secondPrincipal - secondPayment, PRECISION);
                 expect(pp.loanRepayments[1].payments[1].paid).toBeCloseTo(thirdPayment);
                 expect(pp.loanRepayments[1].payments[1].remaining).toBeCloseTo(thirdPrincipal - thirdPayment, PRECISION);
+            }),
+            it('should add a bonus to the most important loan when principal is less than minimum payment', () => {
+                const loans = [
+                    new Loan("Test 1", 2000, 0.2, 20),
+                    new Loan("Test 2", 5, 0.1, 20)
+                ];
+                const years = 6;
+                const loanPaymentMinimums = loans.map(x => getMinimumMonthlyPaymentWithinPeriod(x.principal, x.interest / 100.0, x.minimum, years));
+                const totalMinimum = loanPaymentMinimums.reduce((acc, x) => acc + x, 0);
+                const totalContribution = 1300;
+                const secondLoanAmountPaid = getPrincipalPlusMonthlyInterest(loans[1].principal, loans[1].interest / 100.0);
+                const bonus = (totalContribution - totalMinimum) + 
+                    (loans[1].minimum - secondLoanAmountPaid);
+                const firstLoanAmountPaid = loanPaymentMinimums[0] + bonus;
+                
+                const pp = new PaymentPlan(loans, years, avalancheRepayment);
+                pp.createPlan(1300);
+
+                expect(pp.loanRepayments.length).toBe(2);
+                expect(pp.loanRepayments[0].loan.name).toBe('Test 1');
+                expect(pp.loanRepayments[0].payments[0].paid).toBe(firstLoanAmountPaid);
+                expect(pp.loanRepayments[0].payments[0].paidMoreThanMinimum).toBe(true);
+                expect(pp.loanRepayments[1].loan.name).toBe('Test 2');
+                expect(pp.loanRepayments[1].payments[0].paid).toBe(secondLoanAmountPaid);
+                expect(pp.loanRepayments[1].payments[0].remaining).toBe(0);
             })
         }),
         describe('getPaymentPlanSeries', () => {
@@ -278,10 +303,10 @@ describe('paymentPlan', () => {
                 expect(test1).toBeDefined();
                 /** @type { Map<string, Payment> } */
                 const lps = pp.loanRepayments.reduce((m, x, _, __) => m.set(x.loan.name, x.payments[0]), new Map());
-                expect(test1[0]).toBe(lps.get('Test 1')?.paid);
+                expect(test1?.paid).toBe(lps.get('Test 1')?.paid);
                 const test2 = xs[0][1].get("Test 2");
                 expect(test2).toBeDefined();
-                expect(test2[0]).toBe(lps.get('Test 2')?.paid);
+                expect(test2?.paid).toBe(lps.get('Test 2')?.paid);
             });
         })
     })
