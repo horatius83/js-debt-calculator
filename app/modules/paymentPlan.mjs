@@ -48,10 +48,19 @@ export class LoanRepayment {
     /**
      * Get the minimum payment needed to pay back loan
      * @param {number} years - the maximum number of years to pay back loan
+     * @returns {number} - the minimum payment
      */
     getMinimum = (years) => {
         mustBeGreaterThan0(years, 'Years');
-        return getMinimumMonthlyPaymentWithinPeriod(this.loan.principal, this.loan.interest / 100.0, this.loan.minimum, years);
+        const minimum = getMinimumMonthlyPaymentWithinPeriod(this.loan.principal, this.loan.interest / 100.0, this.loan.minimum, years);
+        if (this.payments.length) {
+                const remaining = this.payments?.at(-1)?.remaining || minimum;
+                const remainingPlusInterest = getPrincipalPlusMonthlyInterest(remaining, this.loan.interest / 100.0);
+                if (remainingPlusInterest < minimum) {
+                    return remainingPlusInterest;
+                }
+            }
+            return minimum;
     }
 
     /**
@@ -188,20 +197,9 @@ export class PaymentPlan {
      * @returns {number} 
      */
     getMinimumRequiredPayment() {
-        const getMinimum = (/** @type {LoanRepayment} */repayment) => {
-            const minimum = repayment.getMinimum(this.years);
-            if (repayment.payments.length) {
-                const remaining = repayment.payments?.at(-1)?.remaining || minimum;
-                const remainingPlusInterest = getPrincipalPlusMonthlyInterest(remaining, repayment.loan.interest / 100.0);
-                if (remainingPlusInterest < minimum) {
-                    return remainingPlusInterest;
-                }
-            }
-            return minimum;
-        };
         return this.loanRepayments
             .filter(lr => !lr.isPaidOff)
-            .map(getMinimum)
+            .map(lr => lr.getMinimum(this.years))
             .reduce((acc, x) => acc + x, 0);
     }
 
