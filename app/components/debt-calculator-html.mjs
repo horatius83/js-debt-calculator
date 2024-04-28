@@ -133,7 +133,7 @@ export const html = /* html */`
             </div>
             <div class="card-body">
                 <ul>
-                    <li v-for="loan in payment[1]" :class="{ mark: loan[1].paidMoreThanMinimum }">
+                    <li v-for="loan in payment[1]" :class="{ mark: loan[1].paidMoreThanMinimum || loan[1].paidOffLoan }">
                         {{ loan[0] }}: {{ asCurrency(loan[1].paid) }}
                     </li>
                 </ul>
