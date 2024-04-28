@@ -35,6 +35,17 @@ describe('interest', () => {
             const result = getMinimumMonthlyPaymentWithinPeriod(principal, interest, minimum, years);
 
             expect(result).toBeCloseTo(minimum);
+        }),
+        it('should calculate zero interest rates correctly', () => {
+            const years = 5;
+            const principal = 1000;
+            const interest = 0;
+            const payment = principal / (years * 12.0);
+            const minimum = 0;
+
+            const result = getMinimumMonthlyPaymentWithinPeriod(principal, interest, minimum, years);
+
+            expect(result).toBeCloseTo(payment);
         })
     })
 })

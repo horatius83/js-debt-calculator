@@ -20,14 +20,18 @@ export class Loan {
 export class Payment {
     /**
      * Represents a payment on a loan
-     * @param {number} paid 
-     * @param {number} remaining 
-     * @param {boolean} isDoubled 
+     * @param {number} paid - how much was paid
+     * @param {number} remaining - principal remaining
+     * @param {number=} multiplier - multiplier (2 = 200% payment, 3 = 300% etc.)
+     * @param {boolean=} paidMoreThanMinimum - user paid more than the minimum required
+     * @param {boolean=} paidOffLoan - user paid this loan off
      */
-    constructor(paid, remaining, isDoubled) {
+    constructor(paid, remaining, multiplier, paidMoreThanMinimum = false, paidOffLoan = false) {
         this.paid = mustBeGreaterThan0(paid, 'Paid');
         this.remaining = mustBeGreaterThanOrEqualTo0(remaining, 'Remaining');
-        this.isDoubled = isDoubled;
+        this.multiplier = multiplier;
+        this.paidMoreThanMinimum = paidMoreThanMinimum;
+        this.paidOffLoan = paidOffLoan
     }
 }
 
@@ -46,36 +50,51 @@ export class LoanRepayment {
     /**
      * Get the minimum payment needed to pay back loan
      * @param {number} years - the maximum number of years to pay back loan
+     * @returns {number} - the minimum payment
      */
     getMinimum = (years) => {
         mustBeGreaterThan0(years, 'Years');
-        return getMinimumMonthlyPaymentWithinPeriod(this.loan.principal, this.loan.interest, this.loan.minimum, years);
+        const minimum = getMinimumMonthlyPaymentWithinPeriod(this.loan.principal, this.loan.interest / 100.0, this.loan.minimum, years);
+        if (this.payments.length) { // Scenario: this is our last payment, the amount remaining is less than the minimum
+            const remaining = this.payments?.at(-1)?.remaining || minimum;
+            const remainingPlusInterest = getPrincipalPlusMonthlyInterest(remaining, this.loan.interest / 100.0);
+            if (remainingPlusInterest < minimum) {
+                return remainingPlusInterest;
+            }
+        } else if (this.loan.principal < minimum) { // Scenario: this is our first payment, but (somehow) the principal is less than the minimum
+            const principalPlusInterest = getPrincipalPlusMonthlyInterest(this.loan.principal, this.loan.interest / 100.0);
+            if (principalPlusInterest < minimum) {
+                return principalPlusInterest;
+            }
+        }
+        return minimum;
     }
 
     /**
      * Add a payment to this loan repayment plan
      * @param {number} amount - the amount available to pay on this loan
-     * @param {boolean=} isDoubled - is this a doubled payment
+     * @param {number=} multiplier - is this a doubled / tripled / etc. payment
+     * @param {boolean=} paidMoreThanMinimum - is this payment more than the minimum required
      * @returns {number} leftover money if this loan is paid off
      */
-    makePayment(amount, isDoubled = false) {
+    makePayment(amount, multiplier, paidMoreThanMinimum) {
         mustBeGreaterThan0(amount, 'Amount');
         if (this.isPaidOff) {
             return amount;
         }
         const principalRemaining = this.payments.at(-1)?.remaining ?? this.loan.principal;
-        const newPrincipal = getPrincipalPlusMonthlyInterest(principalRemaining, this.loan.interest);
+        const newPrincipal = getPrincipalPlusMonthlyInterest(principalRemaining, this.loan.interest / 100.0);
         /**
          * Create a new loan payment
          * @returns {[number, Payment]} - the amount remaining and the Payment to add
          */
         const createPayment = () => {
             if (newPrincipal > amount) {
-                return [0, new Payment(amount, newPrincipal - amount, isDoubled)];
+                return [0, new Payment(amount, newPrincipal - amount, multiplier, paidMoreThanMinimum, false)];
             } else {
                 const amountRemaining = amount - newPrincipal;
                 this.isPaidOff = true;
-                return [amountRemaining, new Payment(newPrincipal, 0, isDoubled)]
+                return [amountRemaining, new Payment(newPrincipal, 0, multiplier, paidMoreThanMinimum, true)]
             }
         }
         const [remainder, payment] = createPayment();
@@ -187,7 +206,7 @@ export class PaymentPlan {
     getMinimumRequiredPayment() {
         return this.loanRepayments
             .filter(lr => !lr.isPaidOff)
-            .map((x) => x.getMinimum(this.years))
+            .map(lr => lr.getMinimum(this.years))
             .reduce((acc, x) => acc + x, 0);
     }
 
@@ -198,7 +217,7 @@ export class PaymentPlan {
     createPlan(contributionAmount) {
         let minimumRequired = this.getMinimumRequiredPayment();
         if (contributionAmount < minimumRequired) {
-            throw new Error(`The minimum amount required is $${minimumRequired.toFixed(2)}`);
+            throw new Error(`The minimum amount required is $${minimumRequired.toFixed(2)} but contribution amount was $${contributionAmount}`);
         }
         let allLoansPaidOff = this.loanRepayments.every(lr => lr.isPaidOff);
         while (!allLoansPaidOff) {
@@ -219,8 +238,36 @@ export class PaymentPlan {
                     continue;
                 }
                 allLoansPaidOff = false;
-                bonus = lr.makePayment(minimumPayment + bonus);
+                bonus = lr.makePayment(minimumPayment + bonus, 1, bonus > 0);
             }
         }
+    }
+
+    /**
+     * Convert a payment plan into an output-friendly format with dates, the name of the loans and what to pay
+     * @param {Date} startDate - when the payment plan will begin
+     * @returns {Generator<[Date, Map<string, Payment>]>}
+     */
+    getPaymentPlanSeries(startDate) {
+        const longestPaymentPlan = Math.max(...this.loanRepayments.map(x => x.payments.length));
+        const startingMonth = startDate.getMonth();
+        const startingYear = startDate.getFullYear();
+        const pps = this.loanRepayments;
+
+        return (function* () {
+            for (let i=0; i<longestPaymentPlan; i++) {
+                const month = (startingMonth + i) % 12;
+                const year = startingYear + ((startingMonth + i) / 12);
+                const date = new Date(year, month, 15);
+                const m = new Map();
+
+                for(const pp of pps) {
+                    if (i < pp.payments.length) {
+                        m.set(pp.loan.name, pp.payments[i]);
+                    }
+                }
+                yield [date, m];
+            }
+        })();
     }
 }
