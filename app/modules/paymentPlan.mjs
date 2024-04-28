@@ -54,13 +54,18 @@ export class LoanRepayment {
         mustBeGreaterThan0(years, 'Years');
         const minimum = getMinimumMonthlyPaymentWithinPeriod(this.loan.principal, this.loan.interest / 100.0, this.loan.minimum, years);
         if (this.payments.length) {
-                const remaining = this.payments?.at(-1)?.remaining || minimum;
-                const remainingPlusInterest = getPrincipalPlusMonthlyInterest(remaining, this.loan.interest / 100.0);
-                if (remainingPlusInterest < minimum) {
-                    return remainingPlusInterest;
-                }
+            const remaining = this.payments?.at(-1)?.remaining || minimum;
+            const remainingPlusInterest = getPrincipalPlusMonthlyInterest(remaining, this.loan.interest / 100.0);
+            if (remainingPlusInterest < minimum) {
+                return remainingPlusInterest;
             }
-            return minimum;
+        } else if (this.loan.principal < minimum) {
+            const principalPlusInterest = getPrincipalPlusMonthlyInterest(this.loan.principal, this.loan.interest / 100.0);
+            if (principalPlusInterest < minimum) {
+                return principalPlusInterest;
+            }
+        }
+        return minimum;
     }
 
     /**

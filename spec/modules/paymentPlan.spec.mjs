@@ -260,13 +260,12 @@ describe('paymentPlan', () => {
                     new Loan("Test 2", 5, 0.1, 20)
                 ];
                 const years = 6;
-                const loanPaymentMinimums = loans.map(x => getMinimumMonthlyPaymentWithinPeriod(x.principal, x.interest / 100.0, x.minimum, years));
-                const totalMinimum = loanPaymentMinimums.reduce((acc, x) => acc + x, 0);
+                const firstMinimum = getMinimumMonthlyPaymentWithinPeriod(loans[0].principal, loans[0].interest / 100.0, loans[0].minimum, years);
+                const secondMinimum = getPrincipalPlusMonthlyInterest(loans[1].principal, loans[1].interest / 100.0);
+                const loanPaymentMinimums = [firstMinimum, secondMinimum].reduce((acc, x) => acc + x, 0);
                 const totalContribution = 1300;
-                const secondLoanAmountPaid = getPrincipalPlusMonthlyInterest(loans[1].principal, loans[1].interest / 100.0);
-                const bonus = (totalContribution - totalMinimum) + 
-                    (loans[1].minimum - secondLoanAmountPaid);
-                const firstLoanAmountPaid = loanPaymentMinimums[0] + bonus;
+                const bonus = totalContribution - loanPaymentMinimums;
+                const firstLoanAmountPaid = firstMinimum + bonus;
                 
                 const pp = new PaymentPlan(loans, years, avalancheRepayment);
                 pp.createPlan(1300);
@@ -276,7 +275,7 @@ describe('paymentPlan', () => {
                 expect(pp.loanRepayments[0].payments[0].paid).toBe(firstLoanAmountPaid);
                 expect(pp.loanRepayments[0].payments[0].paidMoreThanMinimum).toBe(true);
                 expect(pp.loanRepayments[1].loan.name).toBe('Test 2');
-                expect(pp.loanRepayments[1].payments[0].paid).toBe(secondLoanAmountPaid);
+                expect(pp.loanRepayments[1].payments[0].paid).toBe(secondMinimum);
                 expect(pp.loanRepayments[1].payments[0].remaining).toBe(0);
             })
         }),
