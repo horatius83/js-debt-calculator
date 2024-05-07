@@ -115,7 +115,10 @@ export const html = /* html */`
                 <input type="range" class="form-range" min="3" :max=maxMonths step="3" id="years-range" v-model=paymentPeriodInMonths>
                 <div class="col mb-3 btn-group">
                     <button type="button" class="btn btn-success" v-on:click="generatePaymentPlan()">
-                        Generate Payment Plan 
+                        View Payment Plan 
+                    </button>
+                    <button type="button" class="btn btn-success" v-on:click="generatePaymentPlan()">
+                        View Payment Plan PDF
                     </button>
                 </div>
             </div>

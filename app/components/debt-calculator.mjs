@@ -1,6 +1,6 @@
 import { DebtCalculatorState } from "../modules/debtCalculatorState.mjs";
 import { getMinimumMonthlyPaymentWithinPeriod } from "../modules/interest.mjs";
-import { avalancheRepayment, snowballRepayment, PaymentPlan } from "../modules/paymentPlan.mjs";
+import { avalancheRepayment, snowballRepayment, PaymentPlan, Payment } from "../modules/paymentPlan.mjs";
 import { debounce, deleteItem, getLoan } from "../modules/util.mjs";
 import { html } from "./debt-calculator-html.mjs";
 
@@ -235,6 +235,33 @@ export const DebtCalculator = {
             this.totalMonthlyPaymentInput = this.totalMonthlyPaymentInput || this.totalMinimumToNearestDollar;
             paymentPlan.createPlan(Number(this.totalMonthlyPaymentInput));
             this.paymentPlan = paymentPlan;
+        },
+        generatePaymentPlanPdf() {
+            this.generatePaymentPlan();
+            /**
+             * @type {Generator<[Date, Map<string, Payment>]>}
+             */
+            const series = this.paymentPlan.getPaymentPlanSeries(new Date());
+            const pdf = [];
+            for(const tpl of series) {
+                const [date, loans] = tpl;
+                pdf.push({
+                    text: this.dateAsYearAndMonth(date),
+                    style: 'header'
+                });
+                const table = {
+                    body: [
+                        ['Loan', 'Amount', ''],
+                    ]
+                }
+                for(const tpld of loans.entries()) {
+                    const [name, payment] = tpld;
+                    const shouldHighlight = payment.paidMoreThanMinimum || payment.paidOffLoan;
+                    table['body'].push([name, `${payment.paid}`, shouldHighlight ? '*' : '']);
+                }
+                pdf.push(table);
+            }
+            // Print PDF here
         },
         getPaymentPlanSeries() {
             return this.paymentPlan.getPaymentPlanSeries(new Date());
