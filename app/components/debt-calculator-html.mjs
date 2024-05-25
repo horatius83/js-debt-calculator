@@ -126,6 +126,9 @@ export const html = /* html */`
             <button type="button" class="btn btn-success" v-on:click="updatePlan()">
                 Update Plan
             </button>
+            <button type="button" class="btn btn-success" v-on:click="getPdf()">
+                Download PDF 
+            </button>
         </div>
         <div class="card mb-3" v-for="payment in getPaymentPlanSeries()">
             <div class="card-header">
