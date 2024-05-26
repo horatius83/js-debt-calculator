@@ -1,6 +1,6 @@
 import { DebtCalculatorState } from "../modules/debtCalculatorState.mjs";
 import { getMinimumMonthlyPaymentWithinPeriod } from "../modules/interest.mjs";
-import { avalancheRepayment, snowballRepayment, PaymentPlan } from "../modules/paymentPlan.mjs";
+import { avalancheRepayment, snowballRepayment, PaymentPlan, Payment } from "../modules/paymentPlan.mjs";
 import { debounce, deleteItem, getLoan } from "../modules/util.mjs";
 import { html } from "./debt-calculator-html.mjs";
 
@@ -237,10 +237,60 @@ export const DebtCalculator = {
             this.paymentPlan = paymentPlan;
         },
         getPaymentPlanSeries() {
-            return this.paymentPlan.getPaymentPlanSeries(new Date());
+            return this.paymentPlan?.getPaymentPlanSeries(new Date());
         },
         updatePlan() {
             this.paymentPlan = undefined;
+        },
+        getPdf() {
+            /** @type { Generator<[Date, Map<string, Payment>]>}*/
+            const pps = this.paymentPlan?.getPaymentPlanSeries(new Date());
+            const content = [];
+            for(const payment of pps) {
+                content.push({
+                    'text': this.dateAsYearAndMonth(payment[0]),
+                    'style': 'header'
+                })
+                for(const loan of payment[1]) {
+                    const loanName = loan[0];
+                    const amountPaid = this.asCurrency(loan[1].paid);
+                    if (loan[1].paidMoreThanMinimum) {
+                        content.push({
+                            'style': 'bold',
+                            'text': `${loanName}: ${amountPaid}`
+                        });
+                    } else {
+                        content.push(`${loanName}: ${amountPaid}`);
+                    }
+                }
+                content.push('\n\n');
+            }
+            const docDefinition = {
+                content,
+                defaultStyle: {
+                    fontFamily: 'Helvetica',
+                    fontSize: 12
+                },
+                styles: {
+                    header: {
+                        fontSize: 18,
+                        bold: true
+                    },
+                    bold: {
+                        fontSize: 15,
+                        bold: true
+                    }
+                }
+            };
+            pdfMake.fonts = {
+                Roboto: {
+                    normal: 'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.66/fonts/Roboto/Roboto-Regular.ttf',
+                    bold: 'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.66/fonts/Roboto/Roboto-Medium.ttf',
+                    italics: 'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.66/fonts/Roboto/Roboto-Italic.ttf',
+                    bolditalics: 'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.66/fonts/Roboto/Roboto-MediumItalic.ttf'
+                }
+            };
+            pdfMake.createPdf(docDefinition).download();
         }
     },
     computed: {
@@ -250,7 +300,7 @@ export const DebtCalculator = {
         totalPrincipal: function() {
             return this.loans
             .map(x => x.principal)
-            .reduce((acc, x) => acc + x, 0);
+            .reduce((/** @type {number} */ acc, /** @type {number} */ x) => acc + x, 0);
         },
         /**
          * @returns {number} - the minimum payment required every month
