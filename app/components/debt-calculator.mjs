@@ -1,6 +1,6 @@
 import { DebtCalculatorState } from "../modules/debtCalculatorState.mjs";
 import { getMinimumMonthlyPaymentWithinPeriod } from "../modules/interest.mjs";
-import { avalancheRepayment, snowballRepayment, PaymentPlan, Payment } from "../modules/paymentPlan.mjs";
+import { avalancheRepayment, snowballRepayment, PaymentPlan, Payment, PaymentPlanOutputMonth } from "../modules/paymentPlan.mjs";
 import { debounce, deleteItem, getLoan } from "../modules/util.mjs";
 import { html } from "./debt-calculator-html.mjs";
 
@@ -243,15 +243,15 @@ export const DebtCalculator = {
             this.paymentPlan = undefined;
         },
         getPdf() {
-            /** @type { Generator<[Date, Map<string, Payment>]>}*/
+            /** @type { Generator<PaymentPlanOutputMonth>}*/
             const pps = this.paymentPlan?.getPaymentPlanSeries(new Date());
             const content = [];
             for(const payment of pps) {
                 content.push({
-                    'text': this.dateAsYearAndMonth(payment[0]),
+                    'text': payment.month,
                     'style': 'header'
                 })
-                for(const loan of payment[1]) {
+                for(const loan of payment.loanPayments) {
                     const loanName = loan[0];
                     const amountPaid = this.asCurrency(loan[1].paid);
                     if (loan[1].paidMoreThanMinimum) {

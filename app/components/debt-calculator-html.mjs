@@ -132,16 +132,16 @@ export const html = /* html */`
         </div>
         <div class="card mb-3" v-for="payment in getPaymentPlanSeries()">
             <div class="card-header">
-                {{ dateAsYearAndMonth(payment[0]) }}
+                {{ payment.month }}
             </div>
             <div class="card-body">
                 <ul>
-                    <li v-for="loan in payment[1]" :class="{ mark: loan[1].paidMoreThanMinimum || loan[1].paidOffLoan }">
+                    <li v-for="loan in payment.loanPayments" :class="{ mark: loan[1].paidMoreThanMinimum || loan[1].paidOffLoan }">
                         {{ loan[0] }}: {{ asCurrency(loan[1].paid) }}
                     </li>
                 </ul>
             </div>
-        </div> 
+        </div>
     </div>
 
     <!-- New Loan Popup -->
