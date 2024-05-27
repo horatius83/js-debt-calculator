@@ -139,10 +139,10 @@ export const html = /* html */`
                     <li v-for="loan in payment.loanPayments" :class="{ mark: loan[1].paidMoreThanMinimum || loan[1].paidOffLoan }">
                         {{ loan[0] }}: {{ asCurrency(loan[1].paid) }}
                     </li>
+                    <li v-if="payment.emergencyFundPayment">
+                        Emergency Fund: {{ asCurrency(payment.emergencyFundPayment.payment) }}
+                    </li>
                 </ul>
-            </div>
-            <div v-if="payment.emergencyFundPayment">
-                Emergency Fund: {{ asCurrency(payment.emergencyFundPayment.amount) }}
             </div>
         </div>
     </div>
