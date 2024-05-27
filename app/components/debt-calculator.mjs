@@ -272,6 +272,9 @@ export const DebtCalculator = {
                         content.push(`${loanName}: ${amountPaid}`);
                     }
                 }
+                if (payment.emergencyFundPayment) {
+                    content.push(`Emergency Fund Payment: ${this.asCurrency(payment.emergencyFundPayment.payment)}`);
+                }
                 content.push('\n\n');
             }
             const docDefinition = {
