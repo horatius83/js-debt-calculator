@@ -185,9 +185,23 @@ export class EmergencyFund {
     }
 }
 
+export class PaymentPlanOutputMonth {
+    /**
+     * Summary of payments for a given month
+     * @param {string} month - what month this took place
+     * @param {Map<string, Payment>} loanPayments - payments that took place this month
+     * @param {EmergencyFundPayment=} emergencyFundPayment - payment to Emergency Fund (if any)
+     */
+    constructor(month, loanPayments, emergencyFundPayment) {
+        this.month = month;
+        this.loanPayments = loanPayments;
+        this.emergencyFundPayment = emergencyFundPayment
+    }
+}
+
 export class PaymentPlan {
     /**
-     * A class represnting a plan to repay a group of loans
+     * A class representing a plan to repay a group of loans
      * @param {Loan[]} loans - the loans to repay
      * @param {number} years - the maximum number of years to repay those loans
      * @param {(loans: Loan[]) => Loan[]} repaymentStrategy - determines how to prioritize the loans for repayment
@@ -246,13 +260,16 @@ export class PaymentPlan {
     /**
      * Convert a payment plan into an output-friendly format with dates, the name of the loans and what to pay
      * @param {Date} startDate - when the payment plan will begin
-     * @returns {Generator<[Date, Map<string, Payment>]>}
+     * @returns {Generator<PaymentPlanOutputMonth>}
      */
     getPaymentPlanSeries(startDate) {
         const longestPaymentPlan = Math.max(...this.loanRepayments.map(x => x.payments.length));
         const startingMonth = startDate.getMonth();
         const startingYear = startDate.getFullYear();
-        const pps = this.loanRepayments;
+
+        const options = /** @type { DateTimeFormatOptions }*/{ month: 'long', year: "numeric"};
+        const formatter = new Intl.DateTimeFormat('en-US', options);
+        const that = this;
 
         return (function* () {
             for (let i=0; i<longestPaymentPlan; i++) {
@@ -261,12 +278,17 @@ export class PaymentPlan {
                 const date = new Date(year, month, 15);
                 const m = new Map();
 
-                for(const pp of pps) {
+                for(const pp of that.loanRepayments) {
                     if (i < pp.payments.length) {
                         m.set(pp.loan.name, pp.payments[i]);
                     }
                 }
-                yield [date, m];
+                const emergencyFundPayment = i < that.emergencyFund?.payments.length ? that.emergencyFund?.payments[i] : undefined;
+                yield new PaymentPlanOutputMonth(
+                    formatter.format(date),
+                    m,
+                    emergencyFundPayment
+                );
             }
         })();
     }
