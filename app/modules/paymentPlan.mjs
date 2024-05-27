@@ -190,7 +190,7 @@ export class PaymentPlanOutputMonth {
      * Summary of payments for a given month
      * @param {string} month - what month this took place
      * @param {Map<string, Payment>} loanPayments - payments that took place this month
-     * @param {Payment=} emergencyFundPayment - payment to Emergency Fund (if any)
+     * @param {EmergencyFundPayment=} emergencyFundPayment - payment to Emergency Fund (if any)
      */
     constructor(month, loanPayments, emergencyFundPayment) {
         this.month = month;
@@ -266,10 +266,10 @@ export class PaymentPlan {
         const longestPaymentPlan = Math.max(...this.loanRepayments.map(x => x.payments.length));
         const startingMonth = startDate.getMonth();
         const startingYear = startDate.getFullYear();
-        const pps = this.loanRepayments;
 
         const options = /** @type { DateTimeFormatOptions }*/{ month: 'long', year: "numeric"};
         const formatter = new Intl.DateTimeFormat('en-US', options);
+        const that = this;
 
         return (function* () {
             for (let i=0; i<longestPaymentPlan; i++) {
@@ -278,14 +278,16 @@ export class PaymentPlan {
                 const date = new Date(year, month, 15);
                 const m = new Map();
 
-                for(const pp of pps) {
+                for(const pp of that.loanRepayments) {
                     if (i < pp.payments.length) {
                         m.set(pp.loan.name, pp.payments[i]);
                     }
                 }
+                const emergencyFundPayment = i < that.emergencyFund?.payments.length ? that.emergencyFund?.payments[i] : undefined;
                 yield new PaymentPlanOutputMonth(
                     formatter.format(date),
-                    m
+                    m,
+                    emergencyFundPayment
                 );
             }
         })();

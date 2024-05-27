@@ -141,6 +141,9 @@ export const html = /* html */`
                     </li>
                 </ul>
             </div>
+            <div v-if="payment.emergencyFundPayment">
+                Emergency Fund: {{ asCurrency(payment.emergencyFundPayment.amount) }}
+            </div>
         </div>
     </div>
 

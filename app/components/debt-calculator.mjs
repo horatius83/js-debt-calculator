@@ -1,6 +1,6 @@
 import { DebtCalculatorState } from "../modules/debtCalculatorState.mjs";
 import { getMinimumMonthlyPaymentWithinPeriod } from "../modules/interest.mjs";
-import { avalancheRepayment, snowballRepayment, PaymentPlan, Payment, PaymentPlanOutputMonth } from "../modules/paymentPlan.mjs";
+import { avalancheRepayment, snowballRepayment, PaymentPlan, Payment, PaymentPlanOutputMonth, EmergencyFund } from "../modules/paymentPlan.mjs";
 import { debounce, deleteItem, getLoan } from "../modules/util.mjs";
 import { html } from "./debt-calculator-html.mjs";
 
@@ -231,10 +231,19 @@ export const DebtCalculator = {
                 }
             };
             let strategy = getStrategy(this.strategy);
-            const paymentPlan = new PaymentPlan(this.loans, this.paymentPeriodInMonths / 12.0, strategy);
-            this.totalMonthlyPaymentInput = this.totalMonthlyPaymentInput || this.totalMinimumToNearestDollar;
-            paymentPlan.createPlan(Number(this.totalMonthlyPaymentInput));
-            this.paymentPlan = paymentPlan;
+
+            if (this.shouldCreateEmergencyFund) {
+                const emergencyFund = new EmergencyFund(this.emergencyFundMaxAmount, this.emergencyFundPercentage / 100.0);
+                const paymentPlan = new PaymentPlan(this.loans, this.paymentPeriodInMonths / 12.0, strategy, emergencyFund);
+                this.totalMonthlyPaymentInput = this.totalMonthlyPaymentInput || this.totalMinimumToNearestDollar;
+                paymentPlan.createPlan(Number(this.totalMonthlyPaymentInput));
+                this.paymentPlan = paymentPlan;
+            } else {
+                const paymentPlan = new PaymentPlan(this.loans, this.paymentPeriodInMonths / 12.0, strategy);
+                this.totalMonthlyPaymentInput = this.totalMonthlyPaymentInput || this.totalMinimumToNearestDollar;
+                paymentPlan.createPlan(Number(this.totalMonthlyPaymentInput));
+                this.paymentPlan = paymentPlan;
+            }
         },
         getPaymentPlanSeries() {
             return this.paymentPlan?.getPaymentPlanSeries(new Date());
