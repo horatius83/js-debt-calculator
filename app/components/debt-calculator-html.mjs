@@ -123,12 +123,14 @@ export const html = /* html */`
     </div>
     <div v-if="paymentPlan" class="container">
         <div class="card mb-3">
-            <button type="button" class="btn btn-success" v-on:click="updatePlan()">
-                Update Plan
-            </button>
-            <button type="button" class="btn btn-success" v-on:click="getPdf()">
-                Download PDF 
-            </button>
+            <div class="btn-group d-flex justify-content-end" role="group">
+                <button type="button" class="btn btn-primary" v-on:click="updatePlan()">
+                    Update Plan
+                </button>
+                <button type="button" class="btn btn-secondary" v-on:click="getPdf()">
+                    Download PDF 
+                </button>
+            </div>
         </div>
         <div class="card mb-3" v-for="payment in getPaymentPlanSeries()">
             <div class="card-header">
