@@ -1,5 +1,14 @@
 import { getMinimumMonthlyPaymentWithinPeriod, getPrincipalPlusMonthlyInterest } from "../../app/modules/interest.mjs";
-import { avalancheRepayment, snowballRepayment, Loan, LoanRepayment, Payment, EmergencyFund, PaymentPlan } from "../../app/modules/paymentPlan.mjs";
+import { 
+    avalancheRepayment, 
+    snowballRepayment, 
+    Loan, 
+    LoanRepayment, 
+    Payment, 
+    EmergencyFund, 
+    PaymentPlan,
+    MultiplierPaymentPlan
+} from "../../app/modules/paymentPlan.mjs";
 
 const PRECISION = 0.01;
 
@@ -306,5 +315,127 @@ describe('paymentPlan', () => {
                 expect(test2?.paid).toBe(lps.get('Test 2')?.paid);
             });
         })
-    })
+    }),
+    describe('MultiplierPaymentPlan', () => {
+        describe('createPlan', () => {
+            it('should not accept contribution amounts that are too low', () => {
+                const loans = [new Loan("Test 1", 1000, 0.1, 10)];
+                const years = 6;
+                const pp = new MultiplierPaymentPlan(loans, years, avalancheRepayment);
+                const minimumRequired = loans
+                    .map(ln => getMinimumMonthlyPaymentWithinPeriod(ln.principal, ln.interest / 100.0, ln.minimum, years))
+                    .reduce((acc, x) => acc + x, 0);
+                expect(() => pp.createPlan(0)).toThrow(new Error(`The minimum amount required is $${minimumRequired.toFixed(2)} but contribution amount was $0`));
+            }),
+            it('should exit if all loans are paid off', () => {
+                const loans = [new Loan("Test 1", 1000, 0.1, 10)];
+                const years = 6;
+                const pp = new MultiplierPaymentPlan(loans, years, avalancheRepayment);
+                pp.loanRepayments[0].isPaidOff = true;
+                const minimumRequired = loans
+                    .map(ln => getMinimumMonthlyPaymentWithinPeriod(ln.principal, ln.interest, ln.minimum, years))
+                    .reduce((acc, x) => acc + x, 0);
+
+                pp.createPlan(minimumRequired);
+
+                expect(pp.loanRepayments).toBeDefined();
+                expect(pp.loanRepayments.length).toBe(1);
+                expect(pp.loanRepayments[0].payments.length).toBe(0);
+                expect(pp.loanRepayments[0].isPaidOff).toBe(true);
+            }),
+            it('should handle not having an emergency fund', () => {
+                const loans = [new Loan("Test 1", 1000, 0.1, 10)];
+                const years = 6;
+                const pp = new MultiplierPaymentPlan(loans, years, avalancheRepayment);
+
+                pp.createPlan(600);
+
+                expect(pp.emergencyFund).toBeFalsy();
+                expect(pp.loanRepayments.length).toBe(1);
+                expect(pp.loanRepayments[0].payments.length).toBe(2);
+                expect(pp.loanRepayments[0].isPaidOff).toBe(true);
+            }),
+            it('should pay emergency fund first', () => {
+                const loans = [new Loan("Test 1", 1000, 0.1, 10)];
+                const years = 6;
+                const emergencyFund = new EmergencyFund(1000, 0.5);
+                const contribution = 600;
+                const minimumMonthlyPayment = getMinimumMonthlyPaymentWithinPeriod(loans[0].principal, loans[0].interest / 100.0, loans[0].minimum, years);
+                const bonus = contribution - minimumMonthlyPayment;
+                const pp = new MultiplierPaymentPlan(loans, years, avalancheRepayment, emergencyFund);
+
+                pp.createPlan(600);
+
+                expect(pp.emergencyFund).toBeDefined();
+                expect(pp.emergencyFund?.payments.length).toBe(4);
+                expect(pp.emergencyFund?.isPaidOff).toBe(true);
+                expect(emergencyFund.payments[0].payment).toBe(bonus / 2.0);
+                expect(emergencyFund.payments[3].payment).toBeCloseTo(1000 - (3.0 * bonus / 2.0));
+                expect(pp.loanRepayments.length).toBe(1);
+                expect(pp.loanRepayments[0].payments.length).toBe(4);
+                expect(pp.loanRepayments[0].isPaidOff).toBe(true);
+                expect(pp.loanRepayments[0].payments[0].paid).toBe(minimumMonthlyPayment + (bonus / 2.0));
+                expect(pp.loanRepayments[0].payments[3].paid).toBe(getPrincipalPlusMonthlyInterest(pp.loanRepayments[0].payments[2].remaining, loans[0].interest / 100.0));
+            }),
+            it('should roll over payments once one loan is paid off', () => {
+                const loans = [
+                    new Loan("Test 1", 1000, 0.1, 10),
+                    new Loan("Test 2", 2000, 0.2, 20)
+                ];
+                const years = 6;
+                const loanPaymentMinimums = loans.map(x => getMinimumMonthlyPaymentWithinPeriod(x.principal, x.interest / 100.0, x.minimum, years));
+                const totalMinimum = loanPaymentMinimums.reduce((acc, x) => acc + x, 0);
+                const totalContribution = 1300;
+                const bonus = totalContribution - totalMinimum;
+                const firstPrincipal = getPrincipalPlusMonthlyInterest(loans[0].principal, loans[0].interest / 100.0);
+                const firstPayment = firstPrincipal;
+                const remainingBonus = bonus - firstPayment + loanPaymentMinimums[0];
+                const secondPrincipal = getPrincipalPlusMonthlyInterest(loans[1].principal, loans[1].interest / 100.0);
+                const secondPayment = loanPaymentMinimums[1] + remainingBonus;
+                const thirdPrincipal = getPrincipalPlusMonthlyInterest(secondPrincipal - secondPayment, loans[1].interest / 100.0);
+                const thirdPayment = totalContribution;
+                
+                const pp = new MultiplierPaymentPlan(loans, years, snowballRepayment);
+
+                pp.createPlan(1300);
+
+                expect(pp.loanRepayments.length).toBe(2);
+                expect(pp.loanRepayments[0].loan.name).toBe('Test 1');
+                expect(pp.loanRepayments[0].payments.length).toBe(1);
+                expect(pp.loanRepayments[0].payments[0].paid).toBeCloseTo(firstPrincipal, PRECISION);
+                expect(pp.loanRepayments[0].payments[0].remaining).toBe(0);
+                expect(pp.loanRepayments[0].isPaidOff).toBe(true);
+                expect(pp.loanRepayments[1].loan.name).toBe('Test 2');
+                expect(pp.loanRepayments[1].payments.length).toBe(3);
+                expect(pp.loanRepayments[1].payments[0].paid).toBeCloseTo(secondPayment, PRECISION);
+                expect(pp.loanRepayments[1].payments[0].remaining).toBeCloseTo(secondPrincipal - secondPayment, PRECISION);
+                expect(pp.loanRepayments[1].payments[1].paid).toBeCloseTo(thirdPayment);
+                expect(pp.loanRepayments[1].payments[1].remaining).toBeCloseTo(thirdPrincipal - thirdPayment, PRECISION);
+            }),
+            it('should add a bonus to the most important loan when principal is less than minimum payment', () => {
+                const loans = [
+                    new Loan("Test 1", 2000, 0.2, 20),
+                    new Loan("Test 2", 5, 0.1, 20)
+                ];
+                const years = 6;
+                const firstMinimum = getMinimumMonthlyPaymentWithinPeriod(loans[0].principal, loans[0].interest / 100.0, loans[0].minimum, years);
+                const secondMinimum = getPrincipalPlusMonthlyInterest(loans[1].principal, loans[1].interest / 100.0);
+                const loanPaymentMinimums = [firstMinimum, secondMinimum].reduce((acc, x) => acc + x, 0);
+                const totalContribution = 1300;
+                const bonus = totalContribution - loanPaymentMinimums;
+                const firstLoanAmountPaid = firstMinimum + bonus;
+                
+                const pp = new MultiplierPaymentPlan(loans, years, avalancheRepayment);
+                pp.createPlan(1300);
+
+                expect(pp.loanRepayments.length).toBe(2);
+                expect(pp.loanRepayments[0].loan.name).toBe('Test 1');
+                expect(pp.loanRepayments[0].payments[0].paid).toBe(firstLoanAmountPaid);
+                expect(pp.loanRepayments[0].payments[0].paidMoreThanMinimum).toBe(true);
+                expect(pp.loanRepayments[1].loan.name).toBe('Test 2');
+                expect(pp.loanRepayments[1].payments[0].paid).toBe(secondMinimum);
+                expect(pp.loanRepayments[1].payments[0].remaining).toBe(0);
+            })
+        })
+    });
 }); 

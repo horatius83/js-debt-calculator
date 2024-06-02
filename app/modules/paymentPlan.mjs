@@ -293,3 +293,49 @@ export class PaymentPlan {
         })();
     }
 }
+
+export class MultiplierPaymentPlan extends PaymentPlan {
+    /**
+     * A class representing a plan to repay a group of loans
+     * @param {Loan[]} loans - the loans to repay
+     * @param {number} years - the maximum number of years to repay those loans
+     * @param {(loans: Loan[]) => Loan[]} repaymentStrategy - determines how to prioritize the loans for repayment
+     * @param {EmergencyFund=} emergencyFund - optional emergency fund to prioritize while paying down debt
+     */
+    constructor(loans, years, repaymentStrategy, emergencyFund) {
+        super(loans, years, repaymentStrategy, emergencyFund);
+    }   
+
+    /**
+     * Create a plan to pay down a series of loans
+     * @param {number} contributionAmount - the maximum amount of money that can be contributed to paying down the debt
+     */
+    createPlan(contributionAmount) {
+        let minimumRequired = this.getMinimumRequiredPayment();
+        if (contributionAmount < minimumRequired) {
+            throw new Error(`The minimum amount required is $${minimumRequired.toFixed(2)} but contribution amount was $${contributionAmount}`);
+        }
+        let allLoansPaidOff = this.loanRepayments.every(lr => lr.isPaidOff);
+        while (!allLoansPaidOff) {
+            allLoansPaidOff = true;
+            minimumRequired = this.getMinimumRequiredPayment();
+            let totalBonus = contributionAmount - minimumRequired;
+            let leftoverEmergencyFundBonus = this.emergencyFund && !this.emergencyFund.isPaidOff
+                ? this.emergencyFund.addPayment(totalBonus * this.emergencyFund.percentageOfBonusFunds)
+                : 0;
+            let bonus = this.emergencyFund && !this.emergencyFund.isPaidOff
+                ? totalBonus * (1.0 - this.emergencyFund.percentageOfBonusFunds) + leftoverEmergencyFundBonus
+                : totalBonus;
+
+            for (let lr of this.loanRepayments) {
+                const minimumPayment = lr.getMinimum(this.years);
+                if (lr.isPaidOff) {
+                    // Since we don't need to pay this off, roll that amount into the bonus
+                    continue;
+                }
+                allLoansPaidOff = false;
+                bonus = lr.makePayment(minimumPayment + bonus, 1, bonus > 0);
+            }
+        }
+    }   
+}
