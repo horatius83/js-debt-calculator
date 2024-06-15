@@ -326,24 +326,28 @@ export class MultiplierPaymentPlan extends PaymentPlan {
             let bonus = this.emergencyFund && !this.emergencyFund.isPaidOff
                 ? totalBonus * (1.0 - this.emergencyFund.percentageOfBonusFunds) + leftoverEmergencyFundBonus
                 : totalBonus;
-            const loansThatCanBeMultiplied = this.loanRepayments
-            .filter(ln => !ln.isPaidOff && Math.floor(bonus / ln.getMinimum(this.years)) > 1);
 
-            // bonus + minimums of all the loans that are already paid off
-            // 
+            /** @type {Array<[string, number]>} */
+            const minimums = this.loanRepayments
+            .filter(x => !x.isPaidOff)
+            .map(x => [x.loan.name, x.getMinimum(this.years)]);
+            const multiples = getMultiples(bonus, minimums);
+
             for (let lr of this.loanRepayments) {
                 if (lr.isPaidOff) {
-                    // Since we don't need to pay this off, roll that amount into the bonus
                     continue;
                 }
                 allLoansPaidOff = false;
                 const minimumPayment = lr.getMinimum(this.years);
-                const multiplier = Math.floor(bonus / minimumPayment);
-                if (multiplier> 1) {
-                    bonus = lr.makePayment(minimumPayment * multiplier, multiplier, bonus > 0) + (bonus - (minimumPayment * multiplier));
-                } else {
-                    bonus = lr.makePayment(minimumPayment, 1, bonus > 0) + (bonus - minimumPayment);
+                
+                if (multiples.has(lr.loan.name)) {
+                    const multiplier = multiples.get(lr.loan.name);
+                    if (multiplier) {
+                        bonus = lr.makePayment(multiplier * minimumPayment, multiplier, true);
+                        continue
+                    }
                 }
+                bonus = lr.makePayment(minimumPayment, 1, false);
             }
         }
     }
@@ -354,20 +358,41 @@ export class MultiplierPaymentPlan extends PaymentPlan {
  * (This isn't guaranteed to find an optimal solution but it is simpler and more space-efficient than the dynamic 
  * programming algorithms I've seen)
  * @param {number} targetValue - the target value to be equal to or less than
- * @param {Array<[string, number]>} minimums - loan-name to minimum amount mapping
+ * @param {Array<LoanRepayment>} payments - an array of payments
+ * @param {number} years - maximum number of years to make payments
  * @returns {Map<string, number>} - multiples of each loan
  */
-export function getAdditions(targetValue, minimums) {
-    minimums.sort((a, b) => b[1] - a[1]); // sort descending
+export function getMultiples(targetValue, payments, years) {
+    /** @type {Map<string, number>} */
+    const minimums = payments.reduce((m, x) => {
+        const minimum = x.getMinimum(years);        
+        const remaining = x.payments.at(-1)?.remaining || x.loan.principal;
+        const minimumPayment = Math.min(minimum, remaining);
+        if (minimumPayment <= targetValue) {
+            m.set(x.loan.name, minimumPayment);
+        }
+        return m;
+    }, new Map())
+    const sortedPayments = payments
+    .filter(x => minimums.has(x.loan.name));
+    // @ts-ignore
+    sortedPayments.sort((a, b) => minimums.get(b.loan.name) - minimums.get(a.loan.name));
+    
     /** @type { Map<string, number> } */
-    const rv = minimums.reduce((m, x) => {
-        m[x[0]] = 0;
-        return m
-    }, new Map());
-    for (const [k,v] of minimums) {
-        const count = Math.floor(targetValue / v);
-        rv[k] = count;
-        targetValue -= count * v;
+    const rv = new Map();
+    for (const p of sortedPayments) {
+        const remainingOnThisLoan = p.payments.at(-1)?.remaining || p.loan.principal;
+        // This will never be 1, because of the filter in sortedPayments, but it gets the type-checker off my back
+        const minimum = minimums.get(p.loan.name) || 1;
+        if (remainingOnThisLoan < targetValue) {
+            const count = Math.floor(remainingOnThisLoan / minimum);
+            rv.set(p.loan.name, count);
+            targetValue -= count * minimum;
+        } else {
+            const count = Math.floor(targetValue / minimum)
+            rv.set(p.loan.name, count);
+            targetValue -= count * minimum;
+        }
     }
     return rv;
 }
