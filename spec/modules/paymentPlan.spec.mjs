@@ -7,7 +7,8 @@ import {
     Payment, 
     EmergencyFund, 
     PaymentPlan,
-    MultiplierPaymentPlan
+    MultiplierPaymentPlan,
+    getAdditions
 } from "../../app/modules/paymentPlan.mjs";
 
 const PRECISION = 0.01;
@@ -420,10 +421,15 @@ describe('paymentPlan', () => {
                 const years = 6;
                 const firstMinimum = getMinimumMonthlyPaymentWithinPeriod(loans[0].principal, loans[0].interest / 100.0, loans[0].minimum, years);
                 const secondMinimum = getPrincipalPlusMonthlyInterest(loans[1].principal, loans[1].interest / 100.0);
-                const loanPaymentMinimums = [firstMinimum, secondMinimum].reduce((acc, x) => acc + x, 0);
-                const totalContribution = 1300;
-                const bonus = totalContribution - loanPaymentMinimums;
-                const firstLoanAmountPaid = firstMinimum + bonus;
+                //const loanPaymentMinimums = [firstMinimum, secondMinimum].reduce((acc, x) => acc + x, 0);
+                const totalContribution = firstMinimum + secondMinimum + secondMinimum;
+                //const bonus = totalContribution - loanPaymentMinimums;
+                console.log('totalContribution: ', totalContribution);
+                //console.log('bonus: ', bonus);
+                console.log('firstMinimum: ', firstMinimum);
+                console.log('secondMinimum: ',secondMinimum);
+                const firstLoanAmountPaid = firstMinimum;
+                const secondAmountPaid = secondMinimum * 2;
                 
                 const pp = new MultiplierPaymentPlan(loans, years, avalancheRepayment);
                 pp.createPlan(1300);
@@ -433,9 +439,26 @@ describe('paymentPlan', () => {
                 expect(pp.loanRepayments[0].payments[0].paid).toBe(firstLoanAmountPaid);
                 expect(pp.loanRepayments[0].payments[0].paidMoreThanMinimum).toBe(true);
                 expect(pp.loanRepayments[1].loan.name).toBe('Test 2');
-                expect(pp.loanRepayments[1].payments[0].paid).toBe(secondMinimum);
+                expect(pp.loanRepayments[1].payments[0].paid).toBe(secondAmountPaid);
                 expect(pp.loanRepayments[1].payments[0].remaining).toBe(0);
             })
-        })
+        }),
+        describe('getAdditions', () => {
+            it('should calculate values correctly', () => {
+                const targetValue = 30;
+                /** @type { Array<[string, number]>} */
+                const minimums = [
+                    ['a', 25],
+                    ['b', 10],
+                    ['c', 5]
+                ];
+
+                const result = getAdditions(targetValue, minimums);
+
+                expect(result['a']).toBe(1);
+                expect(result['b']).toBe(0);
+                expect(result['c']).toBe(1);
+            })
+        });
     });
 }); 

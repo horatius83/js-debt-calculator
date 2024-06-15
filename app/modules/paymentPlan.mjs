@@ -327,15 +327,45 @@ export class MultiplierPaymentPlan extends PaymentPlan {
                 ? totalBonus * (1.0 - this.emergencyFund.percentageOfBonusFunds) + leftoverEmergencyFundBonus
                 : totalBonus;
 
+            // bonus + minimums of all the loans that are already paid off
+            // 
             for (let lr of this.loanRepayments) {
-                const minimumPayment = lr.getMinimum(this.years);
                 if (lr.isPaidOff) {
                     // Since we don't need to pay this off, roll that amount into the bonus
                     continue;
                 }
                 allLoansPaidOff = false;
-                bonus = lr.makePayment(minimumPayment + bonus, 1, bonus > 0);
+                const minimumPayment = lr.getMinimum(this.years);
+                const multiplier = Math.floor(bonus / minimumPayment);
+                if (multiplier> 1) {
+                    bonus = lr.makePayment(minimumPayment * multiplier, multiplier, bonus > 0) + (bonus - (minimumPayment * multiplier));
+                } else {
+                    bonus = lr.makePayment(minimumPayment, 1, bonus > 0) + (bonus - minimumPayment);
+                }
             }
         }
-    }   
+    }
+}
+
+/**
+ * Given a series of loan-names to minimum payments, produce a map of loan-names to multiples of those minimums
+ * (This isn't guaranteed to find an optimal solution but it is simpler and more space-efficient than the dynamic 
+ * programming algorithms I've seen)
+ * @param {number} targetValue - the target value to be equal to or less than
+ * @param {Array<[string, number]>} minimums - loan-name to minimum amount mapping
+ * @returns {Map<string, number>} - multiples of each loan
+ */
+export function getAdditions(targetValue, minimums) {
+    minimums.sort((a, b) => b[1] - a[1]); // sort descending
+    /** @type { Map<string, number> } */
+    const rv = minimums.reduce((m, x) => {
+        m[x[0]] = 0;
+        return m
+    }, new Map());
+    for (const [k,v] of minimums) {
+        const count = Math.floor(targetValue / v);
+        rv[k] = count;
+        targetValue -= count * v;
+    }
+    return rv;
 }
