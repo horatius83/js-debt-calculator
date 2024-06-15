@@ -326,6 +326,8 @@ export class MultiplierPaymentPlan extends PaymentPlan {
             let bonus = this.emergencyFund && !this.emergencyFund.isPaidOff
                 ? totalBonus * (1.0 - this.emergencyFund.percentageOfBonusFunds) + leftoverEmergencyFundBonus
                 : totalBonus;
+            const loansThatCanBeMultiplied = this.loanRepayments
+            .filter(ln => !ln.isPaidOff && Math.floor(bonus / ln.getMinimum(this.years)) > 1);
 
             // bonus + minimums of all the loans that are already paid off
             // 
