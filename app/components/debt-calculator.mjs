@@ -1,6 +1,6 @@
 import { DebtCalculatorState } from "../modules/debtCalculatorState.mjs";
 import { getMinimumMonthlyPaymentWithinPeriod } from "../modules/interest.mjs";
-import { avalancheRepayment, snowballRepayment, PaymentPlan, Payment } from "../modules/paymentPlan.mjs";
+import { avalancheRepayment, snowballRepayment, PaymentPlan, Payment, PaymentPlanOutputMonth, EmergencyFund } from "../modules/paymentPlan.mjs";
 import { debounce, deleteItem, getLoan } from "../modules/util.mjs";
 import { html } from "./debt-calculator-html.mjs";
 
@@ -231,10 +231,19 @@ export const DebtCalculator = {
                 }
             };
             let strategy = getStrategy(this.strategy);
-            const paymentPlan = new PaymentPlan(this.loans, this.paymentPeriodInMonths / 12.0, strategy);
-            this.totalMonthlyPaymentInput = this.totalMonthlyPaymentInput || this.totalMinimumToNearestDollar;
-            paymentPlan.createPlan(Number(this.totalMonthlyPaymentInput));
-            this.paymentPlan = paymentPlan;
+
+            if (this.shouldCreateEmergencyFund) {
+                const emergencyFund = new EmergencyFund(this.emergencyFundMaxAmount, this.emergencyFundPercentage / 100.0);
+                const paymentPlan = new PaymentPlan(this.loans, this.paymentPeriodInMonths / 12.0, strategy, emergencyFund);
+                this.totalMonthlyPaymentInput = this.totalMonthlyPaymentInput || this.totalMinimumToNearestDollar;
+                paymentPlan.createPlan(Number(this.totalMonthlyPaymentInput));
+                this.paymentPlan = paymentPlan;
+            } else {
+                const paymentPlan = new PaymentPlan(this.loans, this.paymentPeriodInMonths / 12.0, strategy);
+                this.totalMonthlyPaymentInput = this.totalMonthlyPaymentInput || this.totalMinimumToNearestDollar;
+                paymentPlan.createPlan(Number(this.totalMonthlyPaymentInput));
+                this.paymentPlan = paymentPlan;
+            }
         },
         generatePaymentPlanPdf() {
             this.generatePaymentPlan();
@@ -264,10 +273,63 @@ export const DebtCalculator = {
             // Print PDF here
         },
         getPaymentPlanSeries() {
-            return this.paymentPlan.getPaymentPlanSeries(new Date());
+            return this.paymentPlan?.getPaymentPlanSeries(new Date());
         },
         updatePlan() {
             this.paymentPlan = undefined;
+        },
+        getPdf() {
+            /** @type { Generator<PaymentPlanOutputMonth>}*/
+            const pps = this.paymentPlan?.getPaymentPlanSeries(new Date());
+            const content = [];
+            for(const payment of pps) {
+                content.push({
+                    'text': payment.month,
+                    'style': 'header'
+                })
+                for(const loan of payment.loanPayments) {
+                    const loanName = loan[0];
+                    const amountPaid = this.asCurrency(loan[1].paid);
+                    if (loan[1].paidMoreThanMinimum) {
+                        content.push({
+                            'style': 'bold',
+                            'text': `${loanName}: ${amountPaid}`
+                        });
+                    } else {
+                        content.push(`${loanName}: ${amountPaid}`);
+                    }
+                }
+                if (payment.emergencyFundPayment) {
+                    content.push(`Emergency Fund Payment: ${this.asCurrency(payment.emergencyFundPayment.payment)}`);
+                }
+                content.push('\n\n');
+            }
+            const docDefinition = {
+                content,
+                defaultStyle: {
+                    fontFamily: 'Helvetica',
+                    fontSize: 12
+                },
+                styles: {
+                    header: {
+                        fontSize: 18,
+                        bold: true
+                    },
+                    bold: {
+                        fontSize: 15,
+                        bold: true
+                    }
+                }
+            };
+            pdfMake.fonts = {
+                Roboto: {
+                    normal: 'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.66/fonts/Roboto/Roboto-Regular.ttf',
+                    bold: 'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.66/fonts/Roboto/Roboto-Medium.ttf',
+                    italics: 'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.66/fonts/Roboto/Roboto-Italic.ttf',
+                    bolditalics: 'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.66/fonts/Roboto/Roboto-MediumItalic.ttf'
+                }
+            };
+            pdfMake.createPdf(docDefinition).download();
         }
     },
     computed: {
@@ -277,7 +339,7 @@ export const DebtCalculator = {
         totalPrincipal: function() {
             return this.loans
             .map(x => x.principal)
-            .reduce((acc, x) => acc + x, 0);
+            .reduce((/** @type {number} */ acc, /** @type {number} */ x) => acc + x, 0);
         },
         /**
          * @returns {number} - the minimum payment required every month

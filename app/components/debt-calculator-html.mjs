@@ -126,22 +126,30 @@ export const html = /* html */`
     </div>
     <div v-if="paymentPlan" class="container">
         <div class="card mb-3">
-            <button type="button" class="btn btn-success" v-on:click="updatePlan()">
-                Update Plan
-            </button>
+            <div class="btn-group d-flex justify-content-end" role="group">
+                <button type="button" class="btn btn-primary" v-on:click="updatePlan()">
+                    Update Plan
+                </button>
+                <button type="button" class="btn btn-secondary" v-on:click="getPdf()">
+                    Download PDF 
+                </button>
+            </div>
         </div>
         <div class="card mb-3" v-for="payment in getPaymentPlanSeries()">
             <div class="card-header">
-                {{ dateAsYearAndMonth(payment[0]) }}
+                {{ payment.month }}
             </div>
             <div class="card-body">
                 <ul>
-                    <li v-for="loan in payment[1]" :class="{ mark: loan[1].paidMoreThanMinimum || loan[1].paidOffLoan }">
+                    <li v-for="loan in payment.loanPayments" :class="{ mark: loan[1].paidMoreThanMinimum || loan[1].paidOffLoan }">
                         {{ loan[0] }}: {{ asCurrency(loan[1].paid) }}
+                    </li>
+                    <li v-if="payment.emergencyFundPayment">
+                        Emergency Fund: {{ asCurrency(payment.emergencyFundPayment.payment) }}
                     </li>
                 </ul>
             </div>
-        </div> 
+        </div>
     </div>
 
     <!-- New Loan Popup -->

@@ -289,21 +289,19 @@ describe('paymentPlan', () => {
                 const g = pp.getPaymentPlanSeries(new Date(1970, 0, 1));
 
                 const xs = Array.from(g);
-                expect(xs[0][0].getFullYear()).toBe(1970);
-                expect(xs[12][0].getFullYear()).toBe(1971);
-                expect(xs[0][0].getMonth()).toBe(0);
-                expect(xs[1][0].getMonth()).toBe(1);
-                expect(xs[12][0].getMonth()).toBe(0);
-                const entries = Array.from(xs[0][1].entries());
+                expect(xs[0].month).toBe("January 1970");
+                expect(xs[12].month).toBe("January 1971");
+
+                const entries = Array.from(xs[0].loanPayments.entries());
                 expect(entries.length).toBe(2);
-                expect(xs[0][1].has("Test 1")).toBeTrue();
-                expect(xs[0][1].has("Test 2")).toBeTrue();
-                const test1 = xs[0][1].get("Test 1");
+                expect(xs[0].loanPayments.has("Test 1")).toBeTrue();
+                expect(xs[0].loanPayments.has("Test 2")).toBeTrue();
+                const test1 = xs[0].loanPayments.get("Test 1");
                 expect(test1).toBeDefined();
                 /** @type { Map<string, Payment> } */
                 const lps = pp.loanRepayments.reduce((m, x, _, __) => m.set(x.loan.name, x.payments[0]), new Map());
                 expect(test1?.paid).toBe(lps.get('Test 1')?.paid);
-                const test2 = xs[0][1].get("Test 2");
+                const test2 = xs[0].loanPayments.get("Test 2");
                 expect(test2).toBeDefined();
                 expect(test2?.paid).toBe(lps.get('Test 2')?.paid);
             });
