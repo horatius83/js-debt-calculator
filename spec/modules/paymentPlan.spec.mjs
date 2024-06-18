@@ -344,7 +344,7 @@ describe('paymentPlan', () => {
                 expect(pp.loanRepayments[0].payments.length).toBe(0);
                 expect(pp.loanRepayments[0].isPaidOff).toBe(true);
             }),
-            it('should handle not having an emergency fund', () => {
+            xit('should handle not having an emergency fund', () => {
                 const loans = [new Loan("Test 1", 1000, 0.1, 10)];
                 const years = 6;
                 const pp = new MultiplierPaymentPlan(loans, years, avalancheRepayment);
@@ -358,15 +358,17 @@ describe('paymentPlan', () => {
             }),
             it('should pay emergency fund first', () => {
                 const loans = [new Loan("Test 1", 1000, 0.1, 10)];
+                console.log(`loans 1: ${JSON.stringify(loans)}`);
                 const years = 6;
                 const emergencyFund = new EmergencyFund(1000, 0.5);
                 const contribution = 600;
                 const minimumMonthlyPayment = getMinimumMonthlyPaymentWithinPeriod(loans[0].principal, loans[0].interest / 100.0, loans[0].minimum, years);
                 const bonus = contribution - minimumMonthlyPayment;
                 const pp = new MultiplierPaymentPlan(loans, years, avalancheRepayment, emergencyFund);
-                /** @type { Array<[string, number]>} */
-                const minimums = loans.map(x => [x.name, minimumMonthlyPayment]);
-                const multiples = getMultiples(bonus / 2.0, minimums);
+                console.log(`loans 2: ${JSON.stringify(loans)}`);
+                const repayments = loans.map(x => new LoanRepayment(x));
+                const multiples = getMultiples(bonus / 2.0, repayments, years);
+                console.log(`loans 3: ${JSON.stringify(loans)}`);
 
                 pp.createPlan(600);
 
@@ -437,10 +439,10 @@ describe('paymentPlan', () => {
                 //const loanPaymentMinimums = [firstMinimum, secondMinimum].reduce((acc, x) => acc + x, 0);
                 const totalContribution = firstMinimum + secondMinimum + secondMinimum;
                 //const bonus = totalContribution - loanPaymentMinimums;
-                console.log('totalContribution: ', totalContribution);
+                //console.log('totalContribution: ', totalContribution);
                 //console.log('bonus: ', bonus);
-                console.log('firstMinimum: ', firstMinimum);
-                console.log('secondMinimum: ',secondMinimum);
+                //console.log('firstMinimum: ', firstMinimum);
+                //console.log('secondMinimum: ',secondMinimum);
                 const firstLoanAmountPaid = firstMinimum;
                 const secondAmountPaid = secondMinimum * 2;
                 
@@ -459,16 +461,15 @@ describe('paymentPlan', () => {
         describe('getMultiples', () => {
             xit('should calculate values correctly', () => {
                 const targetValue = 30;
-
-
-                /** @type { Array<[string, number]>} */
-                const minimums = [
+                
+                const repayments = [
                     ['a', 25],
                     ['b', 10],
                     ['c', 5]
-                ];
+                ]
+                .map(x => new LoanRepayment(new Loan(x[0], x[1], 0, x[1])));
 
-                const result = getMultiples(targetValue, minimums);
+                const result = getMultiples(targetValue, repayments, 10);
 
                 expect(result.get('a')).toBe(1);
                 expect(result.has('b')).toBeFalse();

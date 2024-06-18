@@ -327,11 +327,7 @@ export class MultiplierPaymentPlan extends PaymentPlan {
                 ? totalBonus * (1.0 - this.emergencyFund.percentageOfBonusFunds) + leftoverEmergencyFundBonus
                 : totalBonus;
 
-            /** @type {Array<[string, number]>} */
-            const minimums = this.loanRepayments
-            .filter(x => !x.isPaidOff)
-            .map(x => [x.loan.name, x.getMinimum(this.years)]);
-            const multiples = getMultiples(bonus, minimums);
+            const multiples = getMultiples(bonus, this.loanRepayments, this.years);
 
             for (let lr of this.loanRepayments) {
                 if (lr.isPaidOff) {
@@ -365,6 +361,7 @@ export class MultiplierPaymentPlan extends PaymentPlan {
 export function getMultiples(targetValue, payments, years) {
     /** @type {Map<string, number>} */
     const minimums = payments.reduce((m, x) => {
+        console.log(`x: ${JSON.stringify(x)}`);
         const minimum = x.getMinimum(years);        
         const remaining = x.payments.at(-1)?.remaining || x.loan.principal;
         const minimumPayment = Math.min(minimum, remaining);
