@@ -342,8 +342,9 @@ export class MultiplierPaymentPlan extends PaymentPlan {
                         bonus = lr.makePayment(multiplier * minimumPayment, multiplier, true);
                         continue
                     }
+                } else {
+                    bonus = lr.makePayment(minimumPayment, 1, false);
                 }
-                bonus = lr.makePayment(minimumPayment, 1, false);
             }
         }
     }
@@ -360,25 +361,25 @@ export class MultiplierPaymentPlan extends PaymentPlan {
  */
 export function getMultiples(targetValue, payments, years) {
     /** @type {Map<string, number>} */
-    const minimums = payments.reduce((m, x) => {
-        console.log(`x: ${JSON.stringify(x)}`);
-        const minimum = x.getMinimum(years);        
-        const remaining = x.payments.at(-1)?.remaining || x.loan.principal;
-        const minimumPayment = Math.min(minimum, remaining);
-        if (minimumPayment <= targetValue) {
-            m.set(x.loan.name, minimumPayment);
+    const minimums = payments
+    .filter(x => !x.isPaidOff)
+    .reduce((m, lp) => {
+        const minimum = lp.getMinimum(years);
+        if (minimum <= targetValue) {
+            m.set(lp.loan.name, minimum);
         }
         return m;
-    }, new Map())
+    }, new Map());
+    // Try to pay off the biggest amounts first
     const sortedPayments = payments
-    .filter(x => minimums.has(x.loan.name));
-    // @ts-ignore
-    sortedPayments.sort((a, b) => minimums.get(b.loan.name) - minimums.get(a.loan.name));
+    .filter(x => minimums.has(x.loan.name))
+    // @ts-ignore (minimums cannot be undefined)
+    .sort((a, b) => minimums.get(b.loan.name) - minimums.get(a.loan.name));
     
     /** @type { Map<string, number> } */
     const rv = new Map();
     for (const p of sortedPayments) {
-        const remainingOnThisLoan = p.payments.at(-1)?.remaining || p.loan.principal;
+        const remainingOnThisLoan = getPrincipalPlusMonthlyInterest(p.payments.at(-1)?.remaining || p.loan.principal, p.loan.interest / 100.0);
         // This will never be 1, because of the filter in sortedPayments, but it gets the type-checker off my back
         const minimum = minimums.get(p.loan.name) || 1;
         if (remainingOnThisLoan < targetValue) {

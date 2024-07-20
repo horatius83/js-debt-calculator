@@ -357,37 +357,63 @@ describe('paymentPlan', () => {
                 expect(pp.loanRepayments[0].isPaidOff).toBe(true);
             }),
             it('should pay emergency fund first', () => {
-                const loans = [new Loan("Test 1", 1000, 0.1, 10)];
-                console.log(`loans 1: ${JSON.stringify(loans)}`);
+                const loan = new Loan("Test 1", 1000, 10, 10);
+                const loans = [loan];
                 const years = 6;
                 const emergencyFund = new EmergencyFund(1000, 0.5);
                 const contribution = 600;
-                const minimumMonthlyPayment = getMinimumMonthlyPaymentWithinPeriod(loans[0].principal, loans[0].interest / 100.0, loans[0].minimum, years);
-                const bonus = contribution - minimumMonthlyPayment;
-                const pp = new MultiplierPaymentPlan(loans, years, avalancheRepayment, emergencyFund);
-                console.log(`loans 2: ${JSON.stringify(loans)}`);
-                const repayments = loans.map(x => new LoanRepayment(x));
-                const multiples = getMultiples(bonus / 2.0, repayments, years);
-                console.log(`loans 3: ${JSON.stringify(loans)}`);
+                const minimumPayment = getMinimumMonthlyPaymentWithinPeriod(
+                    loan.principal,
+                    loan.interest / 100.0,
+                    loan.minimum,
+                    years
+                );
+                const totalBonus = contribution - minimumPayment;
 
-                pp.createPlan(600);
+                const newPayment = (remainingPrincipal, remainingEmergencyFund) => {
+                    const principalPlusInterest = getPrincipalPlusMonthlyInterest(remainingPrincipal, loan.interest / 100.0);
+                    const paymentBonus = emergencyFund.percentageOfBonusFunds * totalBonus < remainingEmergencyFund
+                        ? (1.0 - emergencyFund.percentageOfBonusFunds) * totalBonus
+                        : totalBonus - remainingEmergencyFund;
+                    const emergencyFundBonus = emergencyFund.percentageOfBonusFunds * totalBonus < remainingEmergencyFund
+                        ? emergencyFund.percentageOfBonusFunds * totalBonus
+                        : remainingEmergencyFund;
+                    
+                    const multiplier = paymentBonus < principalPlusInterest
+                        ? Math.floor(paymentBonus / minimumPayment)
+                        : 0;
+                    const amountPaid = paymentBonus < principalPlusInterest
+                        ? minimumPayment * multiplier 
+                        : principalPlusInterest;
+                    const remaining = principalPlusInterest - amountPaid;
+
+                    return { principalPlusInterest, multiplier, amountPaid, remaining,
+                        emergencyFundPaid: emergencyFundBonus,
+                        emergencyFundRemaining: remainingEmergencyFund - emergencyFundBonus
+                    };
+                };
+
+                const payments = [];
+                payments[0] = newPayment(loan.principal, emergencyFund.targetAmount);
+                payments[1] = newPayment(payments[0].remaining, payments[0].emergencyFundRemaining);
+                payments[2] = newPayment(payments[1].remaining, payments[1].emergencyFundRemaining);
+                payments[3] = newPayment(payments[2].remaining, payments[2].emergencyFundRemaining);
+
+                console.log(`Minimum Payment: ${minimumPayment}`);
+                payments.forEach((x, i) => console.log(`Payment ${i}: ${JSON.stringify(x)}`));
+
+                const pp = new MultiplierPaymentPlan(loans, years, avalancheRepayment, emergencyFund);
+                pp.createPlan(contribution);
 
                 expect(pp.emergencyFund).toBeDefined();
                 expect(pp.emergencyFund?.payments.length).toBe(4);
                 expect(pp.emergencyFund?.isPaidOff).toBe(true);
-                expect(emergencyFund.payments[0].payment).toBe(bonus / 2.0);
-                expect(emergencyFund.payments[3].payment).toBeCloseTo(1000 - (3.0 * bonus / 2.0));
-                expect(pp.loanRepayments.length).toBe(1);
-                expect(pp.loanRepayments[0].payments.length).toBe(4);
-                expect(pp.loanRepayments[0].isPaidOff).toBe(true);
-                expect(pp.loanRepayments[0].payments[3].paid).toBe(getPrincipalPlusMonthlyInterest(pp.loanRepayments[0].payments[2].remaining, loans[0].interest / 100.0));
-
-                // type-checking is still bad at determining when a variable can be deemed no longer nullable
-                const multiple = multiples.get(loans[0].name);
-                expect(multiple).toBeDefined();
-                if (multiple) {
-                    expect(pp.loanRepayments[0].payments[0].paid).toBe(minimumMonthlyPayment * multiple);
-                }
+                expect(pp.emergencyFund?.payments[0].payment).toBeCloseTo(emergencyFund.percentageOfBonusFunds * totalBonus);
+                expect(pp.emergencyFund?.payments[3].payment).toBeCloseTo(emergencyFund.targetAmount - (emergencyFund.percentageOfBonusFunds * totalBonus * 3));
+                
+                expect(pp.loanRepayments.length).toBe(4);
+                expect(pp.loanRepayments[0].payments[0].multiplier).toBe(15);
+                expect(pp.loanRepayments[0].payments[0].paid).toBeCloseTo(15 * minimumPayment);
             }),
             xit('should roll over payments once one loan is paid off', () => {
                 const loans = [
