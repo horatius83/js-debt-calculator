@@ -382,11 +382,7 @@ export function getMultiples(targetValue, payments, years) {
         const remainingOnThisLoan = getPrincipalPlusMonthlyInterest(p.payments.at(-1)?.remaining || p.loan.principal, p.loan.interest / 100.0);
         // This will never be 1, because of the filter in sortedPayments, but it gets the type-checker off my back
         const minimum = minimums.get(p.loan.name) || 1;
-        if (remainingOnThisLoan < targetValue) {
-            const count = Math.floor(remainingOnThisLoan / minimum);
-            rv.set(p.loan.name, count);
-            targetValue -= count * minimum;
-        } else {
+        if (minimum <= targetValue) {
             const count = Math.floor(targetValue / minimum)
             rv.set(p.loan.name, count);
             targetValue -= count * minimum;

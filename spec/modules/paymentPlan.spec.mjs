@@ -399,9 +399,6 @@ describe('paymentPlan', () => {
                 payments[2] = newPayment(payments[1].remaining, payments[1].emergencyFundRemaining);
                 payments[3] = newPayment(payments[2].remaining, payments[2].emergencyFundRemaining);
 
-                console.log(`Minimum Payment: ${minimumPayment}`);
-                payments.forEach((x, i) => console.log(`Payment ${i}: ${JSON.stringify(x)}`));
-
                 const pp = new MultiplierPaymentPlan(loans, years, avalancheRepayment, emergencyFund);
                 pp.createPlan(contribution);
 
@@ -411,7 +408,7 @@ describe('paymentPlan', () => {
                 expect(pp.emergencyFund?.payments[0].payment).toBeCloseTo(emergencyFund.percentageOfBonusFunds * totalBonus);
                 expect(pp.emergencyFund?.payments[3].payment).toBeCloseTo(emergencyFund.targetAmount - (emergencyFund.percentageOfBonusFunds * totalBonus * 3));
                 
-                expect(pp.loanRepayments.length).toBe(4);
+                expect(pp.loanRepayments[0].payments.length).toBe(4);
                 expect(pp.loanRepayments[0].payments[0].multiplier).toBe(15);
                 expect(pp.loanRepayments[0].payments[0].paid).toBeCloseTo(15 * minimumPayment);
             }),
