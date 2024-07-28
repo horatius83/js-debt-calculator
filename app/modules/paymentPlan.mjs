@@ -293,3 +293,100 @@ export class PaymentPlan {
         })();
     }
 }
+
+export class MultiplierPaymentPlan extends PaymentPlan {
+    /**
+     * A class representing a plan to repay a group of loans
+     * @param {Loan[]} loans - the loans to repay
+     * @param {number} years - the maximum number of years to repay those loans
+     * @param {(loans: Loan[]) => Loan[]} repaymentStrategy - determines how to prioritize the loans for repayment
+     * @param {EmergencyFund=} emergencyFund - optional emergency fund to prioritize while paying down debt
+     */
+    constructor(loans, years, repaymentStrategy, emergencyFund) {
+        super(loans, years, repaymentStrategy, emergencyFund);
+    }   
+
+    /**
+     * Create a plan to pay down a series of loans
+     * @param {number} contributionAmount - the maximum amount of money that can be contributed to paying down the debt
+     */
+    createPlan(contributionAmount) {
+        let minimumRequired = this.getMinimumRequiredPayment();
+        if (contributionAmount < minimumRequired) {
+            throw new Error(`The minimum amount required is $${minimumRequired.toFixed(2)} but contribution amount was $${contributionAmount}`);
+        }
+        let allLoansPaidOff = this.loanRepayments.every(lr => lr.isPaidOff);
+        while (!allLoansPaidOff) {
+            allLoansPaidOff = true;
+            minimumRequired = this.getMinimumRequiredPayment();
+            let totalBonus = contributionAmount - minimumRequired;
+            let leftoverEmergencyFundBonus = this.emergencyFund && !this.emergencyFund.isPaidOff
+                ? this.emergencyFund.addPayment(totalBonus * this.emergencyFund.percentageOfBonusFunds)
+                : 0;
+            let bonus = this.emergencyFund && !this.emergencyFund.isPaidOff
+                ? totalBonus * (1.0 - this.emergencyFund.percentageOfBonusFunds) + leftoverEmergencyFundBonus
+                : totalBonus;
+
+            const multiples = getMultiples(bonus, this.loanRepayments, this.years);
+
+            for (let lr of this.loanRepayments) {
+                if (lr.isPaidOff) {
+                    continue;
+                }
+                allLoansPaidOff = false;
+                const minimumPayment = lr.getMinimum(this.years);
+                
+                if (multiples.has(lr.loan.name)) {
+                    const multiplier = multiples.get(lr.loan.name);
+                    if (multiplier) {
+                        bonus = lr.makePayment(multiplier * minimumPayment, multiplier, true);
+                        continue
+                    }
+                } else {
+                    bonus = lr.makePayment(minimumPayment, 1, false);
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Given a series of loan-names to minimum payments, produce a map of loan-names to multiples of those minimums
+ * (This isn't guaranteed to find an optimal solution but it is simpler and more space-efficient than the dynamic 
+ * programming algorithms I've seen)
+ * @param {number} targetValue - the target value to be equal to or less than
+ * @param {Array<LoanRepayment>} payments - an array of payments
+ * @param {number} years - maximum number of years to make payments
+ * @returns {Map<string, number>} - multiples of each loan
+ */
+export function getMultiples(targetValue, payments, years) {
+    /** @type {Map<string, number>} */
+    const minimums = payments
+    .filter(x => !x.isPaidOff)
+    .reduce((m, lp) => {
+        const minimum = lp.getMinimum(years);
+        if (minimum <= targetValue) {
+            m.set(lp.loan.name, minimum);
+        }
+        return m;
+    }, new Map());
+    // Try to pay off the biggest amounts first
+    const sortedPayments = payments
+    .filter(x => minimums.has(x.loan.name))
+    // @ts-ignore (minimums cannot be undefined)
+    .sort((a, b) => minimums.get(b.loan.name) - minimums.get(a.loan.name));
+    
+    /** @type { Map<string, number> } */
+    const rv = new Map();
+    for (const p of sortedPayments) {
+        const remainingOnThisLoan = getPrincipalPlusMonthlyInterest(p.payments.at(-1)?.remaining || p.loan.principal, p.loan.interest / 100.0);
+        // This will never be 1, because of the filter in sortedPayments, but it gets the type-checker off my back
+        const minimum = minimums.get(p.loan.name) || 1;
+        if (minimum <= targetValue) {
+            const count = Math.floor(targetValue / minimum)
+            rv.set(p.loan.name, count);
+            targetValue -= count * minimum;
+        }
+    }
+    return rv;
+}
