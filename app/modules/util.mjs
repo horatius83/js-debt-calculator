@@ -1,4 +1,7 @@
-import { Loan } from "./paymentPlan.mjs";
+import { Loan } from "./loan.mjs";
+import Dinero from 'dinero.js'
+
+export const zero = Dinero({amount: 0});
 
 /**
  * Delete an item from an array
