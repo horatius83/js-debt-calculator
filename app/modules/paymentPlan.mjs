@@ -1,8 +1,9 @@
 import { getMinimumMonthlyPaymentWithinPeriod, getPrincipalPlusMonthlyInterest } from './interest.mjs';
-import { mustBeBetween, mustBeGreaterThan0, mustBeGreaterThanOrEqualTo0 } from './validation.mjs';
-
-
-
+import { Loan } from './loan.mjs';
+import Dinero from 'dinero.js';
+import { zero } from './util.mjs';
+import { EmergencyFund } from './emergencyFund.mjs';
+import { LoanRepayment } from './loanRepayment.mjs';
 
 /**
  * Sort loans according to interest rate
@@ -22,82 +23,8 @@ export function avalancheRepayment(loans) {
  */
 export function snowballRepayment(loans) {
     let newLoans = [...loans];
-    newLoans.sort((a,b) => a.principal - b.principal);
+    newLoans.sort((a,b) => a.principal.getAmount() - b.principal.getAmount());
     return newLoans;
-}
-
-export class EmergencyFundPayment {
-    /**
-     * A individual payment toward an emergency fund
-     * @param {number} payment 
-     * @param {number} amountRemaining 
-     */
-    constructor(payment, amountRemaining) {
-        this.payment = mustBeGreaterThan0(payment, 'Payment');
-        this.amountRemaining = mustBeGreaterThanOrEqualTo0(amountRemaining, 'Amount Remaining');
-    }
-}
-
-export class EmergencyFund {
-    /**
-     * A payment plan for an emergency fund, once the target amount is reached, all further bonus money will be 
-     * applied to the loans
-     * @param {number} targetAmount - the target amount for the Emergency fund
-     * @param {number} percentageOfBonusFunds - the percentage of bonus funds to apply to the emergency fund
-     */
-    constructor(targetAmount, percentageOfBonusFunds) {
-        this.targetAmount = mustBeGreaterThan0(targetAmount, 'Target Amount');
-        this.percentageOfBonusFunds = mustBeBetween(0, percentageOfBonusFunds, 1, 'Percentage of Bonus Funds');
-        /** @type {EmergencyFundPayment[]} */
-        this.payments = [];
-        this.isPaidOff = false;
-    }
-
-    /**
-     * Add payment to emergency fund and return any remaining money if partial or no payment is needed
-     * @param {number} amount - the amount to pay to the Emergency Fund
-     * @returns {number} - amount leftover if this is paid off
-     */
-    addPayment(amount) {
-        mustBeGreaterThan0(amount, 'Amount');
-        if (this.isPaidOff) {
-            return amount;
-        }
-        const mostRecentPayment = this.payments.at(-1);
-        if (mostRecentPayment) {
-            if (mostRecentPayment.amountRemaining > amount) {
-                this.payments.push(new EmergencyFundPayment(amount, mostRecentPayment.amountRemaining - amount));
-                return 0;
-            } else {
-                this.payments.push(new EmergencyFundPayment(mostRecentPayment.amountRemaining, 0));
-                this.isPaidOff = true;
-                return amount - mostRecentPayment.amountRemaining;
-            }
-        } else {
-            if (this.targetAmount > amount) {
-                this.payments.push(new EmergencyFundPayment(amount, this.targetAmount - amount));
-                return 0;
-            } else {
-                this.payments.push(new EmergencyFundPayment(this.targetAmount, 0));
-                this.isPaidOff = true;
-                return amount - this.targetAmount;
-            }
-        }
-    }
-}
-
-export class PaymentPlanOutputMonth {
-    /**
-     * Summary of payments for a given month
-     * @param {string} month - what month this took place
-     * @param {Map<string, Payment>} loanPayments - payments that took place this month
-     * @param {EmergencyFundPayment=} emergencyFundPayment - payment to Emergency Fund (if any)
-     */
-    constructor(month, loanPayments, emergencyFundPayment) {
-        this.month = month;
-        this.loanPayments = loanPayments;
-        this.emergencyFundPayment = emergencyFundPayment
-    }
 }
 
 export class PaymentPlan {
@@ -110,24 +37,27 @@ export class PaymentPlan {
      */
     constructor(loans, years, repaymentStrategy, emergencyFund) {
         this.loanRepayments = repaymentStrategy(loans).map(ln => new LoanRepayment(ln));
-        this.years = mustBeGreaterThan0(years, 'Years');
+        if (years <= 0) {
+            throw new Error('Years must be greater than 0');
+        }
+        this.years = years;
         this.emergencyFund = emergencyFund;
     }
 
     /**
      * Get the minimum payment required for all the loans
-     * @returns {number} 
+     * @returns { Dinero.Dinero } 
      */
     getMinimumRequiredPayment() {
         return this.loanRepayments
             .filter(lr => !lr.isPaidOff)
             .map(lr => lr.getMinimum(this.years))
-            .reduce((acc, x) => acc + x, 0);
+            .reduce((acc, x) => acc.add(x), zero);
     }
 
     /**
      * Create a plan to pay down a series of loans
-     * @param {number} contributionAmount - the maximum amount of money that can be contributed to paying down the debt
+     * @param { Dinero.Dinero } contributionAmount - the maximum amount of money that can be contributed to paying down the debt
      */
     createPlan(contributionAmount) {
         let minimumRequired = this.getMinimumRequiredPayment();
@@ -140,7 +70,7 @@ export class PaymentPlan {
             minimumRequired = this.getMinimumRequiredPayment();
             let totalBonus = contributionAmount - minimumRequired;
             let leftoverEmergencyFundBonus = this.emergencyFund && !this.emergencyFund.isPaidOff
-                ? this.emergencyFund.addPayment(totalBonus * this.emergencyFund.percentageOfBonusFunds)
+                ? this.emergencyFund.addPayment(Dinero({amount: totalBonus * this.emergencyFund.percentageOfBonusFunds}))
                 : 0;
             let bonus = this.emergencyFund && !this.emergencyFund.isPaidOff
                 ? totalBonus * (1.0 - this.emergencyFund.percentageOfBonusFunds) + leftoverEmergencyFundBonus

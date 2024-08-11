@@ -14,9 +14,11 @@ export class Payment {
         if (paid.lessThanOrEqual(zero)) {
             throw new Error(`Amount paid cannot be less than or equal to 0`);
         }
+        this.paid = paid;
         if (remaining.lessThan(zero)) {
             throw new Error(`Remaining principal cannot be less than 0`);
         }
+        this.remaining = remaining;
         this.multiplier = multiplier;
         this.paidMoreThanMinimum = paidMoreThanMinimum;
         this.paidOffLoan = paidOffLoan

@@ -1,6 +1,8 @@
 import { Loan } from './loan.mjs'
 import { Payment } from './payment.mjs';
 import { getMinimumMonthlyPaymentWithinPeriod, getPrincipalPlusMonthlyInterest } from './interest.mjs';
+import Dinero from 'dinero.js';
+import { zero } from './util.mjs';
 
 export class LoanRepayment {
     /**
@@ -17,7 +19,7 @@ export class LoanRepayment {
     /**
      * Get the minimum payment needed to pay back loan
      * @param {number} years - the maximum number of years to pay back loan
-     * @returns {number} - the minimum payment
+     * @returns { Dinero.Dinero } - the minimum payment
      */
     getMinimum = (years) => {
         if (years <= 0) {
@@ -41,13 +43,15 @@ export class LoanRepayment {
 
     /**
      * Add a payment to this loan repayment plan
-     * @param {number} amount - the amount available to pay on this loan
+     * @param { Dinero.Dinero } amount - the amount available to pay on this loan
      * @param {number=} multiplier - is this a doubled / tripled / etc. payment
      * @param {boolean=} paidMoreThanMinimum - is this payment more than the minimum required
-     * @returns {number} leftover money if this loan is paid off
+     * @returns { Dinero.Dinero } leftover money if this loan is paid off
      */
     makePayment(amount, multiplier, paidMoreThanMinimum) {
-        mustBeGreaterThan0(amount, 'Amount');
+        if (amount.lessThanOrEqual(zero)) {
+            throw new Error('Payment amount cannot be less than or equal to zero');
+        }
         if (this.isPaidOff) {
             return amount;
         }
@@ -55,15 +59,15 @@ export class LoanRepayment {
         const newPrincipal = getPrincipalPlusMonthlyInterest(principalRemaining, this.loan.interest / 100.0);
         /**
          * Create a new loan payment
-         * @returns {[number, Payment]} - the amount remaining and the Payment to add
+         * @returns {[Dinero.Dinero, Payment]} - the amount remaining and the Payment to add
          */
         const createPayment = () => {
             if (newPrincipal > amount) {
-                return [0, new Payment(amount, newPrincipal - amount, multiplier, paidMoreThanMinimum, false)];
+                return [zero, new Payment(amount, newPrincipal.subtract(amount), multiplier, paidMoreThanMinimum, false)];
             } else {
-                const amountRemaining = amount - newPrincipal;
+                const amountRemaining = amount.subtract(newPrincipal);
                 this.isPaidOff = true;
-                return [amountRemaining, new Payment(newPrincipal, 0, multiplier, paidMoreThanMinimum, true)]
+                return [amountRemaining, new Payment(newPrincipal, zero, multiplier, paidMoreThanMinimum, true)]
             }
         }
         const [remainder, payment] = createPayment();
