@@ -5,11 +5,15 @@ import { Loan } from "../../app/modules/loan.mjs";
 import { LoanRepayment } from "../../app/modules/loanRepayment.mjs";
 import { Payment } from "../../app/modules/payment.mjs";
 import { avalancheRepayment, snowballRepayment, PaymentPlan } from "../../app/modules/paymentPlan.mjs";
-import { moneyFormat, usd, zero } from "../../app/modules/util.mjs";
+import { moneyFormat, moneyMatcher, usd, zero } from "../../app/modules/util.mjs";
 
 const PRECISION = 0.01;
 
 describe('paymentPlan', () => {
+    beforeEach(function() {
+        jasmine.addMatchers(moneyMatcher);
+    });
+
     describe('Loan', () => {
         describe('principal', () => {
             it('should be greater than 0', () => {
@@ -39,8 +43,8 @@ describe('paymentPlan', () => {
         }),
         describe('remaining', () => {
             it('should be greater than or equal to 0', () => {
-                expect(() => new Payment(usd(100), usd(-1)))
-                .toThrow(new Error('Remaining principal ($-1.00) cannot be less than $0'));
+                expect(() => new Payment(usd(100), usd(-100)))
+                .toThrow(new Error('Remaining principal (-$1.00) cannot be less than $0'));
             });
         })
     }),
@@ -53,7 +57,7 @@ describe('paymentPlan', () => {
 
             const result = lnr.getMinimum(years);
 
-            expect(result.equalsTo(minimum)).toBeTrue();
+            expect(result).toHaveEqualMonetaryValueTo(minimum);
         })
     }),
     describe('avalancheRepayment', () => {
@@ -114,7 +118,8 @@ describe('paymentPlan', () => {
     describe('EmergencyFund', () => {
         describe('constructor', () => {
            it('should not accept a target amount less than or equal to 0', () => {
-                expect(() => new EmergencyFund(usd(-1), 1)).toThrow(new Error('Target Amount ($-1) must be greater than $0'));
+                expect(() => new EmergencyFund(usd(-100), 1))
+                .toThrow(new Error('Target amount (-$1.00) must be greater than $0'));
            }),
            it('cannot be less than 0', () => {
                 expect(() => new EmergencyFund(usd(1000), -1)).toThrow(new Error('Percentage of bonus funds (-100%) cannot be less than 0%'));
@@ -125,7 +130,8 @@ describe('paymentPlan', () => {
         }),
         describe('addPayment', () => {
             it('must have an amount greater than 0', () => {
-                expect(() => new EmergencyFund(usd(1000), 0.5).addPayment(zero)).toThrow(new Error('Amount (0) cannot be less than or equal to 0'));
+                expect(() => new EmergencyFund(usd(1000), 0.5).addPayment(zero))
+                .toThrow(new Error('Amount ($0.00) must be greater than $0'));
             }),
             it('must return amount if it is paid off', () => {
                 const amount = 5000;
@@ -133,7 +139,8 @@ describe('paymentPlan', () => {
 
                 const result = em.addPayment(usd(amount));
 
-                expect(result).toBe(usd(4000));
+                //expect(result).toBe(usd(4000));
+                expect(result).toHaveEqualMonetaryValueTo(usd(4000));
                 expect(em.payments.length).toBe(1);
                 expect(em.payments[0].amountRemaining.equalsTo(zero)).toBeTrue();
                 expect(em.payments[0].payment.equalsTo(usd(1000))).toBeTrue();
@@ -146,13 +153,13 @@ describe('paymentPlan', () => {
 
                 const secondResult = em.addPayment(usd(amount));
 
-                expect(firstResult).toBe(zero);
-                expect(secondResult).toBe(zero);
+                expect(firstResult).toHaveEqualMonetaryValueTo(zero);
+                expect(secondResult).toHaveEqualMonetaryValueTo(zero);
                 expect(em.payments.length).toBe(2);
-                expect(em.payments[0].amountRemaining.equalsTo(usd(900))).toBeTrue();
-                expect(em.payments[0].payment.equalsTo(usd(100))).toBeTrue();
-                expect(em.payments[1].amountRemaining.equalsTo(usd(800))).toBeTrue();
-                expect(em.payments[1].payment.equalsTo(usd(100))).toBeTrue();
+                expect(em.payments[0].amountRemaining).toHaveEqualMonetaryValueTo(usd(900));
+                expect(em.payments[0].payment).toHaveEqualMonetaryValueTo(usd(100));
+                expect(em.payments[1].amountRemaining).toHaveEqualMonetaryValueTo(usd(800));
+                expect(em.payments[1].payment).toHaveEqualMonetaryValueTo(usd(100));
             })
         })
     }),
@@ -173,7 +180,7 @@ describe('paymentPlan', () => {
                 const minimumRequired = loans
                     .map(ln => getMinimumMonthlyPaymentWithinPeriod(ln.principal, ln.interest / 100.0, ln.minimum, years))
                     .reduce((acc, x) => acc.add(x), zero);
-                expect(() => pp.createPlan(zero)).toThrow(new Error(`The minimum amount required is $${minimumRequired} but contribution amount was $0`));
+                expect(() => pp.createPlan(zero)).toThrow(new Error(`The minimum amount required is ${minimumRequired.toFormat(moneyFormat)} but contribution amount was $0`));
             }),
             it('should exit if all loans are paid off', () => {
                 const loans = [new Loan("Test 1", usd(1000), 0.1, usd(10))];
@@ -217,7 +224,8 @@ describe('paymentPlan', () => {
                 expect(pp.emergencyFund).toBeDefined();
                 expect(pp.emergencyFund?.payments.length).toBe(4);
                 expect(pp.emergencyFund?.isPaidOff).toBe(true);
-                expect(emergencyFund.payments[0].payment.equalsTo(bonus.divide(2.0))).toBeTrue();
+                //expect(emergencyFund.payments[0].payment.equalsTo(bonus.divide(2.0))).toBeTrue();
+                expect(emergencyFund.payments[0].payment).toHaveEqualMonetaryValueTo(bonus.divide(2.0));
                 //expect(emergencyFund.payments[3].payment).toBe(1000 - (3.0 * bonus / 2.0));
                 expect(emergencyFund.payments[3].payment.equalsTo(usd(1000).subtract(usd(3).multiply(bonus.divide(2.0).getAmount())))).toBeTrue();
                 expect(pp.loanRepayments.length).toBe(1);
@@ -259,10 +267,13 @@ describe('paymentPlan', () => {
                 expect(pp.loanRepayments[0].isPaidOff).toBe(true);
                 expect(pp.loanRepayments[1].loan.name).toBe('Test 2');
                 expect(pp.loanRepayments[1].payments.length).toBe(3);
-                expect(pp.loanRepayments[1].payments[0].paid.equalsTo(secondPayment)).toBeTrue();
-                expect(pp.loanRepayments[1].payments[0].remaining.equalsTo(secondPrincipal.subtract(secondPayment))).toBeTrue();
-                expect(pp.loanRepayments[1].payments[1].paid.equalsTo(thirdPayment)).toBeTrue();
-                expect(pp.loanRepayments[1].payments[1].remaining.equalsTo(thirdPrincipal.subtract(thirdPayment))).toBeTrue();
+                expect(pp.loanRepayments[1].payments[0].paid).toHaveEqualMonetaryValueTo(secondPayment);
+                //expect(pp.loanRepayments[1].payments[0].remaining.equalsTo(secondPrincipal.subtract(secondPayment))).toBeTrue();
+                expect(pp.loanRepayments[1].payments[0].remaining).toHaveEqualMonetaryValueTo(secondPrincipal.subtract(secondPayment));
+                //expect(pp.loanRepayments[1].payments[1].paid.equalsTo(thirdPayment)).toBeTrue();
+                expect(pp.loanRepayments[1].payments[1].paid).toHaveEqualMonetaryValueTo(thirdPayment);
+                //expect(pp.loanRepayments[1].payments[1].remaining.equalsTo(thirdPrincipal.subtract(thirdPayment))).toBeTrue();
+                expect(pp.loanRepayments[1].payments[1].remaining).toHaveEqualMonetaryValueTo(thirdPrincipal.subtract(thirdPayment));
             }),
             it('should add a bonus to the most important loan when principal is less than minimum payment', () => {
                 const loans = [

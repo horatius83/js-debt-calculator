@@ -39,7 +39,7 @@ export class PaymentPlan {
     constructor(loans, years, repaymentStrategy, emergencyFund) {
         this.loanRepayments = repaymentStrategy(loans).map(ln => new LoanRepayment(ln));
         if (years <= 0) {
-            throw new Error('Years must be greater than 0');
+            throw new Error(`Years (${years}) must be greater than 0`);
         }
         this.years = years;
         this.emergencyFund = emergencyFund;
