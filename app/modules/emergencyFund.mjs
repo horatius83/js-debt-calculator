@@ -1,5 +1,5 @@
 import Dinero from 'dinero.js';
-import { zero } from './util.mjs';
+import { moneyFormat, zero } from './util.mjs';
 import { EmergencyFundPayment } from './emergencyFundPayment.mjs';
 
 export class EmergencyFund {
@@ -11,14 +11,15 @@ export class EmergencyFund {
      */
     constructor(targetAmount, percentageOfBonusFunds) {
         if (targetAmount.lessThanOrEqual(zero)) {
-            throw new Error('Target amount must be greater than 0')
+            throw new Error(`Target amount (${targetAmount.toFormat(moneyFormat)}) must be greater than $0`)
         }
+        const toPercent = (decimalValue) => `${decimalValue * 100.0}%`;
         this.targetAmount = targetAmount;
         if (percentageOfBonusFunds < 0) {
-            throw new Error('Percentage of bonus funds cannot be less than 0%');
+            throw new Error(`Percentage of bonus funds (${toPercent(percentageOfBonusFunds)}) cannot be less than 0%`);
         }
         if (percentageOfBonusFunds > 1) {
-            throw new Error('Percentage of bonus funds cannot be more than 100%');
+            throw new Error(`Percentage of bonus funds (${toPercent(percentageOfBonusFunds)}) cannot be more than 100%`);
         }
         this.percentageOfBonusFunds = percentageOfBonusFunds;
         /** @type {EmergencyFundPayment[]} */
@@ -33,7 +34,7 @@ export class EmergencyFund {
      */
     addPayment(amount) {
         if (amount.lessThanOrEqual(zero)) {
-            throw new Error('Amount must be greater than 0');
+            throw new Error(`Amount (${amount.toFormat(moneyFormat)}) must be greater than $0`);
         }
         if (this.isPaidOff) {
             return amount;

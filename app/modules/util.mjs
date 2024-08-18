@@ -2,6 +2,15 @@ import { Loan } from "./loan.mjs";
 import Dinero from 'dinero.js'
 
 export const zero = Dinero({amount: 0});
+/**
+ * Return a number as USD
+ * @param {number} amount 
+ * @returns {Dinero.Dinero}
+ */
+export const usd = (amount) => Dinero({amount});
+
+export const moneyFormat = '$0,0.00';
+
 
 /**
  * Delete an item from an array

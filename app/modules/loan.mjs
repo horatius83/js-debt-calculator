@@ -1,5 +1,5 @@
 import Dinero from 'dinero.js'
-import { zero } from './util.mjs'
+import { moneyFormat, zero } from './util.mjs'
 
 export class Loan {
     /**
@@ -12,15 +12,15 @@ export class Loan {
     constructor(name, principal, interest, minimum) {
         this.name = name;
         if (principal.lessThanOrEqual(zero)) {
-            throw new Error(`Principal cannot be less than or equal to 0`);
+            throw new Error(`Principal (${principal.toFormat(moneyFormat)}) must be greater than $0`);
         }
         this.principal = principal;
         if (interest < 0) {
-            throw new Error(`Interest cannot be less than 0`);
+            throw new Error(`Interest (${interest}%) cannot be less than 0%`);
         }
         this.interest = interest;
-        if (minimum.lessThan(zero)) {
-            throw new Error(`Minimum cannot be less than 0`);
+        if (minimum.lessThanOrEqual(zero)) {
+            throw new Error(`Minimum (${minimum.toFormat(moneyFormat)}) must be greater than $0`);
         }
         this.minimum = minimum;
     }

@@ -1,5 +1,5 @@
 import Dinero from 'dinero.js'
-import { zero } from './util.mjs'
+import { moneyFormat, zero } from './util.mjs'
 
 export class Payment {
     /**
@@ -12,11 +12,11 @@ export class Payment {
      */
     constructor(paid, remaining, multiplier, paidMoreThanMinimum = false, paidOffLoan = false) {
         if (paid.lessThanOrEqual(zero)) {
-            throw new Error(`Amount paid cannot be less than or equal to 0`);
+            throw new Error(`Amount paid (${paid.toFormat(moneyFormat)}) must be greater than $0`);
         }
         this.paid = paid;
         if (remaining.lessThan(zero)) {
-            throw new Error(`Remaining principal cannot be less than 0`);
+            throw new Error(`Remaining principal (${remaining.toFormat(moneyFormat)}) cannot be less than $0`);
         }
         this.remaining = remaining;
         this.multiplier = multiplier;

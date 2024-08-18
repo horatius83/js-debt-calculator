@@ -4,6 +4,7 @@ import Dinero from 'dinero.js';
 import { zero } from './util.mjs';
 import { EmergencyFund } from './emergencyFund.mjs';
 import { LoanRepayment } from './loanRepayment.mjs';
+import { PaymentPlanOutputMonth } from './paymentPlanOutputMonth.mjs';
 
 /**
  * Sort loans according to interest rate
@@ -62,18 +63,18 @@ export class PaymentPlan {
     createPlan(contributionAmount) {
         let minimumRequired = this.getMinimumRequiredPayment();
         if (contributionAmount < minimumRequired) {
-            throw new Error(`The minimum amount required is $${minimumRequired.toFixed(2)} but contribution amount was $${contributionAmount}`);
+            throw new Error(`The minimum amount required is $${minimumRequired} but contribution amount was $${contributionAmount}`);
         }
         let allLoansPaidOff = this.loanRepayments.every(lr => lr.isPaidOff);
         while (!allLoansPaidOff) {
             allLoansPaidOff = true;
             minimumRequired = this.getMinimumRequiredPayment();
-            let totalBonus = contributionAmount - minimumRequired;
+            let totalBonus = contributionAmount.subtract(minimumRequired);
             let leftoverEmergencyFundBonus = this.emergencyFund && !this.emergencyFund.isPaidOff
-                ? this.emergencyFund.addPayment(Dinero({amount: totalBonus * this.emergencyFund.percentageOfBonusFunds}))
-                : 0;
+                ? this.emergencyFund.addPayment(totalBonus.multiply(this.emergencyFund.percentageOfBonusFunds))
+                : zero;
             let bonus = this.emergencyFund && !this.emergencyFund.isPaidOff
-                ? totalBonus * (1.0 - this.emergencyFund.percentageOfBonusFunds) + leftoverEmergencyFundBonus
+                ? totalBonus.multiply(1.0 - this.emergencyFund.percentageOfBonusFunds).add(leftoverEmergencyFundBonus)
                 : totalBonus;
 
             for (let lr of this.loanRepayments) {
@@ -83,7 +84,7 @@ export class PaymentPlan {
                     continue;
                 }
                 allLoansPaidOff = false;
-                bonus = lr.makePayment(minimumPayment + bonus, 1, bonus > 0);
+                bonus = lr.makePayment(minimumPayment.add(bonus), 1, bonus.greaterThan(zero));
             }
         }
     }
@@ -114,7 +115,9 @@ export class PaymentPlan {
                         m.set(pp.loan.name, pp.payments[i]);
                     }
                 }
-                const emergencyFundPayment = i < that.emergencyFund?.payments.length ? that.emergencyFund?.payments[i] : undefined;
+                const emergencyFundPayment = that.emergencyFund?.payments.length && i < that.emergencyFund.payments.length 
+                    ? that.emergencyFund?.payments[i] 
+                    : undefined;
                 yield new PaymentPlanOutputMonth(
                     formatter.format(date),
                     m,
