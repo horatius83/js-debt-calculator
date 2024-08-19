@@ -1,7 +1,7 @@
 import { getMinimumMonthlyPaymentWithinPeriod, getPrincipalPlusMonthlyInterest } from './interest.mjs';
 import { Loan } from './loan.mjs';
 import Dinero from 'dinero.js';
-import { zero } from './util.mjs';
+import { moneyFormat, zero } from './util.mjs';
 import { EmergencyFund } from './emergencyFund.mjs';
 import { LoanRepayment } from './loanRepayment.mjs';
 import { PaymentPlanOutputMonth } from './paymentPlanOutputMonth.mjs';
@@ -62,8 +62,8 @@ export class PaymentPlan {
      */
     createPlan(contributionAmount) {
         let minimumRequired = this.getMinimumRequiredPayment();
-        if (contributionAmount < minimumRequired) {
-            throw new Error(`The minimum amount required is $${minimumRequired} but contribution amount was $${contributionAmount}`);
+        if (contributionAmount.lessThan(minimumRequired)) {
+            throw new Error(`The minimum amount required is ${minimumRequired.toFormat(moneyFormat)} but contribution amount was ${contributionAmount.toFormat(moneyFormat)}`);
         }
         let allLoansPaidOff = this.loanRepayments.every(lr => lr.isPaidOff);
         while (!allLoansPaidOff) {

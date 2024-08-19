@@ -62,7 +62,7 @@ export class LoanRepayment {
          * @returns {[Dinero.Dinero, Payment]} - the amount remaining and the Payment to add
          */
         const createPayment = () => {
-            if (newPrincipal > amount) {
+            if (newPrincipal.greaterThan(amount)) {
                 return [zero, new Payment(amount, newPrincipal.subtract(amount), multiplier, paidMoreThanMinimum, false)];
             } else {
                 const amountRemaining = amount.subtract(newPrincipal);

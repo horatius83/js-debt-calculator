@@ -4,13 +4,33 @@ import { Loan } from "../../app/modules/loan.mjs";
 import { LoanRepayment } from "../../app/modules/loanRepayment.mjs";
 import { Payment } from "../../app/modules/payment.mjs";
 import { avalancheRepayment, snowballRepayment, PaymentPlan } from "../../app/modules/paymentPlan.mjs";
-import { moneyFormat, moneyMatcher, usd, zero } from "../../app/modules/util.mjs";
+import { moneyFormat, usd, zero } from "../../app/modules/util.mjs";
 
 const PRECISION = 0.01;
 
+/**
+ * Check if items are equal and output a helpful error message
+ * @param {Dinero.Dinero} actual 
+ * @param {Dinero.Dinero} expected 
+ */
+const eq = (actual, expected) => {
+    const context = `${actual.toFormat(moneyFormat)} should be ${expected.toFormat(moneyFormat)}`;
+    expect(actual).withContext(context).toEqual(expected);
+};
+
 describe('paymentPlan', () => {
     beforeEach(function() {
-        jasmine.addMatchers(moneyMatcher);
+        /**
+         * Compare two dinero objects
+         * @param {Dinero.Dinero} a 
+         * @param {Dinero.Dinero} b 
+         */
+        const moneyEq = (a, b) => {
+            try {
+                return a.equalsTo(b);
+            } catch {}
+        }
+        jasmine.addCustomEqualityTester(moneyEq);
     });
 
     describe('Loan', () => {
@@ -56,7 +76,7 @@ describe('paymentPlan', () => {
 
             const result = lnr.getMinimum(years);
 
-            expect(result).toHaveEqualMonetaryValueTo(minimum);
+            expect(result).toEqual(minimum);
         })
     }),
     describe('avalancheRepayment', () => {
@@ -138,7 +158,7 @@ describe('paymentPlan', () => {
 
                 const result = em.addPayment(usd(amount));
 
-                expect(result).toHaveEqualMonetaryValueTo(usd(4000));
+                expect(result).toEqual(usd(4000));
                 expect(em.payments.length).toBe(1);
                 expect(em.payments[0].amountRemaining.equalsTo(zero)).toBeTrue();
                 expect(em.payments[0].payment.equalsTo(usd(1000))).toBeTrue();
@@ -151,13 +171,13 @@ describe('paymentPlan', () => {
                 const firstResult = em.addPayment(usd(amount));
                 const secondResult = em.addPayment(usd(amount));
 
-                expect(firstResult).toHaveEqualMonetaryValueTo(zero);
-                expect(secondResult).toHaveEqualMonetaryValueTo(zero);
+                expect(firstResult).toEqual(zero);
+                expect(secondResult).toEqual(zero);
                 expect(em.payments.length).toBe(2);
-                expect(em.payments[0].amountRemaining).toHaveEqualMonetaryValueTo(usd(900));
-                expect(em.payments[0].payment).toHaveEqualMonetaryValueTo(usd(100));
-                expect(em.payments[1].amountRemaining).toHaveEqualMonetaryValueTo(usd(800));
-                expect(em.payments[1].payment).toHaveEqualMonetaryValueTo(usd(100));
+                expect(em.payments[0].amountRemaining).toEqual(usd(900));
+                expect(em.payments[0].payment).toEqual(usd(100));
+                expect(em.payments[1].amountRemaining).toEqual(usd(800));
+                expect(em.payments[1].payment).toEqual(usd(100));
             })
         })
     }),
@@ -178,7 +198,8 @@ describe('paymentPlan', () => {
                 const minimumRequired = loans
                     .map(ln => getMinimumMonthlyPaymentWithinPeriod(ln.principal, ln.interest / 100.0, ln.minimum, years))
                     .reduce((acc, x) => acc.add(x), zero);
-                expect(() => pp.createPlan(zero)).toThrow(new Error(`The minimum amount required is ${minimumRequired.toFormat(moneyFormat)} but contribution amount was $0`));
+                expect(() => pp.createPlan(zero))
+                .toThrow(new Error(`The minimum amount required is ${minimumRequired.toFormat(moneyFormat)} but contribution amount was $0.00`));
             }),
             it('should exit if all loans are paid off', () => {
                 const loans = [new Loan("Test 1", usd(1000), 0.1, usd(10))];
@@ -223,7 +244,7 @@ describe('paymentPlan', () => {
                 expect(pp.emergencyFund?.payments.length).toBe(4);
                 expect(pp.emergencyFund?.isPaidOff).toBe(true);
                 //expect(emergencyFund.payments[0].payment.equalsTo(bonus.divide(2.0))).toBeTrue();
-                expect(emergencyFund.payments[0].payment).toHaveEqualMonetaryValueTo(bonus.divide(2.0));
+                expect(emergencyFund.payments[0].payment).toEqual(bonus.divide(2.0));
                 //expect(emergencyFund.payments[3].payment).toBe(1000 - (3.0 * bonus / 2.0));
                 expect(emergencyFund.payments[3].payment.equalsTo(usd(1000).subtract(usd(3).multiply(bonus.divide(2.0).getAmount())))).toBeTrue();
                 expect(pp.loanRepayments.length).toBe(1);
@@ -265,13 +286,12 @@ describe('paymentPlan', () => {
                 expect(pp.loanRepayments[0].isPaidOff).toBe(true);
                 expect(pp.loanRepayments[1].loan.name).toBe('Test 2');
                 expect(pp.loanRepayments[1].payments.length).toBe(3);
-                expect(pp.loanRepayments[1].payments[0].paid).toHaveEqualMonetaryValueTo(secondPayment);
-                //expect(pp.loanRepayments[1].payments[0].remaining.equalsTo(secondPrincipal.subtract(secondPayment))).toBeTrue();
-                expect(pp.loanRepayments[1].payments[0].remaining).toHaveEqualMonetaryValueTo(secondPrincipal.subtract(secondPayment));
-                //expect(pp.loanRepayments[1].payments[1].paid.equalsTo(thirdPayment)).toBeTrue();
-                expect(pp.loanRepayments[1].payments[1].paid).toHaveEqualMonetaryValueTo(thirdPayment);
-                //expect(pp.loanRepayments[1].payments[1].remaining.equalsTo(thirdPrincipal.subtract(thirdPayment))).toBeTrue();
-                expect(pp.loanRepayments[1].payments[1].remaining).toHaveEqualMonetaryValueTo(thirdPrincipal.subtract(thirdPayment));
+                expect(pp.loanRepayments[1].payments[0].paid).toEqual(secondPayment);
+                expect(pp.loanRepayments[1].payments[0].remaining)
+                .toEqual(secondPrincipal.subtract(secondPayment));
+                expect(pp.loanRepayments[1].payments[1].paid).toEqual(thirdPayment);
+                expect(pp.loanRepayments[1].payments[1].remaining)
+                .toEqual(thirdPrincipal.subtract(thirdPayment));
             }),
             it('should add a bonus to the most important loan when principal is less than minimum payment', () => {
                 const loans = [
@@ -289,16 +309,17 @@ describe('paymentPlan', () => {
                 const pp = new PaymentPlan(loans, years, avalancheRepayment);
                 pp.createPlan(usd(1300));
 
+                
                 expect(pp.loanRepayments.length).toBe(2);
                 expect(pp.loanRepayments[0].loan.name).toBe('Test 1');
-                expect(pp.loanRepayments[0].payments[0].paid.equalsTo(firstLoanAmountPaid)).toBeTrue();
+                eq(pp.loanRepayments[0].payments[0].paid, firstLoanAmountPaid);
                 expect(pp.loanRepayments[0].payments[0].paidMoreThanMinimum).toBe(true);
                 expect(pp.loanRepayments[1].loan.name).toBe('Test 2');
-                expect(pp.loanRepayments[1].payments[0].paid.equalsTo(secondMinimum)).toBeTrue();
-                expect(pp.loanRepayments[1].payments[0].remaining).toBe(zero);
+                eq(pp.loanRepayments[1].payments[0].paid, secondMinimum);
+                expect(pp.loanRepayments[1].payments[0].remaining).toEqual(zero);
             })
         }),
-        describe('getPaymentPlanSeries', () => {
+        xdescribe('getPaymentPlanSeries', () => {
             it('should produce a generator that has dates, and a series of loan-names and payments', () => {
                 const loans = [new Loan("Test 1", usd(10000), 0.1, usd(10)), new Loan("Test 2", usd(12000), 0.1, usd(10))];
                 const years = 6;

@@ -58,28 +58,3 @@ export function debounce(func, timeoutInMs=300) {
         }, timeoutInMs);
     };
 }
-
-export const moneyMatcher = {
-    toHaveEqualMonetaryValueTo: function() {
-        return {
-            /**
-             * 
-             * @param {Dinero.Dinero} actual 
-             * @param {Dinero.Dinero} expected 
-             */
-            compare: function(actual, expected) {
-                if (actual.equalsTo(expected)) {
-                    return {
-                        pass: true,
-                        message: `Expected ${actual.toFormat(moneyFormat)} to be ${expected.toFormat(moneyFormat)}`
-                    }
-                } else {
-                    return {
-                        pass: false,
-                        message: `Expected ${actual.toFormat(moneyFormat)} to be ${expected.toFormat(moneyFormat)}`
-                    }
-                }
-            }
-        }
-    }
-};
