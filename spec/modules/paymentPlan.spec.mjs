@@ -151,8 +151,6 @@ describe('paymentPlan', () => {
                 const firstResult = em.addPayment(usd(amount));
                 const secondResult = em.addPayment(usd(amount));
 
-                console.log(JSON.stringify(firstResult));
-                console.log(JSON.stringify(secondResult));
                 expect(firstResult).toHaveEqualMonetaryValueTo(zero);
                 expect(secondResult).toHaveEqualMonetaryValueTo(zero);
                 expect(em.payments.length).toBe(2);
