@@ -1,4 +1,3 @@
-import Dinero from "dinero.js";
 import { EmergencyFund } from "../../app/modules/emergencyFund.mjs";
 import { getMinimumMonthlyPaymentWithinPeriod, getPrincipalPlusMonthlyInterest } from "../../app/modules/interest.mjs";
 import { Loan } from "../../app/modules/loan.mjs";
@@ -135,11 +134,10 @@ describe('paymentPlan', () => {
             }),
             it('must return amount if it is paid off', () => {
                 const amount = 5000;
-                let em = new EmergencyFund(usd(1000),1.0);
+                let em = new EmergencyFund(usd(1000), 1.0);
 
                 const result = em.addPayment(usd(amount));
 
-                //expect(result).toBe(usd(4000));
                 expect(result).toHaveEqualMonetaryValueTo(usd(4000));
                 expect(em.payments.length).toBe(1);
                 expect(em.payments[0].amountRemaining.equalsTo(zero)).toBeTrue();
@@ -149,10 +147,12 @@ describe('paymentPlan', () => {
             it('must handle having previous payments', () => {
                 const amount = 100;
                 let em = new EmergencyFund(usd(1000), 1.0);
-                const firstResult = em.addPayment(usd(amount));
 
+                const firstResult = em.addPayment(usd(amount));
                 const secondResult = em.addPayment(usd(amount));
 
+                console.log(JSON.stringify(firstResult));
+                console.log(JSON.stringify(secondResult));
                 expect(firstResult).toHaveEqualMonetaryValueTo(zero);
                 expect(secondResult).toHaveEqualMonetaryValueTo(zero);
                 expect(em.payments.length).toBe(2);

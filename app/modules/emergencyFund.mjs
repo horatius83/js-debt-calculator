@@ -42,7 +42,9 @@ export class EmergencyFund {
         const mostRecentPayment = this.payments.at(-1);
         if (mostRecentPayment) {
             if (mostRecentPayment.amountRemaining > amount) {
-                this.payments.push(new EmergencyFundPayment(amount, mostRecentPayment.amountRemaining.subtract(amount)));
+                this.payments.push(
+                    new EmergencyFundPayment(amount, mostRecentPayment.amountRemaining.subtract(amount))
+                );
                 return zero;
             } else {
                 this.payments.push(new EmergencyFundPayment(mostRecentPayment.amountRemaining, zero));
@@ -50,10 +52,13 @@ export class EmergencyFund {
                 return amount.subtract(mostRecentPayment.amountRemaining);
             }
         } else {
+            console.log('No recent payment');
             if (this.targetAmount > amount) {
+                console.log('this.targetAmount > amount');
                 this.payments.push(new EmergencyFundPayment(amount, this.targetAmount.subtract(amount)));
                 return zero;
             } else {
+                console.log('!this.targetAmount > amount')
                 this.payments.push(new EmergencyFundPayment(this.targetAmount, zero));
                 this.isPaidOff = true;
                 return amount.subtract(this.targetAmount);
