@@ -22,7 +22,6 @@ describe('interest', () => {
             const principal = usd(1000);
             const interest = 0.1; // 10% APR
             const minimum = zero;
-            //const payment = ((interest / 12.0) * principal) / (1 - Math.pow(1 + (interest / 12.0), years * -12.0));
             const payment = principal.multiply(interest / 12.0).divide(1 - Math.pow(1 + (interest / 12.0), years * -12.0));
 
             const result = getMinimumMonthlyPaymentWithinPeriod(principal, interest, minimum, years);

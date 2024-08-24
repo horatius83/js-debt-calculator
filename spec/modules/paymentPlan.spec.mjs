@@ -63,7 +63,7 @@ describe('paymentPlan', () => {
         describe('remaining', () => {
             it('should be greater than or equal to 0', () => {
                 expect(() => new Payment(usd(100), usd(-100)))
-                .toThrow(new Error('Remaining principal (-$1.00) cannot be less than $0'));
+                .toThrow(new Error('Remaining principal (-$100.00) cannot be less than $0'));
             });
         })
     }),
@@ -72,7 +72,7 @@ describe('paymentPlan', () => {
             const ln = new Loan('Test Loan', usd(1000), 0.1, usd(10));
             const lnr = new LoanRepayment(ln);
             const years = 6;
-            const minimum = getMinimumMonthlyPaymentWithinPeriod(ln.principal, ln.interest / 100.0, ln.minimum, years);
+            const minimum = getMinimumMonthlyPaymentWithinPeriod(ln.principal, ln.interest, ln.minimum, years);
 
             const result = lnr.getMinimum(years);
 
@@ -138,7 +138,7 @@ describe('paymentPlan', () => {
         describe('constructor', () => {
            it('should not accept a target amount less than or equal to 0', () => {
                 expect(() => new EmergencyFund(usd(-100), 1))
-                .toThrow(new Error('Target amount (-$1.00) must be greater than $0'));
+                .toThrow(new Error('Target amount (-$100.00) must be greater than $0'));
            }),
            it('cannot be less than 0', () => {
                 expect(() => new EmergencyFund(usd(1000), -1)).toThrow(new Error('Percentage of bonus funds (-100%) cannot be less than 0%'));
@@ -196,7 +196,7 @@ describe('paymentPlan', () => {
                 const years = 6;
                 const pp = new PaymentPlan(loans, years, avalancheRepayment);
                 const minimumRequired = loans
-                    .map(ln => getMinimumMonthlyPaymentWithinPeriod(ln.principal, ln.interest / 100.0, ln.minimum, years))
+                    .map(ln => getMinimumMonthlyPaymentWithinPeriod(ln.principal, ln.interest, ln.minimum, years))
                     .reduce((acc, x) => acc.add(x), zero);
                 expect(() => pp.createPlan(zero))
                 .toThrow(new Error(`The minimum amount required is ${minimumRequired.toFormat(moneyFormat)} but contribution amount was $0.00`));
@@ -234,7 +234,7 @@ describe('paymentPlan', () => {
                 const years = 6;
                 const emergencyFund = new EmergencyFund(usd(1000), 0.5);
                 const contribution = usd(600);
-                const minimumMonthlyPayment = getMinimumMonthlyPaymentWithinPeriod(loans[0].principal, loans[0].interest / 100.0, loans[0].minimum, years);
+                const minimumMonthlyPayment = getMinimumMonthlyPaymentWithinPeriod(loans[0].principal, loans[0].interest, loans[0].minimum, years);
                 const bonus = contribution.subtract(minimumMonthlyPayment);
                 const pp = new PaymentPlan(loans, years, avalancheRepayment, emergencyFund);
 
@@ -243,17 +243,16 @@ describe('paymentPlan', () => {
                 expect(pp.emergencyFund).toBeDefined();
                 expect(pp.emergencyFund?.payments.length).toBe(4);
                 expect(pp.emergencyFund?.isPaidOff).toBe(true);
-                //expect(emergencyFund.payments[0].payment.equalsTo(bonus.divide(2.0))).toBeTrue();
-                expect(emergencyFund.payments[0].payment).toEqual(bonus.divide(2.0));
+                eq(emergencyFund.payments[0].payment, bonus.divide(2));
                 //expect(emergencyFund.payments[3].payment).toBe(1000 - (3.0 * bonus / 2.0));
-                expect(emergencyFund.payments[3].payment.equalsTo(usd(1000).subtract(usd(3).multiply(bonus.divide(2.0).getAmount())))).toBeTrue();
+                eq(emergencyFund.payments[3].payment, usd(1000).subtract(bonus.multiply(3).divide(2)));
                 expect(pp.loanRepayments.length).toBe(1);
                 expect(pp.loanRepayments[0].payments.length).toBe(4);
                 expect(pp.loanRepayments[0].isPaidOff).toBe(true);
                 //expect(pp.loanRepayments[0].payments[0].paid).toBe(minimumMonthlyPayment + (bonus / 2.0));
-                expect(pp.loanRepayments[0].payments[0].paid.equalsTo(minimumMonthlyPayment.add(bonus.divide(2.0)))).toBeTrue();
+                eq(pp.loanRepayments[0].payments[0].paid, minimumMonthlyPayment.add(bonus.divide(2)));
                 expect(pp.loanRepayments[0].payments[3].paid.equalsTo(
-                    getPrincipalPlusMonthlyInterest(pp.loanRepayments[0].payments[2].remaining, loans[0].interest / 100.0)))
+                    getPrincipalPlusMonthlyInterest(pp.loanRepayments[0].payments[2].remaining, loans[0].interest)))
                 .toBeTrue();
             }),
             it('should roll over payments once one loan is paid off', () => {
@@ -262,16 +261,16 @@ describe('paymentPlan', () => {
                     new Loan("Test 2", usd(2000), 0.2, usd(20))
                 ];
                 const years = 6;
-                const loanPaymentMinimums = loans.map(x => getMinimumMonthlyPaymentWithinPeriod(x.principal, x.interest / 100.0, x.minimum, years));
+                const loanPaymentMinimums = loans.map(x => getMinimumMonthlyPaymentWithinPeriod(x.principal, x.interest, x.minimum, years));
                 const totalMinimum = loanPaymentMinimums.reduce((acc, x) => acc.add(x), zero);
                 const totalContribution = usd(1300);
                 const bonus = totalContribution.subtract(totalMinimum);
-                const firstPrincipal = getPrincipalPlusMonthlyInterest(loans[0].principal, loans[0].interest / 100.0);
+                const firstPrincipal = getPrincipalPlusMonthlyInterest(loans[0].principal, loans[0].interest);
                 const firstPayment = firstPrincipal;
                 const remainingBonus = bonus.subtract(firstPayment).add(loanPaymentMinimums[0]);
-                const secondPrincipal = getPrincipalPlusMonthlyInterest(loans[1].principal, loans[1].interest / 100.0);
+                const secondPrincipal = getPrincipalPlusMonthlyInterest(loans[1].principal, loans[1].interest);
                 const secondPayment = loanPaymentMinimums[1].add(remainingBonus);
-                const thirdPrincipal = getPrincipalPlusMonthlyInterest(secondPrincipal.subtract(secondPayment), loans[1].interest / 100.0);
+                const thirdPrincipal = getPrincipalPlusMonthlyInterest(secondPrincipal.subtract(secondPayment), loans[1].interest);
                 const thirdPayment = totalContribution;
                 
                 const pp = new PaymentPlan(loans, years, snowballRepayment);
@@ -299,8 +298,8 @@ describe('paymentPlan', () => {
                     new Loan("Test 2", usd(5), 0.1, usd(20))
                 ];
                 const years = 6;
-                const firstMinimum = getMinimumMonthlyPaymentWithinPeriod(loans[0].principal, loans[0].interest / 100.0, loans[0].minimum, years);
-                const secondMinimum = getPrincipalPlusMonthlyInterest(loans[1].principal, loans[1].interest / 100.0);
+                const firstMinimum = getMinimumMonthlyPaymentWithinPeriod(loans[0].principal, loans[0].interest, loans[0].minimum, years);
+                const secondMinimum = getPrincipalPlusMonthlyInterest(loans[1].principal, loans[1].interest);
                 const loanPaymentMinimums = [firstMinimum, secondMinimum].reduce((acc, x) => acc.add(x), zero);
                 const totalContribution = usd(1300);
                 const bonus = totalContribution.subtract(loanPaymentMinimums);

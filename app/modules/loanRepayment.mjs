@@ -25,15 +25,15 @@ export class LoanRepayment {
         if (years <= 0) {
             throw new Error(`Years must be greater than 0`);
         }
-        const minimum = getMinimumMonthlyPaymentWithinPeriod(this.loan.principal, this.loan.interest / 100.0, this.loan.minimum, years);
+        const minimum = getMinimumMonthlyPaymentWithinPeriod(this.loan.principal, this.loan.interest, this.loan.minimum, years);
         if (this.payments.length) { // Scenario: this is our last payment, the amount remaining is less than the minimum
             const remaining = this.payments?.at(-1)?.remaining || minimum;
-            const remainingPlusInterest = getPrincipalPlusMonthlyInterest(remaining, this.loan.interest / 100.0);
+            const remainingPlusInterest = getPrincipalPlusMonthlyInterest(remaining, this.loan.interest);
             if (remainingPlusInterest < minimum) {
                 return remainingPlusInterest;
             }
         } else if (this.loan.principal < minimum) { // Scenario: this is our first payment, but (somehow) the principal is less than the minimum
-            const principalPlusInterest = getPrincipalPlusMonthlyInterest(this.loan.principal, this.loan.interest / 100.0);
+            const principalPlusInterest = getPrincipalPlusMonthlyInterest(this.loan.principal, this.loan.interest);
             if (principalPlusInterest < minimum) {
                 return principalPlusInterest;
             }
@@ -56,7 +56,7 @@ export class LoanRepayment {
             return amount;
         }
         const principalRemaining = this.payments.at(-1)?.remaining ?? this.loan.principal;
-        const newPrincipal = getPrincipalPlusMonthlyInterest(principalRemaining, this.loan.interest / 100.0);
+        const newPrincipal = getPrincipalPlusMonthlyInterest(principalRemaining, this.loan.interest);
         /**
          * Create a new loan payment
          * @returns {[Dinero.Dinero, Payment]} - the amount remaining and the Payment to add

@@ -319,7 +319,7 @@ export const DebtCalculator = {
          */
         totalMinimum: function() {
             const r = this.loans
-            .map(x => getMinimumMonthlyPaymentWithinPeriod(x.principal, x.interest / 100.0, x.minimum, this.paymentPeriodInMonths / 12.0))
+            .map(x => getMinimumMonthlyPaymentWithinPeriod(x.principal, x.interest, x.minimum, this.paymentPeriodInMonths / 12.0))
             .reduce((acc, x) => acc + x, 0);
             return r;
         },

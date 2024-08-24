@@ -4,10 +4,10 @@ import Dinero from 'dinero.js'
 export const zero = Dinero({amount: 0});
 /**
  * Return a number as USD
- * @param {number} amount 
+ * @param {number} amount in dollars
  * @returns {Dinero.Dinero}
  */
-export const usd = (amount) => Dinero({amount});
+export const usd = (amount) => Dinero({amount: amount * 100});
 
 export const moneyFormat = '$0,0.00';
 
