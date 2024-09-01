@@ -24,10 +24,13 @@ export function getLoanPaymentAmount(principal, interestRatePerPeriod, numberofP
  * @param {number} years - the maximum number of years to pay off loans
  */
 export const getMinimumMonthlyPaymentWithinPeriod = (principal, interest, minimumPayment, years) => 
-    Dinero.maximum([
-        getLoanPaymentAmount(principal, interest / 12.0, 12 * years),
-        minimumPayment
-   ]);
+    Dinero.minimum([
+        getPrincipalPlusMonthlyInterest(principal, interest),
+        Dinero.maximum([
+            getLoanPaymentAmount(principal, interest / 12.0, 12 * years),
+            minimumPayment
+        ])
+    ]);
 
 /**
  * Get principal plus monthly interest

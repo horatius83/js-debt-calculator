@@ -307,7 +307,6 @@ describe('paymentPlan', () => {
                 
                 const pp = new PaymentPlan(loans, years, avalancheRepayment);
                 pp.createPlan(usd(1300));
-
                 
                 expect(pp.loanRepayments.length).toBe(2);
                 expect(pp.loanRepayments[0].loan.name).toBe('Test 1');
