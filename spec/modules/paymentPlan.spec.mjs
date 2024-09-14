@@ -14,7 +14,9 @@ const PRECISION = 0.01;
  * @param {Dinero.Dinero} expected 
  */
 const eq = (actual, expected) => {
-    const context = `${actual.toFormat(moneyFormat)} should be ${expected.toFormat(moneyFormat)}`;
+    const actualString = actual ? actual.toFormat(moneyFormat) : 'undefined';
+    const expectedString = expected ? expected.toFormat(moneyFormat) : 'undefined';
+    const context = `${actualString} should be ${expectedString}`;
     expect(actual).withContext(context).toEqual(expected);
 };
 
@@ -317,7 +319,7 @@ describe('paymentPlan', () => {
                 expect(pp.loanRepayments[1].payments[0].remaining).toEqual(zero);
             })
         }),
-        xdescribe('getPaymentPlanSeries', () => {
+        describe('getPaymentPlanSeries', () => {
             it('should produce a generator that has dates, and a series of loan-names and payments', () => {
                 const loans = [new Loan("Test 1", usd(10000), 0.1, usd(10)), new Loan("Test 2", usd(12000), 0.1, usd(10))];
                 const years = 6;
@@ -337,11 +339,12 @@ describe('paymentPlan', () => {
                 const test1 = xs[0].loanPayments.get("Test 1");
                 expect(test1).toBeDefined();
                 /** @type { Map<string, Payment> } */
-                const lps = pp.loanRepayments.reduce((m, x, _, __) => m.set(x.loan.name, x.payments[0]), new Map());
-                expect(test1?.paid.equalsTo(lps.get('Test1')?.paid)).toBeTrue();
+                const lps = pp.loanRepayments.reduce((m, x, _, __) => m.set(x.loan.name, x.payments[0])
+                , new Map());
+                eq(test1?.paid, lps.get('Test 1')?.paid);
                 const test2 = xs[0].loanPayments.get("Test 2");
                 expect(test2).toBeDefined();
-                expect(test2?.paid.equalsTo(lps.get('Test 2')?.paid)).toBeTrue();
+                eq(test2?.paid, lps.get('Test 2')?.paid);
             });
         })
     })
