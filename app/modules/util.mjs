@@ -38,7 +38,7 @@ export function getLoan(name, principal, interest, minimum) {
     const i = Number(interest);
     const m = Number(minimum);
     if (!Number.isNaN(p) && !Number.isNaN(i) && !Number.isNaN(m) && name) {
-        return new Loan(name, p, i, m);
+        return new Loan(name, usd(p), i, usd(m));
     }
 }
 

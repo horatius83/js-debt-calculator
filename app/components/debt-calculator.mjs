@@ -1,7 +1,9 @@
 import { DebtCalculatorState } from "../modules/debtCalculatorState.mjs";
+import { EmergencyFund } from "../modules/emergencyFund.mjs";
 import { getMinimumMonthlyPaymentWithinPeriod } from "../modules/interest.mjs";
-import { avalancheRepayment, snowballRepayment, PaymentPlan, Payment, PaymentPlanOutputMonth, EmergencyFund } from "../modules/paymentPlan.mjs";
-import { debounce, deleteItem, getLoan } from "../modules/util.mjs";
+import { avalancheRepayment, snowballRepayment, PaymentPlan } from "../modules/paymentPlan.mjs";
+import { PaymentPlanOutputMonth } from "../modules/paymentPlanOutputMonth.mjs";
+import { debounce, deleteItem, getLoan, moneyFormat, usd } from "../modules/util.mjs";
 import { html } from "./debt-calculator-html.mjs";
 
 const MAX_YEARS = 20;
@@ -236,12 +238,12 @@ export const DebtCalculator = {
                 const emergencyFund = new EmergencyFund(this.emergencyFundMaxAmount, this.emergencyFundPercentage / 100.0);
                 const paymentPlan = new PaymentPlan(this.loans, this.paymentPeriodInMonths / 12.0, strategy, emergencyFund);
                 this.totalMonthlyPaymentInput = this.totalMonthlyPaymentInput || this.totalMinimumToNearestDollar;
-                paymentPlan.createPlan(Number(this.totalMonthlyPaymentInput));
+                paymentPlan.createPlan(usd(Number(this.totalMonthlyPaymentInput)));
                 this.paymentPlan = paymentPlan;
             } else {
                 const paymentPlan = new PaymentPlan(this.loans, this.paymentPeriodInMonths / 12.0, strategy);
                 this.totalMonthlyPaymentInput = this.totalMonthlyPaymentInput || this.totalMinimumToNearestDollar;
-                paymentPlan.createPlan(Number(this.totalMonthlyPaymentInput));
+                paymentPlan.createPlan(usd(Number(this.totalMonthlyPaymentInput)));
                 this.paymentPlan = paymentPlan;
             }
         },
@@ -262,7 +264,7 @@ export const DebtCalculator = {
                 })
                 for(const loan of payment.loanPayments) {
                     const loanName = loan[0];
-                    const amountPaid = this.asCurrency(loan[1].paid);
+                    const amountPaid = loan[1].paid.toFormat(moneyFormat);
                     if (loan[1].paidMoreThanMinimum) {
                         content.push({
                             'style': 'bold',
@@ -273,7 +275,7 @@ export const DebtCalculator = {
                     }
                 }
                 if (payment.emergencyFundPayment) {
-                    content.push(`Emergency Fund Payment: ${this.asCurrency(payment.emergencyFundPayment.payment)}`);
+                    content.push(`Emergency Fund Payment: ${payment.emergencyFundPayment.payment.toFormat(moneyFormat)}`);
                 }
                 content.push('\n\n');
             }
@@ -322,9 +324,6 @@ export const DebtCalculator = {
             .map(x => getMinimumMonthlyPaymentWithinPeriod(x.principal, x.interest, x.minimum, this.paymentPeriodInMonths / 12.0))
             .reduce((acc, x) => acc + x, 0);
             return r;
-        },
-        totalMinimumToNearestDollar: function() {
-            return Math.ceil(this.totalMinimum);
         },
         maxMonths: () => MAX_YEARS * 12,
         totalMonthlyPayment() {
