@@ -11,11 +11,13 @@ export const html = /* html */`
             <div class="card-body">
                 <table id="loans-table" class="table table-striped">
                     <thead>
-                        <th class="loans-table-name-column">Name</th>
-                        <th class="loans-table-principal-column">Principal</th>
-                        <th class="loans-table-interest-column">Interest</th>
-                        <th class="loans-table-minimum-column">Minimum</th>
-                        <th class="loans-table-delete-column"></th>
+                        <tr>
+                            <th class="loans-table-name-column">Name</th>
+                            <th class="loans-table-principal-column">Principal</th>
+                            <th class="loans-table-interest-column">Interest</th>
+                            <th class="loans-table-minimum-column">Minimum</th>
+                            <th class="loans-table-delete-column"></th>
+                        </tr>
                     </thead>
                     <tbody class="table-group-divider">
                         <tr v-for="(loan, index) in loans" :key="index">
@@ -32,17 +34,19 @@ export const html = /* html */`
                         </tr>
                     </tbody>
                     <tfoot class="table-group-divider">
-                        <td>Total</td>
-                        <td>{{ asCurrency(totalPrincipal) }}</td>
-                        <td /> 
-                        <td>{{ asCurrency(totalMinimum) }}</td>
-                        <td>
-                            <div class="btn-group d-flex justify-content-end">
-                                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#new-loan-modal">
-                                    Add New Loan 
-                                </button>
-                            </div>
-                        </td>
+                        <tr>
+                            <td>Total</td>
+                            <td>{{ asCurrency(totalPrincipal) }}</td>
+                            <td /> 
+                            <td>{{ asCurrency(totalMinimum) }}</td>
+                            <td>
+                                <div class="btn-group d-flex justify-content-end">
+                                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#new-loan-modal">
+                                        Add New Loan 
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
                     </tfoot>
                 </table>
             </div>
