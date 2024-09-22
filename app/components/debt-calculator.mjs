@@ -1,3 +1,4 @@
+import Dinero from "dinero.js";
 import { DebtCalculatorState } from "../modules/debtCalculatorState.mjs";
 import { EmergencyFund } from "../modules/emergencyFund.mjs";
 import { getMinimumMonthlyPaymentWithinPeriod } from "../modules/interest.mjs";
@@ -27,11 +28,20 @@ export const DebtCalculator = {
     methods: {
         /**
          * Format a value as dollars and cents
-         * @param {number} value - 3.14
+         * @param {Dinero.Dinero} value - 3.14
          * @returns {string} - value formatted as a currency ($3.14)
          */
         asCurrency(value) {
-            return usdFormatter.format(value);
+            if (value && value?.toFormat) {
+                return value?.toFormat(moneyFormat);
+            } else {
+                if (!value) {
+                    console.error(`asCurrency: value is not valid`);
+                } else if (!value?.toFormat) {
+                    console.error(`asCurrency: value: ${value} is not valid`);
+                }
+            }
+            return '$0.00';
         },
 
         /**
@@ -40,9 +50,8 @@ export const DebtCalculator = {
          * @returns {string}
          */
         asPercentage(value) {
-            return `${value.toFixed(2)}%`;
+            return `${(value * 100).toFixed(2)}%`;
         },
-
         /**
          * Convert number of months into a string of years and months
          * @param {number} months
@@ -312,18 +321,20 @@ export const DebtCalculator = {
          * @returns {number} - the sum of all the principal amounts
          */
         totalPrincipal: function() {
-            return this.loans
-            .map(x => x.principal)
-            .reduce((/** @type {number} */ acc, /** @type {number} */ x) => acc + x, 0);
+           return this.loans
+           .reduce((acc, ln) => acc.add(ln.principal), Dinero({amount: 0}));
         },
         /**
-         * @returns {number} - the minimum payment required every month
+         * @returns {Dinero.Dinero} - the minimum payment required every month
          */
         totalMinimum: function() {
             const r = this.loans
             .map(x => getMinimumMonthlyPaymentWithinPeriod(x.principal, x.interest, x.minimum, this.paymentPeriodInMonths / 12.0))
-            .reduce((acc, x) => acc + x, 0);
+            .reduce((acc, x) => acc.add(x), Dinero({amount: 0}));
             return r;
+        },
+        totalMinimumToNearestDollar: function() {
+            return this.totalMinimum.toFormat(moneyFormat);
         },
         maxMonths: () => MAX_YEARS * 12,
         totalMonthlyPayment() {
