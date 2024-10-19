@@ -7,10 +7,9 @@ export const zero = Dinero({amount: 0});
  * @param {number} amount in dollars
  * @returns {Dinero.Dinero}
  */
-export const usd = (amount) => Dinero({amount: amount * 100});
+export const usd = (amount) => Dinero({ amount: amount * 100 });
 
 export const moneyFormat = '$0,0.00';
-
 
 /**
  * Delete an item from an array
@@ -58,3 +57,10 @@ export function debounce(func, timeoutInMs=300) {
         }, timeoutInMs);
     };
 }
+
+/**
+ * Parse a string value representing a currency into a numeric value
+ * @param {string} v - value in the form of $12,345.67
+ * @returns { number | undefined } - the numeric value of the number or undefined if not possible
+ */
+export const parseValue = (v) => parseFloat(v.replace(/[$,]/g, ''));

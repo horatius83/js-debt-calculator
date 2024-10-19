@@ -252,8 +252,13 @@ export const DebtCalculator = {
             } else {
                 const paymentPlan = new PaymentPlan(this.loans, this.paymentPeriodInMonths / 12.0, strategy);
                 this.totalMonthlyPaymentInput = this.totalMonthlyPaymentInput || this.totalMinimumToNearestDollar;
-                paymentPlan.createPlan(usd(Number(this.totalMonthlyPaymentInput)));
-                this.paymentPlan = paymentPlan;
+                const tmpi = Number(this.totalMonthlyPaymentInput);
+                if (tmpi) {
+                    paymentPlan.createPlan(usd(tmpi));
+                    this.paymentPlan = paymentPlan;
+                } else {
+                    console.error(`Total Monthly Payment Input was not a number: ${tmpi} (${this.totalMonthlyPaymentInput})`);
+                }
             }
         },
         getPaymentPlanSeries() {
