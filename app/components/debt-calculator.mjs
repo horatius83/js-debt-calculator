@@ -4,7 +4,7 @@ import { EmergencyFund } from "../modules/emergencyFund.mjs";
 import { getMinimumMonthlyPaymentWithinPeriod } from "../modules/interest.mjs";
 import { avalancheRepayment, snowballRepayment, PaymentPlan } from "../modules/paymentPlan.mjs";
 import { PaymentPlanOutputMonth } from "../modules/paymentPlanOutputMonth.mjs";
-import { debounce, deleteItem, getLoan, moneyFormat, usd } from "../modules/util.mjs";
+import { debounce, deleteItem, getLoan, moneyFormat, parseValue, usd } from "../modules/util.mjs";
 import { html } from "./debt-calculator-html.mjs";
 
 const MAX_YEARS = 20;
@@ -252,7 +252,7 @@ export const DebtCalculator = {
             } else {
                 const paymentPlan = new PaymentPlan(this.loans, this.paymentPeriodInMonths / 12.0, strategy);
                 this.totalMonthlyPaymentInput = this.totalMonthlyPaymentInput || this.totalMinimumToNearestDollar;
-                const tmpi = Number(this.totalMonthlyPaymentInput);
+                const tmpi = parseValue(this.totalMonthlyPaymentInput);
                 if (tmpi) {
                     paymentPlan.createPlan(usd(tmpi));
                     this.paymentPlan = paymentPlan;
