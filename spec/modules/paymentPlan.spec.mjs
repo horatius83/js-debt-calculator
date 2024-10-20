@@ -136,53 +136,6 @@ describe('paymentPlan', () => {
             expect(result.length).toBe(0);
         })
     }),
-    describe('EmergencyFund', () => {
-        describe('constructor', () => {
-           it('should not accept a target amount less than or equal to 0', () => {
-                expect(() => new EmergencyFund(usd(-100), 1))
-                .toThrow(new Error('Target amount (-$100.00) must be greater than $0'));
-           }),
-           it('cannot be less than 0', () => {
-                expect(() => new EmergencyFund(usd(1000), -1)).toThrow(new Error('Percentage of bonus funds (-100%) cannot be less than 0%'));
-           }),
-           it('cannot be greater than 1', () => {
-                expect(() => new EmergencyFund(usd(1000), 2)).toThrow(new Error('Percentage of bonus funds (200%) cannot be more than 100%'));
-           })
-        }),
-        describe('addPayment', () => {
-            it('must have an amount greater than 0', () => {
-                expect(() => new EmergencyFund(usd(1000), 0.5).addPayment(zero))
-                .toThrow(new Error('Amount ($0.00) must be greater than $0'));
-            }),
-            it('must return amount if it is paid off', () => {
-                const amount = 5000;
-                let em = new EmergencyFund(usd(1000), 1.0);
-
-                const result = em.addPayment(usd(amount));
-
-                expect(result).toEqual(usd(4000));
-                expect(em.payments.length).toBe(1);
-                expect(em.payments[0].amountRemaining.equalsTo(zero)).toBeTrue();
-                expect(em.payments[0].payment.equalsTo(usd(1000))).toBeTrue();
-                expect(em.isPaidOff).toBeTrue();
-            }),
-            it('must handle having previous payments', () => {
-                const amount = 100;
-                let em = new EmergencyFund(usd(1000), 1.0);
-
-                const firstResult = em.addPayment(usd(amount));
-                const secondResult = em.addPayment(usd(amount));
-
-                expect(firstResult).toEqual(zero);
-                expect(secondResult).toEqual(zero);
-                expect(em.payments.length).toBe(2);
-                expect(em.payments[0].amountRemaining).toEqual(usd(900));
-                expect(em.payments[0].payment).toEqual(usd(100));
-                expect(em.payments[1].amountRemaining).toEqual(usd(800));
-                expect(em.payments[1].payment).toEqual(usd(100));
-            })
-        })
-    }),
     describe('PaymentPlan', () => {
         it('should not have years-to-repay to be less than or equal to 0', () => {
             const loans = [new Loan("Test 1", usd(1000), 0.1, usd(10))];

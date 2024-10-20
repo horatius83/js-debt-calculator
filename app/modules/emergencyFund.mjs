@@ -36,8 +36,8 @@ export class EmergencyFund {
      * @returns { Dinero.Dinero } - amount leftover if this is paid off
      */
     addPayment(amount) {
-        if (amount.lessThanOrEqual(zero)) {
-            throw new Error(`Amount (${amount.toFormat(moneyFormat)}) must be greater than $0`);
+        if (amount.lessThan(zero)) {
+            throw new Error(`Amount (${amount.toFormat(moneyFormat)}) cannot be less than $0`);
         }
         if (this.isPaidOff) {
             return amount;

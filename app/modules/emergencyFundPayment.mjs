@@ -9,8 +9,8 @@ export class EmergencyFundPayment {
      * @param { Dinero.Dinero } amountRemaining 
      */
     constructor(payment, amountRemaining) {
-        if (payment.lessThanOrEqual(zero)) {
-            throw new Error(`Payment must be greater than 0`);
+        if (payment.lessThan(zero)) {
+            throw new Error(`Payment cannot be less than zero`);
         }
         this.payment = payment;
         if (amountRemaining.lessThan(zero)) {

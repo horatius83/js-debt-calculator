@@ -23,7 +23,7 @@ describe('Emergency Fund', () => {
 
             expect(efp).toThrow(new Error('Target amount must be defined'));
         });
-        it('should throw an error if the target amount is less than or equal to zero', () => {
+        it('should throw an error if the target amount is less than zero', () => {
             const targetAmount = zero;
             const percentageOfBonusFunds = 0.5;
 
@@ -125,15 +125,30 @@ describe('Emergency Fund', () => {
             expect(ef.payments[0].amountRemaining.getAmount()).toBe(zero.getAmount());
             expect(ef.payments[0].payment.getAmount()).toBe(targetAmount.getAmount());
         });
-        it('should not allow payments equal to or less than $0', () => {
+        it('should not allow payments less than $0', () => {
             const targetAmount = usd(100);
             const percentageOfBonusFunds = 1.0;
-            const payment = zero;
+            const payment = usd(-1);
             const ef = new EmergencyFund(targetAmount, percentageOfBonusFunds);
 
             const resultP = () => ef.addPayment(payment);
 
-            expect(resultP).toThrow(new Error('Amount ($0.00) must be greater than $0'));
+            expect(resultP).toThrow(new Error('Amount (-$1.00) cannot be less than $0'));
+        });
+        it('should allow payments of zero dollars, so you can pay down some debt first before contributing to an emergency fund', () => {
+            const targetAmount = usd(100);
+            const percentageOfBonusFunds = 0.5;
+            const payment = zero;
+            const ef = new EmergencyFund(targetAmount, percentageOfBonusFunds);
+
+            const result = ef.addPayment(payment);
+
+            const amountRemaining = targetAmount.subtract(payment);
+            expect(result.getAmount()).toBe(zero.getAmount());
+            expect(ef.isPaidOff).toBeFalse();
+            expect(ef.payments.length).toBe(1);
+            expect(ef.payments[0].amountRemaining.getAmount()).toBe(amountRemaining.getAmount());
+            expect(ef.payments[0].payment.getAmount()).toBe(payment.getAmount());
         });
     });
 });
