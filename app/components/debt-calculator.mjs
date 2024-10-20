@@ -244,10 +244,10 @@ export const DebtCalculator = {
             let strategy = getStrategy(this.strategy);
 
             if (this.shouldCreateEmergencyFund) {
-                const emergencyFund = new EmergencyFund(this.emergencyFundMaxAmount, this.emergencyFundPercentage / 100.0);
+                const emergencyFund = new EmergencyFund(usd(this.emergencyFundMaxAmount), this.emergencyFundPercentage / 100.0);
                 const paymentPlan = new PaymentPlan(this.loans, this.paymentPeriodInMonths / 12.0, strategy, emergencyFund);
                 this.totalMonthlyPaymentInput = this.totalMonthlyPaymentInput || this.totalMinimumToNearestDollar;
-                paymentPlan.createPlan(usd(Number(this.totalMonthlyPaymentInput)));
+                paymentPlan.createPlan(usd(parseValue(this.totalMonthlyPaymentInput)));
                 this.paymentPlan = paymentPlan;
             } else {
                 const paymentPlan = new PaymentPlan(this.loans, this.paymentPeriodInMonths / 12.0, strategy);
