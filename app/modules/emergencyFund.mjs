@@ -10,6 +10,9 @@ export class EmergencyFund {
      * @param {number} percentageOfBonusFunds - the percentage of bonus funds to apply to the emergency fund, must be between 0 (0%) and 1 (100%)
      */
     constructor(targetAmount, percentageOfBonusFunds) {
+        if (!targetAmount || !targetAmount?.lessThanOrEqual) {
+            throw new Error(`Target amount must be defined`);
+        }
         if (targetAmount.lessThanOrEqual(zero)) {
             throw new Error(`Target amount (${targetAmount.toFormat(moneyFormat)}) must be greater than $0`)
         }
