@@ -6,6 +6,7 @@ import { avalancheRepayment, snowballRepayment, PaymentPlan } from "../modules/p
 import { PaymentPlanOutputMonth } from "../modules/paymentPlanOutputMonth.mjs";
 import { debounce, deleteItem, getLoan, moneyFormat, parseValue, usd } from "../modules/util.mjs";
 import { html } from "./debt-calculator-html.mjs";
+import { Loan } from "../modules/loan.mjs";
 
 const MAX_YEARS = 20;
 
@@ -95,12 +96,12 @@ export const DebtCalculator = {
          * @param {number} loanIndex 
          */
         openEditLoanDialog(loanIndex) {
-            if (loanIndex >= 0) {
-                const loan = this.loans[loanIndex];
+            if (loanIndex >= 0 && loanIndex < this.loans.length) {
+                /** @type { Loan } */ const loan = this.loans[loanIndex];
                 this.currentEditLoan.name = loan.name;
-                this.currentEditLoan.principal = String(loan.principal);
-                this.currentEditLoan.interest = String(loan.interest);
-                this.currentEditLoan.minimum = String(loan.minimum);
+                this.currentEditLoan.principal = this.asCurrency(loan.principal);
+                this.currentEditLoan.interest = String(loan.interest * 100.0);
+                this.currentEditLoan.minimum = this.asCurrency(loan.minimum);
                 this.currentEditLoan.index = loanIndex;
             } else {
                 console.error(`openEditLoanDialog: Loan index ${loanIndex} is invalid`)
@@ -114,11 +115,10 @@ export const DebtCalculator = {
         editLoan(loanIndex) {
             if (loanIndex >= 0) {
                 // Set the loan data
-                const loan = this.loans[loanIndex];
-                loan.principal = Number(this.currentEditLoan.principal);
-                loan.interest = Number(this.currentEditLoan.interest);
-                loan.minimum = Number(this.currentEditLoan.minimum);
-
+                /** @type { Loan } */const loan = this.loans[loanIndex];
+                loan.principal = usd(parseValue(this.currentEditLoan.principal));
+                loan.interest = Number(this.currentEditLoan.interest) / 100.0;
+                loan.minimum = usd(parseValue(this.currentEditLoan.minimum));
                 this.clearEdit();
             } else {
                 console.error(`editLoan: Loan index ${loanIndex} is invalid`)
@@ -360,13 +360,9 @@ export const DebtCalculator = {
         },
         cannotEditLoan() {
             try {
-                const editLoan = getLoan(
-                    this.currentEditLoan.name, 
-                    this.currentEditLoan.principal,
-                    this.currentEditLoan.interest,
-                    this.currentEditLoan.minimum
-                );
-                return editLoan === undefined;
+                const principal = usd(parseValue(this.currentEditLoan.principal));
+                const minimum = usd(parseValue(this.currentEditLoan.minimum));
+                return !principal || !minimum || !this.currentEditLoan.name || !Number(this.currentEditLoan.interest);
             } catch(e) {
                 return true;
             }

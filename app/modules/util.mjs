@@ -61,6 +61,6 @@ export function debounce(func, timeoutInMs=300) {
 /**
  * Parse a string value representing a currency into a numeric value
  * @param {string} v - value in the form of $12,345.67
- * @returns { number | undefined } - the numeric value of the number or undefined if not possible
+ * @returns { number } - the numeric value of the number or undefined if not possible
  */
 export const parseValue = (v) => parseFloat(v.replace(/[$,]/g, ''));
