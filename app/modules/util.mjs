@@ -1,4 +1,15 @@
-import { Loan } from "./paymentPlan.mjs";
+import { Loan } from "./loan.mjs";
+import Dinero from 'dinero.js'
+
+export const zero = Dinero({amount: 0});
+/**
+ * Return a number as USD
+ * @param {number} amount in dollars
+ * @returns {Dinero.Dinero}
+ */
+export const usd = (amount) => Dinero({ amount: amount * 100 });
+
+export const moneyFormat = '$0,0.00';
 
 /**
  * Delete an item from an array
@@ -22,11 +33,11 @@ export function deleteItem(array, predicate) {
  * @returns {Loan | undefined} - Either a Loan if the values are valid or undefined
  */
 export function getLoan(name, principal, interest, minimum) {
-    const p = Number(principal);
-    const i = Number(interest);
-    const m = Number(minimum);
-    if (!Number.isNaN(p) && !Number.isNaN(i) && !Number.isNaN(m) && name) {
-        return new Loan(name, p, i, m);
+    const p = parseValue(principal);
+    const m = parseValue(minimum);
+    const i = Number(interest) / 100.0;
+    if (!Number.isNaN(p) && !Number.isNaN(i) && !Number.isNaN(m) && !!name) {
+        return new Loan(name, usd(p), i, usd(m));
     }
 }
 
@@ -46,3 +57,10 @@ export function debounce(func, timeoutInMs=300) {
         }, timeoutInMs);
     };
 }
+
+/**
+ * Parse a string value representing a currency into a numeric value
+ * @param {string} v - value in the form of $12,345.67
+ * @returns { number } - the numeric value of the number or NaN if not possible
+ */
+export const parseValue = (v) => parseFloat(v.replace(/[$,]/g, ''));

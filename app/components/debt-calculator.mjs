@@ -1,8 +1,12 @@
+import Dinero from "dinero.js";
 import { DebtCalculatorState } from "../modules/debtCalculatorState.mjs";
+import { EmergencyFund } from "../modules/emergencyFund.mjs";
 import { getMinimumMonthlyPaymentWithinPeriod } from "../modules/interest.mjs";
-import { avalancheRepayment, snowballRepayment, PaymentPlan, Payment, PaymentPlanOutputMonth, EmergencyFund } from "../modules/paymentPlan.mjs";
-import { debounce, deleteItem, getLoan } from "../modules/util.mjs";
+import { avalancheRepayment, snowballRepayment, PaymentPlan } from "../modules/paymentPlan.mjs";
+import { PaymentPlanOutputMonth } from "../modules/paymentPlanOutputMonth.mjs";
+import { debounce, deleteItem, getLoan, moneyFormat, parseValue, usd } from "../modules/util.mjs";
 import { html } from "./debt-calculator-html.mjs";
+import { Loan } from "../modules/loan.mjs";
 
 const MAX_YEARS = 20;
 
@@ -25,11 +29,20 @@ export const DebtCalculator = {
     methods: {
         /**
          * Format a value as dollars and cents
-         * @param {number} value - 3.14
+         * @param {Dinero.Dinero} value - 3.14
          * @returns {string} - value formatted as a currency ($3.14)
          */
         asCurrency(value) {
-            return usdFormatter.format(value);
+            if (value && value?.toFormat) {
+                return value?.toFormat(moneyFormat);
+            } else {
+                if (!value) {
+                    console.error(`asCurrency: value is not valid`);
+                } else if (!value?.toFormat) {
+                    console.error(`asCurrency: value: ${value} is not valid`);
+                }
+            }
+            return '$0.00';
         },
 
         /**
@@ -38,9 +51,8 @@ export const DebtCalculator = {
          * @returns {string}
          */
         asPercentage(value) {
-            return `${value.toFixed(2)}%`;
+            return `${(value * 100).toFixed(2)}%`;
         },
-
         /**
          * Convert number of months into a string of years and months
          * @param {number} months
@@ -84,12 +96,12 @@ export const DebtCalculator = {
          * @param {number} loanIndex 
          */
         openEditLoanDialog(loanIndex) {
-            if (loanIndex >= 0) {
-                const loan = this.loans[loanIndex];
+            if (loanIndex >= 0 && loanIndex < this.loans.length) {
+                /** @type { Loan } */ const loan = this.loans[loanIndex];
                 this.currentEditLoan.name = loan.name;
-                this.currentEditLoan.principal = String(loan.principal);
-                this.currentEditLoan.interest = String(loan.interest);
-                this.currentEditLoan.minimum = String(loan.minimum);
+                this.currentEditLoan.principal = this.asCurrency(loan.principal);
+                this.currentEditLoan.interest = String(loan.interest * 100.0);
+                this.currentEditLoan.minimum = this.asCurrency(loan.minimum);
                 this.currentEditLoan.index = loanIndex;
             } else {
                 console.error(`openEditLoanDialog: Loan index ${loanIndex} is invalid`)
@@ -103,11 +115,10 @@ export const DebtCalculator = {
         editLoan(loanIndex) {
             if (loanIndex >= 0) {
                 // Set the loan data
-                const loan = this.loans[loanIndex];
-                loan.principal = Number(this.currentEditLoan.principal);
-                loan.interest = Number(this.currentEditLoan.interest);
-                loan.minimum = Number(this.currentEditLoan.minimum);
-
+                /** @type { Loan } */const loan = this.loans[loanIndex];
+                loan.principal = usd(parseValue(this.currentEditLoan.principal));
+                loan.interest = Number(this.currentEditLoan.interest) / 100.0;
+                loan.minimum = usd(parseValue(this.currentEditLoan.minimum));
                 this.clearEdit();
             } else {
                 console.error(`editLoan: Loan index ${loanIndex} is invalid`)
@@ -233,16 +244,21 @@ export const DebtCalculator = {
             let strategy = getStrategy(this.strategy);
 
             if (this.shouldCreateEmergencyFund) {
-                const emergencyFund = new EmergencyFund(this.emergencyFundMaxAmount, this.emergencyFundPercentage / 100.0);
+                const emergencyFund = new EmergencyFund(usd(this.emergencyFundMaxAmount), this.emergencyFundPercentage / 100.0);
                 const paymentPlan = new PaymentPlan(this.loans, this.paymentPeriodInMonths / 12.0, strategy, emergencyFund);
                 this.totalMonthlyPaymentInput = this.totalMonthlyPaymentInput || this.totalMinimumToNearestDollar;
-                paymentPlan.createPlan(Number(this.totalMonthlyPaymentInput));
+                paymentPlan.createPlan(usd(parseValue(this.totalMonthlyPaymentInput)));
                 this.paymentPlan = paymentPlan;
             } else {
                 const paymentPlan = new PaymentPlan(this.loans, this.paymentPeriodInMonths / 12.0, strategy);
                 this.totalMonthlyPaymentInput = this.totalMonthlyPaymentInput || this.totalMinimumToNearestDollar;
-                paymentPlan.createPlan(Number(this.totalMonthlyPaymentInput));
-                this.paymentPlan = paymentPlan;
+                const tmpi = parseValue(this.totalMonthlyPaymentInput);
+                if (tmpi) {
+                    paymentPlan.createPlan(usd(tmpi));
+                    this.paymentPlan = paymentPlan;
+                } else {
+                    console.error(`Total Monthly Payment Input was not a number: ${tmpi} (${this.totalMonthlyPaymentInput})`);
+                }
             }
         },
         getPaymentPlanSeries() {
@@ -262,7 +278,7 @@ export const DebtCalculator = {
                 })
                 for(const loan of payment.loanPayments) {
                     const loanName = loan[0];
-                    const amountPaid = this.asCurrency(loan[1].paid);
+                    const amountPaid = loan[1].paid.toFormat(moneyFormat);
                     if (loan[1].paidMoreThanMinimum) {
                         content.push({
                             'style': 'bold',
@@ -273,7 +289,7 @@ export const DebtCalculator = {
                     }
                 }
                 if (payment.emergencyFundPayment) {
-                    content.push(`Emergency Fund Payment: ${this.asCurrency(payment.emergencyFundPayment.payment)}`);
+                    content.push(`Emergency Fund Payment: ${payment.emergencyFundPayment.payment.toFormat(moneyFormat)}`);
                 }
                 content.push('\n\n');
             }
@@ -310,21 +326,20 @@ export const DebtCalculator = {
          * @returns {number} - the sum of all the principal amounts
          */
         totalPrincipal: function() {
-            return this.loans
-            .map(x => x.principal)
-            .reduce((/** @type {number} */ acc, /** @type {number} */ x) => acc + x, 0);
+           return this.loans
+           .reduce((acc, ln) => acc.add(ln.principal), Dinero({amount: 0}));
         },
         /**
-         * @returns {number} - the minimum payment required every month
+         * @returns {Dinero.Dinero} - the minimum payment required every month
          */
         totalMinimum: function() {
             const r = this.loans
-            .map(x => getMinimumMonthlyPaymentWithinPeriod(x.principal, x.interest / 100.0, x.minimum, this.paymentPeriodInMonths / 12.0))
-            .reduce((acc, x) => acc + x, 0);
+            .map(x => getMinimumMonthlyPaymentWithinPeriod(x.principal, x.interest, x.minimum, this.paymentPeriodInMonths / 12.0))
+            .reduce((acc, x) => acc.add(x), Dinero({amount: 0}));
             return r;
         },
         totalMinimumToNearestDollar: function() {
-            return Math.ceil(this.totalMinimum);
+            return this.totalMinimum.toFormat(moneyFormat);
         },
         maxMonths: () => MAX_YEARS * 12,
         totalMonthlyPayment() {
@@ -332,26 +347,26 @@ export const DebtCalculator = {
         },
         cannotAddNewLoan() {
             try {
-                const newLoan = getLoan(
+                const loan = getLoan(
                     this.newLoan.name, 
-                    this.newLoan.principal,
+                    this.newLoan.principal, 
                     this.newLoan.interest,
-                    this.newLoan.minimum
+                    this.newLoan.minimum,
                 );
-                return newLoan === undefined;
+                return !loan;
             } catch(e) {
                 return true;
             }
         },
         cannotEditLoan() {
             try {
-                const editLoan = getLoan(
+                const loan = getLoan(
                     this.currentEditLoan.name, 
-                    this.currentEditLoan.principal,
+                    this.currentEditLoan.principal, 
                     this.currentEditLoan.interest,
-                    this.currentEditLoan.minimum
+                    this.currentEditLoan.minimum,
                 );
-                return editLoan === undefined;
+                return !loan;
             } catch(e) {
                 return true;
             }

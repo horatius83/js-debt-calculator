@@ -8,7 +8,8 @@
   },
   "scripts": {
     "test": "jasmine",
-    "serve": "http-server ./app"
+    "serve": "http-server ./app",
+    "start": "http-server ./app"
   },
   "repository": {
     "type": "git",
@@ -29,6 +30,7 @@
     "jasmine": "^5.1.0"
   },
   "dependencies": {
+    "dinero.js": "^1.9.1",
     "http-server": "^14.1.1"
   }
 }
