@@ -347,22 +347,26 @@ export const DebtCalculator = {
         },
         cannotAddNewLoan() {
             try {
-                const newLoan = getLoan(
+                const loan = getLoan(
                     this.newLoan.name, 
-                    this.newLoan.principal,
+                    this.newLoan.principal, 
                     this.newLoan.interest,
-                    this.newLoan.minimum
+                    this.newLoan.minimum,
                 );
-                return newLoan === undefined;
+                return !!loan;
             } catch(e) {
                 return true;
             }
         },
         cannotEditLoan() {
             try {
-                const principal = usd(parseValue(this.currentEditLoan.principal));
-                const minimum = usd(parseValue(this.currentEditLoan.minimum));
-                return !principal || !minimum || !this.currentEditLoan.name || !Number(this.currentEditLoan.interest);
+                const loan = getLoan(
+                    this.currentEditLoan.name, 
+                    this.currentEditLoan.principal, 
+                    this.currentEditLoan.interest,
+                    this.currentEditLoan.minimum,
+                );
+                return !!loan;
             } catch(e) {
                 return true;
             }

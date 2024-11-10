@@ -4,7 +4,7 @@ describe('util', () => {
     describe('getLoan', () => {
         it('should return a loan if the values are valid', () => {
             const principal = "1000";
-            const interest = "0.01";
+            const interest = "10";
             const minimum = "10";
             const name = 'Test Name';
 
@@ -13,12 +13,12 @@ describe('util', () => {
             expect(result).not.toBeUndefined();
             expect(result?.name).toBe(name);
             expect(result?.principal.getAmount()).toBe(100000);
-            expect(result?.interest).toBe(0.01);
+            expect(result?.interest).toBe(0.1);
             expect(result?.minimum.getAmount()).toBe(1000);
         });
         it('should return undefined if principal is not a number', () => {
             const principal = "blah";
-            const interest = "0.01";
+            const interest = "10";
             const minimum = "10";
             const name = 'Test Name';
 
@@ -38,7 +38,7 @@ describe('util', () => {
         });
         it('should return undefined if minimum is not a number', () => {
             const principal = "1000";
-            const interest = "0.01";
+            const interest = "10";
             const minimum = "blah";
             const name = 'Test Name';
 
@@ -48,7 +48,7 @@ describe('util', () => {
         });
         it('should return undefined if name is invalid', () => {
             const principal = "1000";
-            const interest = "0.01";
+            const interest = "10";
             const minimum = "10";
             const name = undefined;
 
