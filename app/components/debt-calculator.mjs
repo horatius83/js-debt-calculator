@@ -353,7 +353,7 @@ export const DebtCalculator = {
                     this.newLoan.interest,
                     this.newLoan.minimum,
                 );
-                return !!loan;
+                return !loan;
             } catch(e) {
                 return true;
             }
@@ -366,7 +366,7 @@ export const DebtCalculator = {
                     this.currentEditLoan.interest,
                     this.currentEditLoan.minimum,
                 );
-                return !!loan;
+                return !loan;
             } catch(e) {
                 return true;
             }
