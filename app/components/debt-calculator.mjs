@@ -4,7 +4,7 @@ import { EmergencyFund } from "../modules/emergencyFund.mjs";
 import { getMinimumMonthlyPaymentWithinPeriod } from "../modules/interest.mjs";
 import { avalancheRepayment, snowballRepayment, PaymentPlan } from "../modules/paymentPlan.mjs";
 import { PaymentPlanOutputMonth } from "../modules/paymentPlanOutputMonth.mjs";
-import { debounce, deleteItem, getLoan, moneyFormat, parseValue, usd } from "../modules/util.mjs";
+import { debounce, deleteItem, getLoan, moneyFormat, parseValue, usd, downloadFile } from "../modules/util.mjs";
 import { html } from "./debt-calculator-html.mjs";
 import { Loan } from "../modules/loan.mjs";
 
@@ -319,6 +319,20 @@ export const DebtCalculator = {
                 }
             };
             pdfMake.createPdf(docDefinition).download();
+        },
+        /**
+         * Save loans to file
+         * @param {Array<Loan>} loans 
+         */
+        saveLoans(loans) {
+            console.log(`saveLoans: ${loans?.length}`);
+            const data = JSON.stringify({
+                version: 1,
+                v1: {
+                    loans: loans
+                }
+            });
+            downloadFile('loans.json', data);
         }
     },
     computed: {

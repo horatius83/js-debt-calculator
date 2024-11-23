@@ -44,7 +44,8 @@ export const html = /* html */`
                                     <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#new-loan-modal">
                                         Add New Loan 
                                     </button>
-                                    <button type="button" class="btn btn-success">
+                                    <button type="button" class="btn btn-success" 
+                                        v-on:click="saveLoans(loans)">
                                         Save Loans
                                     </button>
                                 </div>
