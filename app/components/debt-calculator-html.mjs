@@ -44,6 +44,9 @@ export const html = /* html */`
                                     <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#new-loan-modal">
                                         Add New Loan 
                                     </button>
+                                    <button type="button" class="btn btn-success">
+                                        Save Loans
+                                    </button>
                                 </div>
                             </td>
                         </tr>
