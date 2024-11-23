@@ -325,7 +325,6 @@ export const DebtCalculator = {
          * @param {Array<Loan>} loans 
          */
         saveLoans(loans) {
-            console.log(`saveLoans: ${loans?.length}`);
             const data = JSON.stringify({
                 version: 1,
                 v1: {
@@ -333,6 +332,33 @@ export const DebtCalculator = {
                 }
             });
             downloadFile('loans.json', data);
+        },
+        loadLoans(event) {
+            console.log(`Load loans: ${event?.target?.files[0]}`);
+            const file = event?.target?.files[0];
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                console.log(`reader.onload: ${e.target?.result}`);
+                const json = JSON.parse(e.target?.result + '');
+                if (json?.version === 1) {
+                    const loans = json?.v1?.loans;
+                    if (loans) {
+                        loans.forEach(element => {
+                            console.log(`Adding Loan: ${element.name}`);
+                            this.loans.push(new Loan(
+                                element.name,
+                                usd(element.principal.amount / 100.0),
+                                element.interest,
+                                usd(element.minimum.amount / 100.0)
+                            ));
+                            console.log('Added.');
+                        });
+                    }
+                } else {
+                    console.error(`Loan file version ${json?.version} is not supported.`)
+                }
+            }
+            reader.readAsText(file);
         }
     },
     computed: {
