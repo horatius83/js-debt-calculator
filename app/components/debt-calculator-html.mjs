@@ -58,6 +58,15 @@ export const html = /* html */`
                 <div v-else>
                     <label for="loan-file-upload">Load Loans</label>
                     <input type="file" id="loan-file-upload" accept="application/json" v-on:change="loadLoans">
+                    <div class="btn-group d-flex justify-content-end">
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#new-loan-modal">
+                            Add New Loan 
+                        </button>
+                        <button type="button" class="btn btn-success" 
+                            v-on:click="saveLoans(loans)">
+                            Save Loans
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
