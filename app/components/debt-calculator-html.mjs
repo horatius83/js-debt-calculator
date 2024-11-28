@@ -56,8 +56,9 @@ export const html = /* html */`
                     </table>
                 </div>
                 <div v-else>
-                    <label for="loan-file-upload">Load Loans</label>
-                    <input type="file" id="loan-file-upload" accept="application/json" v-on:change="loadLoans">
+                    <div class="card-body">
+                        <input type="file" id="loan-file-upload" name="loan-file-upload" accept="application/json" v-on:change="loadLoans">
+                    </div>
                     <div class="btn-group d-flex justify-content-end">
                         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#new-loan-modal">
                             Add New Loan 
@@ -118,7 +119,7 @@ export const html = /* html */`
                 <select class="form-select" aria-label="Strategy Selection" id="avalanche-select" v-model="strategy">
                     <option value="avalanche" selected>Avalanche (Highest Interest First)</option>
                     <option value="snowball">Snowball (Lowest Principal First)</option>
-                    <option value="double">Multiplier (Pay Multiples of Amount Owed)</option>
+                    <!--<option value="double">Multiplier (Pay Multiples of Amount Owed)</option>-->
                 </select>
                 <label for="total-monthly-payment" class="form-label">Total Monthly Payment</label>
                 <div class="input-group mb-3">
