@@ -26,6 +26,7 @@ export class DebtCalculatorState {
         /** @type {Array<Loan>} */
         // this.loans = []
         this.loans = [
+            /*
             new Loan("Monroe and Main", usd(60.36), 0.21, usd(20.0)),
             new Loan("Blair", usd(124.87), 0.2724, usd(51)),
             new Loan("Chase Slate", usd(1549.03), 0.2999, usd(51)),
@@ -41,6 +42,7 @@ export class DebtCalculatorState {
             new Loan("Walmart", usd(3872.16), 0.1715, usd(94)),
             new Loan("Military Star", usd(799.68), 0.1049, usd(45)),
             new Loan("Sears", usd(3797.66), 0.2544, usd(122))
+            */
         ];
         /** @type {NewLoanState} */
         this.newLoan = new NewLoanState();

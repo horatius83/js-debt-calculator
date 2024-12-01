@@ -64,3 +64,40 @@ export function debounce(func, timeoutInMs=300) {
  * @returns { number } - the numeric value of the number or NaN if not possible
  */
 export const parseValue = (v) => parseFloat(v.replace(/[$,]/g, ''));
+
+
+/**
+ * Download a JSON file to the local file system
+ * @param {string} filename - name of the file to save
+ * @param {string} data - data as a string
+ */
+export const downloadFile = (filename, data) => {
+    const link = document.createElement('a');
+    const file = new Blob([data], {type: 'application/json'});
+    link.href = URL.createObjectURL(file);
+    link.download = filename;
+    link.click();
+    URL.revokeObjectURL(link.href);
+};
+
+/**
+ * Convert utf-8 text into base-64
+ * @param {string} text - text to encode
+ * @returns {string} - represents the string encoded in base64
+ */
+export const textToBase64 = (text) => {
+    const bytes = new TextEncoder().encode(text);
+    const binString = Array.from(bytes, (byte) => String.fromCodePoint(byte)).join('');
+    return btoa(binString);
+}
+
+/**
+ * Convert a base64 string into a utf-8 string
+ * @param {string} b64text - string in base64
+ * @returns {string} - string in utf-8
+ */
+export const base64ToText = (b64text) => {
+    const binString = atob(b64text);
+    const byteArray = Uint8Array.from(binString, (m, _) => m.codePointAt(0));
+    return new TextDecoder().decode(byteArray);
+}

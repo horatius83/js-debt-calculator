@@ -1,4 +1,4 @@
-import { parseValue, getLoan, usd } from '../../app/modules/util.mjs'
+import { parseValue, getLoan, usd, textToBase64, base64ToText } from '../../app/modules/util.mjs'
 
 describe('util', () => {
     describe('getLoan', () => {
@@ -100,5 +100,23 @@ describe('util', () => {
 
             expect(result).toBeNaN();
         })
+    });
+    describe('base64 encoding / decoding', () => {
+        it('should encode utf-8 data correctly', () => {
+            const testString = 'こんにちは世界';
+
+            const encodedString = textToBase64(testString);
+            const decodedString = base64ToText(encodedString);
+
+            expect(decodedString).toBe(testString);
+        });
+        it('should handle empty strings', () => {
+            const testString = '';
+
+            const encodedString = textToBase64(testString);
+            const decodedString = base64ToText(encodedString);
+
+            expect(decodedString).toBe(testString);           
+        });
     });
 });
