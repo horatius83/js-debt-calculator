@@ -138,7 +138,10 @@ export const html = /* html */`
                 <label for="years-range" class="form-label">Repayment Period ({{ asYearsAndMonths(paymentPeriodInMonths) }})</label>
                 <input type="range" class="form-range" min="3" :max=maxMonths step="3" id="years-range" v-model=paymentPeriodInMonths>
                 <div class="col mb-3 btn-group">
-                    <button type="button" class="btn btn-success" v-on:click="generatePaymentPlan()">
+                    <button type="button" 
+                        class="btn btn-success" 
+                        v-on:click="generatePaymentPlan()"
+                        :disabled="cannotGeneratePaymentPlan">
                         Generate Payment Plan 
                     </button>
                 </div>
