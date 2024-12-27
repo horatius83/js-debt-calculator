@@ -351,7 +351,7 @@ export const DebtCalculator = {
                                 element.interest,
                                 usd(element.minimum.amount / 100.0)
                             ));
-                            console.log('Added.');
+                            console.log(`Added: ${element.name}.`);
                         });
                     }
                 } else {
@@ -410,6 +410,14 @@ export const DebtCalculator = {
             } catch(e) {
                 return true;
             }
+        },
+        cannotGeneratePaymentPlan() {
+            debugger;
+            const minimum = this.totalMinimum;
+            const totalMonthlyPayment2 = usd(this.totalMonthlyPayment);
+            const totalMinimum = this.totalMinimum;
+            const totalMonthlyPayment = usd(totalMonthlyPayment2 || totalMinimum);
+            return totalMonthlyPayment.lessThan(minimum) || !this.loans.length;
         }
     },
     template: html
