@@ -414,9 +414,9 @@ export const DebtCalculator = {
         cannotGeneratePaymentPlan() {
             debugger;
             const minimum = this.totalMinimum;
-            const totalMonthlyPayment2 = usd(this.totalMonthlyPayment);
-            const totalMinimum = this.totalMinimum;
-            const totalMonthlyPayment = usd(totalMonthlyPayment2 || totalMinimum);
+            const totalMonthlyPayment = this.totalMonthlyPayment
+                ? usd(this.totalMonthlyPayment) 
+                : minimum;
             return totalMonthlyPayment.lessThan(minimum) || !this.loans.length;
         }
     },
