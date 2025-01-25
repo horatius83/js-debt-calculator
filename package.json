@@ -10,7 +10,8 @@
     "test": "jasmine",
     "serve": "http-server ./app",
     "start": "http-server ./app",
-    "prod-start": "http-server ./dist/prod"
+    "prod-start": "http-server ./dist/prod",
+    "make-prod": "powershell .\\make-prod.ps1"
   },
   "repository": {
     "type": "git",
