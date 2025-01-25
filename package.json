@@ -9,7 +9,8 @@
   "scripts": {
     "test": "jasmine",
     "serve": "http-server ./app",
-    "start": "http-server ./app"
+    "start": "http-server ./app",
+    "prod-start": "http-server ./dist/prod"
   },
   "repository": {
     "type": "git",
