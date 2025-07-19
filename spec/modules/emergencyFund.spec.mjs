@@ -1,3 +1,4 @@
+// @ts-check
 import { EmergencyFund } from "../../app/modules/emergencyFund.mjs";
 import { usd, zero } from "../../app/modules/util.mjs";
 

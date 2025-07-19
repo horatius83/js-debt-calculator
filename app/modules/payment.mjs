@@ -1,3 +1,4 @@
+// @ts-check
 import Dinero from 'dinero.js'
 import { moneyFormat, zero } from './util.mjs'
 

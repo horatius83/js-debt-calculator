@@ -1,3 +1,4 @@
+// @ts-check
 import { Payment } from './payment.mjs';
 import { EmergencyFundPayment } from './emergencyFundPayment.mjs';
 
