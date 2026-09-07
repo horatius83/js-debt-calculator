@@ -412,12 +412,10 @@ export const DebtCalculator = {
             }
         },
         cannotGeneratePaymentPlan() {
-            debugger;
             const minimum = this.totalMinimum;
-            const totalMonthlyPayment2 = usd(this.totalMonthlyPayment);
-            const totalMinimum = this.totalMinimum;
-            const totalMonthlyPayment = usd(totalMonthlyPayment2 || totalMinimum);
-            return totalMonthlyPayment.lessThan(minimum) || !this.loans.length;
+            const entered = this.totalMonthlyPayment;
+            const effective = entered > 0 ? usd(entered) : minimum;
+            return effective.lessThan(minimum) || !this.loans.length;
         }
     },
     template: html
