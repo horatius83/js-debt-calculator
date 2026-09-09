@@ -224,7 +224,7 @@ export const DebtCalculator = {
         validateEmergencyFundMaxAmount: debounce(function() {
             const element = this.$refs.emergencyFundMaximumAmountRef;
             const number = Number(element.value);
-            if (number) {
+            if (Number.isFinite(number)) {
                 if (number >= 0) {
                     this.emergencyFundMaxAmountErrorMessage = '';
                     element.classList.remove('is-invalid');
