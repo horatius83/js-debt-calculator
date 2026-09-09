@@ -1,3 +1,4 @@
+// @ts-check
 import { parseValue, getLoan, usd, textToBase64, base64ToText } from '../../app/modules/util.mjs'
 
 describe('util', () => {

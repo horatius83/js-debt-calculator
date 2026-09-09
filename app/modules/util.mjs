@@ -1,3 +1,4 @@
+// @ts-check
 import { Loan } from "./loan.mjs";
 import Dinero from 'dinero.js'
 
@@ -7,7 +8,7 @@ export const zero = Dinero({amount: 0});
  * @param {number} amount in dollars
  * @returns {Dinero.Dinero}
  */
-export const usd = (amount) => Dinero({ amount: amount * 100 });
+export const usd = (amount) => Dinero({ amount: Math.round(amount * 100) });
 
 export const moneyFormat = '$0,0.00';
 

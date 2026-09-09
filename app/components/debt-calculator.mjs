@@ -135,14 +135,22 @@ export const DebtCalculator = {
         },
 
         addLoan() {
+            // Check if loan already exists
+            if (this.loans.some(x => this.newLoan.name == x.name)) {
+                return;
+            }
+
             const loan = getLoan(
                 this.newLoan.name, 
                 this.newLoan.principal, 
                 this.newLoan.interest, 
                 this.newLoan.minimum);
-            if (loan) {
+            const existingLoan = loan ? this.loans.find(x => x.name === this.newLoan.name) : undefined;
+            if (!existingLoan && loan) {
                 this.loans.push(loan);
                 this.clear();
+            } else {
+                console.error(`addLoan: Loan ${this.newLoan.name} already exists.`);
             }
         },
 
@@ -158,7 +166,12 @@ export const DebtCalculator = {
             if (!this.newLoan.name) {
                 this.$refs.newLoanNameRef.classList.add('is-invalid');
             } else {
-                this.$refs.newLoanNameRef.classList.remove('is-invalid');
+                const existingLoan = this.loans.find(x => x.name === this.newLoan.name);
+                if (existingLoan) {
+                    this.$refs.newLoanNameRef.classList.add('is-invalid'); 
+                } else {
+                    this.$refs.newLoanNameRef.classList.remove('is-invalid');
+                }
             }
         }),
 
@@ -211,7 +224,7 @@ export const DebtCalculator = {
         validateEmergencyFundMaxAmount: debounce(function() {
             const element = this.$refs.emergencyFundMaximumAmountRef;
             const number = Number(element.value);
-            if (number) {
+            if (Number.isFinite(number)) {
                 if (number >= 0) {
                     this.emergencyFundMaxAmountErrorMessage = '';
                     element.classList.remove('is-invalid');
@@ -310,14 +323,6 @@ export const DebtCalculator = {
                     }
                 }
             };
-            pdfMake.fonts = {
-                Roboto: {
-                    normal: 'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.66/fonts/Roboto/Roboto-Regular.ttf',
-                    bold: 'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.66/fonts/Roboto/Roboto-Medium.ttf',
-                    italics: 'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.66/fonts/Roboto/Roboto-Italic.ttf',
-                    bolditalics: 'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.66/fonts/Roboto/Roboto-MediumItalic.ttf'
-                }
-            };
             pdfMake.createPdf(docDefinition).download();
         },
         /**
@@ -339,23 +344,27 @@ export const DebtCalculator = {
             const reader = new FileReader();
             reader.onload = (e) => {
                 console.log(`reader.onload: ${e.target?.result}`);
-                const json = JSON.parse(e.target?.result + '');
-                if (json?.version === 1) {
-                    const loans = json?.v1?.loans;
-                    if (loans) {
-                        loans.forEach(element => {
-                            console.log(`Adding Loan: ${element.name}`);
-                            this.loans.push(new Loan(
-                                element.name,
-                                usd(element.principal.amount / 100.0),
-                                element.interest,
-                                usd(element.minimum.amount / 100.0)
-                            ));
-                            console.log('Added.');
-                        });
+                try {
+                    const json = JSON.parse(e.target?.result + '');
+                    if (json?.version === 1) {
+                        const loans = json?.v1?.loans;
+                        if (loans) {
+                            loans.forEach(element => {
+                                console.log(`Adding Loan: ${element.name}`);
+                                this.loans.push(new Loan(
+                                    element.name,
+                                    usd(element.principal.amount / 100.0),
+                                    element.interest,
+                                    usd(element.minimum.amount / 100.0)
+                                ));
+                                console.log(`Added: ${element.name}.`);
+                            });
+                        }
+                    } else {
+                        console.error(`Loan file version ${json?.version} is not supported.`)
                     }
-                } else {
-                    console.error(`Loan file version ${json?.version} is not supported.`)
+                } catch(e) {
+                    console.error("Failed to load loans ", e);
                 }
             }
             reader.readAsText(file);
@@ -410,6 +419,12 @@ export const DebtCalculator = {
             } catch(e) {
                 return true;
             }
+        },
+        cannotGeneratePaymentPlan() {
+            const minimum = this.totalMinimum;
+            const entered = this.totalMonthlyPayment;
+            const effective = entered > 0 ? usd(entered) : minimum;
+            return effective.lessThan(minimum) || !this.loans.length;
         }
     },
     template: html

@@ -1,3 +1,4 @@
+// @ts-check
 import { Loan } from './loan.mjs'
 import { Payment } from './payment.mjs';
 import { getMinimumMonthlyPaymentWithinPeriod, getPrincipalPlusMonthlyInterest } from './interest.mjs';
@@ -29,10 +30,10 @@ export class LoanRepayment {
         if (this.payments.length) { // Scenario: this is our last payment, the amount remaining is less than the minimum
             const remaining = this.payments?.at(-1)?.remaining || minimum;
             const remainingPlusInterest = getPrincipalPlusMonthlyInterest(remaining, this.loan.interest);
-            if (remainingPlusInterest < minimum) {
+            if (remainingPlusInterest.lessThan(minimum)) {
                 return remainingPlusInterest;
             }
-        } else if (this.loan.principal < minimum) { // Scenario: this is our first payment, but (somehow) the principal is less than the minimum
+        } else if (this.loan.principal.lessThan(minimum)) { // Scenario: this is our first payment, but (somehow) the principal is less than the minimum
             const principalPlusInterest = getPrincipalPlusMonthlyInterest(this.loan.principal, this.loan.interest);
             if (principalPlusInterest < minimum) {
                 return principalPlusInterest;

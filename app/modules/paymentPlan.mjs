@@ -1,4 +1,4 @@
-import { getMinimumMonthlyPaymentWithinPeriod, getPrincipalPlusMonthlyInterest } from './interest.mjs';
+// @ts-check
 import { Loan } from './loan.mjs';
 import Dinero from 'dinero.js';
 import { moneyFormat, zero } from './util.mjs';

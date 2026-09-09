@@ -1,3 +1,4 @@
+// @ts-check
 import { getLoanPaymentAmount, getMinimumMonthlyPaymentWithinPeriod } 
 from '../../app/modules/interest.mjs';
 import { usd, zero } from '../../app/modules/util.mjs';
