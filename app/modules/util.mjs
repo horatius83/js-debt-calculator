@@ -1,3 +1,4 @@
+// @ts-check
 import { Loan } from "./loan.mjs";
 import Dinero from 'dinero.js'
 

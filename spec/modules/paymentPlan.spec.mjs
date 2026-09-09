@@ -1,3 +1,4 @@
+// @ts-check
 import { EmergencyFund } from "../../app/modules/emergencyFund.mjs";
 import { getMinimumMonthlyPaymentWithinPeriod, getPrincipalPlusMonthlyInterest } from "../../app/modules/interest.mjs";
 import { Loan } from "../../app/modules/loan.mjs";

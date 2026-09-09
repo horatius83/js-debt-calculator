@@ -1,4 +1,4 @@
-
+// @ts-check
 import Dinero from 'dinero.js';
 import { zero } from './util.mjs';
 

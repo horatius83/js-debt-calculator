@@ -145,9 +145,12 @@ export const DebtCalculator = {
                 this.newLoan.principal, 
                 this.newLoan.interest, 
                 this.newLoan.minimum);
-            if (loan) {
+            const existingLoan = loan ? this.loans.find(x => x.name === this.newLoan.name) : undefined;
+            if (!existingLoan && loan) {
                 this.loans.push(loan);
                 this.clear();
+            } else {
+                console.error(`addLoan: Loan ${this.newLoan.name} already exists.`);
             }
         },
 
@@ -163,7 +166,12 @@ export const DebtCalculator = {
             if (!this.newLoan.name) {
                 this.$refs.newLoanNameRef.classList.add('is-invalid');
             } else {
-                this.$refs.newLoanNameRef.classList.remove('is-invalid');
+                const existingLoan = this.loans.find(x => x.name === this.newLoan.name);
+                if (existingLoan) {
+                    this.$refs.newLoanNameRef.classList.add('is-invalid'); 
+                } else {
+                    this.$refs.newLoanNameRef.classList.remove('is-invalid');
+                }
             }
         }),
 
@@ -313,14 +321,6 @@ export const DebtCalculator = {
                         fontSize: 15,
                         bold: true
                     }
-                }
-            };
-            pdfMake.fonts = {
-                Roboto: {
-                    normal: 'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.66/fonts/Roboto/Roboto-Regular.ttf',
-                    bold: 'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.66/fonts/Roboto/Roboto-Medium.ttf',
-                    italics: 'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.66/fonts/Roboto/Roboto-Italic.ttf',
-                    bolditalics: 'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.66/fonts/Roboto/Roboto-MediumItalic.ttf'
                 }
             };
             pdfMake.createPdf(docDefinition).download();
