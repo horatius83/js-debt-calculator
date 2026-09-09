@@ -135,6 +135,11 @@ export const DebtCalculator = {
         },
 
         addLoan() {
+            // Check if loan already exists
+            if (this.loans.some(x => this.newLoan.name == x.name)) {
+                return;
+            }
+
             const loan = getLoan(
                 this.newLoan.name, 
                 this.newLoan.principal, 
@@ -339,23 +344,27 @@ export const DebtCalculator = {
             const reader = new FileReader();
             reader.onload = (e) => {
                 console.log(`reader.onload: ${e.target?.result}`);
-                const json = JSON.parse(e.target?.result + '');
-                if (json?.version === 1) {
-                    const loans = json?.v1?.loans;
-                    if (loans) {
-                        loans.forEach(element => {
-                            console.log(`Adding Loan: ${element.name}`);
-                            this.loans.push(new Loan(
-                                element.name,
-                                usd(element.principal.amount / 100.0),
-                                element.interest,
-                                usd(element.minimum.amount / 100.0)
-                            ));
-                            console.log(`Added: ${element.name}.`);
-                        });
+                try {
+                    const json = JSON.parse(e.target?.result + '');
+                    if (json?.version === 1) {
+                        const loans = json?.v1?.loans;
+                        if (loans) {
+                            loans.forEach(element => {
+                                console.log(`Adding Loan: ${element.name}`);
+                                this.loans.push(new Loan(
+                                    element.name,
+                                    usd(element.principal.amount / 100.0),
+                                    element.interest,
+                                    usd(element.minimum.amount / 100.0)
+                                ));
+                                console.log(`Added: ${element.name}.`);
+                            });
+                        }
+                    } else {
+                        console.error(`Loan file version ${json?.version} is not supported.`)
                     }
-                } else {
-                    console.error(`Loan file version ${json?.version} is not supported.`)
+                } catch(e) {
+                    console.error("Failed to load loans ", e);
                 }
             }
             reader.readAsText(file);
