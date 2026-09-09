@@ -32,7 +32,7 @@ export class LoanRepayment {
             if (remainingPlusInterest < minimum) {
                 return remainingPlusInterest;
             }
-        } else if (this.loan.principal < minimum) { // Scenario: this is our first payment, but (somehow) the principal is less than the minimum
+        } else if (this.loan.principal.lessThan(minimum)) { // Scenario: this is our first payment, but (somehow) the principal is less than the minimum
             const principalPlusInterest = getPrincipalPlusMonthlyInterest(this.loan.principal, this.loan.interest);
             if (principalPlusInterest < minimum) {
                 return principalPlusInterest;
